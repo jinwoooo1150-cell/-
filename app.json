@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "수능 마스터",
-    "slug": "suneung-master",
+    "name": "Suolingo",
+    "slug": "suolingo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
