@@ -52,7 +52,7 @@ function IncorrectCard({ item, index, onDelete }: { item: IncorrectNote; index: 
           <Text style={styles.cardTitle} numberOfLines={1}>{item.quizTitle}</Text>
           <Text style={styles.cardAuthor}>{item.quizAuthor}</Text>
         </View>
-        <Pressable onPress={handleDelete} hitSlop={8}>
+        <Pressable onPress={handleDelete} hitSlop={8} style={styles.deleteButton}>
           <Ionicons name="trash-outline" size={20} color="#EF4444" />
         </Pressable>
       </View>
@@ -279,6 +279,12 @@ const styles = StyleSheet.create({
     fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     flex: 1,
+  },
+  deleteButton: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
   },
   explanationBox: {
     flexDirection: "row",
