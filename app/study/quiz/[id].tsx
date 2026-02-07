@@ -249,7 +249,10 @@ export default function QuizScreen() {
       >
         <View style={styles.passageCard}>
           <View style={styles.passageMeta}>
-            <Text style={styles.passageTitle}>{quiz.title}</Text>
+            <View style={styles.passageTitleRow}>
+              <Text style={styles.passageTitle}>{quiz.title}</Text>
+              <Text style={styles.passageSource}>{quiz.source}</Text>
+            </View>
             <Text style={styles.passageAuthor}>{quiz.author}</Text>
           </View>
           <View style={styles.passageDivider} />
@@ -431,10 +434,20 @@ const styles = StyleSheet.create({
     gap: 4,
     marginBottom: 14,
   },
+  passageTitleRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 8,
+  },
   passageTitle: {
     fontFamily: "NotoSansKR_900Black",
     fontSize: 20,
     color: Colors.light.text,
+  },
+  passageSource: {
+    fontFamily: "NotoSansKR_400Regular",
+    fontSize: 11,
+    color: Colors.light.textMuted,
   },
   passageAuthor: {
     fontFamily: "NotoSansKR_400Regular",

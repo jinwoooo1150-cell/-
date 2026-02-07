@@ -10,6 +10,7 @@ export interface QuizPassage {
   categoryId: string;
   title: string;
   author: string;
+  source: string;
   passage: string;
   questions: QuizQuestion[];
 }
@@ -20,6 +21,7 @@ export const quizPassages: QuizPassage[] = [
     categoryId: "modern-poem",
     title: "진달래꽃",
     author: "김소월",
+    source: "수능특강 문학 45p",
     passage:
       "나 보기가 역겨워\n가실 때에는\n말없이 고이 보내 드리우리다\n\n영변에 약산\n진달래꽃\n아름 따다 가실 길에 뿌리우리다\n\n가시는 걸음걸음\n놓인 그 꽃을\n사뿐히 즈려밟고 가시옵소서\n\n나 보기가 역겨워\n가실 때에는\n죽어도 아니 눈물 흘리우리다",
     questions: [
@@ -58,6 +60,7 @@ export const quizPassages: QuizPassage[] = [
     categoryId: "modern-poem",
     title: "서시",
     author: "윤동주",
+    source: "수능특강 문학 78p",
     passage:
       "죽는 날까지 하늘을 우러러\n한 점 부끄럼이 없기를,\n잎새에 이는 바람에도\n나는 괴로워했다.\n별을 노래하는 마음으로\n모든 죽어 가는 것을 사랑해야지\n그리고 나한테 주어진 길을\n걸어가야겠다.\n\n오늘 밤에도 별이 바람에 스치운다.",
     questions: [
@@ -103,6 +106,7 @@ export const quizPassages: QuizPassage[] = [
     categoryId: "modern-novel",
     title: "소나기",
     author: "황순원",
+    source: "2024학년도 6월 모의평가",
     passage:
       "소년은 개울가에서 소녀를 보자 곧 윤 초시네 증손녀라는 걸 알 수 있었다. 소녀는 개울에다 손을 잠그고 물장난을 하고 있는 것이다. 서울서는 이런 개울물을 보지 못하기나 한 듯이.\n\n벌써 며칠째 소녀는 학교에서 돌아오는 길에 물장난이었다. 그런데, 어제까지 개울 기슭에서 하더니, 오늘은 징검다리 한가운데 앉아서 하고 있다.\n\n소년은 개울둑에 앉아 버들가지에 물을 튀기고 있었다.",
     questions: [
@@ -141,6 +145,7 @@ export const quizPassages: QuizPassage[] = [
     categoryId: "classic-poetry",
     title: "청산별곡",
     author: "작자 미상",
+    source: "수능특강 문학 152p",
     passage:
       "살어리 살어리랏다 청산에 살어리랏다\n멀위랑 다래랑 먹고 청산에 살어리랏다\n얄리얄리 얄랑셩 얄라리 얄라\n\n우러라 우러라 새여 자고 니러 우러라 새여\n널라와 시름 한 나도 자고 니러 우러노라\n얄리얄리 얄랑셩 얄라리 얄라",
     questions: [
@@ -179,6 +184,7 @@ export const quizPassages: QuizPassage[] = [
     categoryId: "classic-novel",
     title: "춘향전",
     author: "작자 미상",
+    source: "수능완성 문학 89p",
     passage:
       "이 도령이 방자를 불러,\n\"저기 그네 뛰는 저 계집이 누구냐?\"\n\"예, 저것은 퇴기 월매의 딸이요, 이름은 춘향이라 하옵니다. 나이 열여섯에 자색이 절륜하고 문장과 가무에 능하오나, 기생의 딸이라 양반이 상대할 바 아니옵니다.\"\n\"그 말이 무슨 말이냐. 사람이 사람을 사랑하는 데 신분이 무슨 상관이냐.\"\n이 도령의 눈에는 그네를 뛰는 춘향의 모습이 선녀와 같았다.",
     questions: [
