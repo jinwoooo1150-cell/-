@@ -5,6 +5,14 @@ export interface QuizQuestion {
   explanation: string;
 }
 
+export interface RelatedExamQuestion {
+  id: string;
+  sourceTitle: string;
+  statement: string;
+  isTrue: boolean;
+  explanation: string;
+}
+
 export interface QuizPassage {
   id: string;
   categoryId: string;
@@ -13,6 +21,7 @@ export interface QuizPassage {
   source: string;
   passage: string;
   questions: QuizQuestion[];
+  relatedExams?: RelatedExamQuestion[];
 }
 
 export const quizPassages: QuizPassage[] = [
@@ -52,6 +61,24 @@ export const quizPassages: QuizPassage[] = [
         isTrue: true,
         explanation:
           "'고이 보내 드리우리다', '가실 길에 뿌리우리다' 등 구체적인 행동 묘사를 통해 감정을 간접적으로 전달하는 기법을 사용하고 있습니다.",
+      },
+    ],
+    relatedExams: [
+      {
+        id: "re-mp1-1",
+        sourceTitle: "2023학년도 수능",
+        statement: "화자가 꽃을 뿌리는 행위는 이별의 슬픔을 의식적으로 억제하려는 태도를 보여준다.",
+        isTrue: true,
+        explanation:
+          "화자는 이별의 고통을 겉으로 드러내지 않고, 꽃을 뿌리는 행위를 통해 아름다운 이별을 연출하면서 슬픔을 내면화하고 있습니다. 이는 의식적 감정 억제의 표현입니다.",
+      },
+      {
+        id: "re-mp1-2",
+        sourceTitle: "2022학년도 9월 평가원",
+        statement: "'사뿐히 즈려밟고'는 화자가 임에게 고통을 주고 싶은 마음을 표현한 것이다.",
+        isTrue: false,
+        explanation:
+          "'사뿐히 즈려밟고'는 화자의 헌신적 사랑을 역설적으로 표현한 것입니다. 꽃을 밟고 가라는 것은 임에게 고통을 주려는 것이 아니라, 임의 발걸음을 편안하게 해주려는 자기희생적 사랑의 표현입니다.",
       },
     ],
   },
@@ -100,6 +127,24 @@ export const quizPassages: QuizPassage[] = [
           "마지막 행은 결의를 다진 후 다시 현실의 고뇌로 돌아오는 순환적 구조를 만들어, 시 전체에 여운과 깊이를 부여합니다.",
       },
     ],
+    relatedExams: [
+      {
+        id: "re-mp2-1",
+        sourceTitle: "2024학년도 수능",
+        statement: "'별'과 '바람'은 각각 이상과 현실적 시련을 상징하는 대립적 소재이다.",
+        isTrue: true,
+        explanation:
+          "'별'은 화자가 추구하는 이상적 가치(순수, 양심)를, '바람'은 현실에서 겪는 고뇌와 시련을 상징합니다. 두 소재의 대립을 통해 화자의 내적 갈등이 형상화됩니다.",
+      },
+      {
+        id: "re-mp2-2",
+        sourceTitle: "2021학년도 6월 평가원",
+        statement: "이 시의 화자는 현실에 안주하며 소극적 태도를 보이고 있다.",
+        isTrue: false,
+        explanation:
+          "화자는 '걸어가야겠다'라는 의지적 표현을 통해 주어진 길을 적극적으로 걸어가겠다는 결의를 보여줍니다. 이는 소극적 태도가 아닌 능동적이고 실천적인 자세입니다.",
+      },
+    ],
   },
   {
     id: "modern-novel-1",
@@ -137,6 +182,24 @@ export const quizPassages: QuizPassage[] = [
         isTrue: true,
         explanation:
           "개울, 징검다리, 버들가지 등의 자연물은 소년과 소녀의 순수하고 맑은 감정을 효과적으로 부각시키는 배경으로 기능합니다.",
+      },
+    ],
+    relatedExams: [
+      {
+        id: "re-mn1-1",
+        sourceTitle: "2023학년도 9월 평가원",
+        statement: "서술자는 소년의 내면 심리를 직접적으로 서술하고 있다.",
+        isTrue: false,
+        explanation:
+          "이 작품에서 서술자는 인물의 외적 행동을 묘사할 뿐, 내면 심리를 직접 서술하지 않습니다. 행동과 상황을 통해 심리를 간접적으로 암시하는 기법을 사용하고 있습니다.",
+      },
+      {
+        id: "re-mn1-2",
+        sourceTitle: "2020학년도 수능",
+        statement: "'서울서는 이런 개울물을 보지 못하기나 한 듯이'라는 서술은 소녀의 도시적 배경을 암시한다.",
+        isTrue: true,
+        explanation:
+          "이 서술을 통해 소녀가 서울에서 온 존재임이 암시되며, 도시와 시골의 대비가 만들어집니다. 이는 소녀에게 개울이 주는 신선함과 소년과의 만남의 특별함을 부각시킵니다.",
       },
     ],
   },
@@ -178,6 +241,24 @@ export const quizPassages: QuizPassage[] = [
           "화자는 현실에서의 시름과 고통을 견디지 못해 청산으로 가려는 모습을 보입니다. '시름 한 나도'에서 화자의 깊은 고뇌가 드러납니다.",
       },
     ],
+    relatedExams: [
+      {
+        id: "re-cp1-1",
+        sourceTitle: "2022학년도 수능",
+        statement: "이 작품에서 '새'는 화자의 분신으로서 시름을 공유하는 존재이다.",
+        isTrue: true,
+        explanation:
+          "'우러라 새여'에서 화자는 우는 새에게 자신의 시름을 투영하고 있습니다. 새와 자신을 동일시하며 '널라와 시름 한 나도'라고 하여 새와 시름을 공유하고 있습니다.",
+      },
+      {
+        id: "re-cp1-2",
+        sourceTitle: "2019학년도 6월 평가원",
+        statement: "이 작품은 현실 비판 의식이 직접적으로 드러나는 참여 문학이다.",
+        isTrue: false,
+        explanation:
+          "청산별곡은 현실의 고통에서 벗어나고자 하는 도피 의식이 주를 이루며, 직접적인 현실 비판보다는 개인적 시름과 방랑의 정서를 노래하고 있습니다.",
+      },
+    ],
   },
   {
     id: "classic-novel-1",
@@ -215,6 +296,24 @@ export const quizPassages: QuizPassage[] = [
         isTrue: true,
         explanation:
           "그네뛰기는 단오(음력 5월 5일)의 대표적인 민속놀이로, 이 장면은 봄날 단오의 계절적 배경을 암시하고 있습니다.",
+      },
+    ],
+    relatedExams: [
+      {
+        id: "re-cn1-1",
+        sourceTitle: "2024학년도 9월 평가원",
+        statement: "이 도령과 방자의 대화에서 조선 시대 신분 제도에 대한 상반된 인식이 드러난다.",
+        isTrue: true,
+        explanation:
+          "방자는 신분 차이를 당연시하며 만남을 만류하고, 이 도령은 신분을 초월한 사랑을 주장합니다. 이를 통해 당시 신분 제도에 대한 상반된 인식이 대비적으로 드러납니다.",
+      },
+      {
+        id: "re-cn1-2",
+        sourceTitle: "2021학년도 수능",
+        statement: "춘향전은 인물 간의 갈등이 없는 낭만적 사랑 이야기이다.",
+        isTrue: false,
+        explanation:
+          "춘향전은 신분 갈등, 변학도와의 대립 등 사회적 갈등이 핵심 구조를 이루는 작품입니다. 단순한 낭만적 사랑 이야기가 아니라 신분 제도에 대한 비판 의식이 담겨 있습니다.",
       },
     ],
   },
