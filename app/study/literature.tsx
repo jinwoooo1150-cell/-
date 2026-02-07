@@ -36,10 +36,7 @@ export default function LiteratureScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const quizCategoryId = categoryQuizMap[catId];
     if (quizCategoryId) {
-      const quizzes = getQuizzesByCategory(quizCategoryId);
-      if (quizzes.length > 0) {
-        router.push({ pathname: "/study/quiz/[id]", params: { id: quizzes[0].id } });
-      }
+      router.push({ pathname: "/study/works", params: { category: quizCategoryId } });
     }
   };
 
