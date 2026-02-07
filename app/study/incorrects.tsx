@@ -17,7 +17,8 @@ import { useStudy, IncorrectNote } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
 
 function IncorrectCard({ item, index, onDelete }: { item: IncorrectNote; index: number; onDelete: (id: string) => void }) {
-  const correctAnswer = item.isTrue ? "O" : "X";
+  const isVocab = !!item.correctAnswer;
+  const correctAnswer = isVocab ? item.correctAnswer! : (item.isTrue ? "O" : "X");
 
   const handleDelete = () => {
     if (Platform.OS === "web") {
@@ -41,12 +42,12 @@ function IncorrectCard({ item, index, onDelete }: { item: IncorrectNote; index: 
   return (
     <Animated.View
       entering={Platform.OS !== "web" ? FadeInDown.delay(index * 80).springify() : undefined}
-      style={styles.card}
+      style={[styles.card, isVocab && styles.cardVocab]}
     >
       <View style={styles.cardHeader}>
         <View style={styles.cardTitleRow}>
-          <View style={styles.incorrectBadge}>
-            <Ionicons name="close" size={12} color="#FFF" />
+          <View style={[styles.incorrectBadge, isVocab && { backgroundColor: "#00B4D8" }]}>
+            <Ionicons name={isVocab ? "language" : "close"} size={12} color="#FFF" />
           </View>
           <Text style={styles.cardTitle} numberOfLines={1}>{item.quizTitle}</Text>
           <Text style={styles.cardAuthor}>{item.quizAuthor}</Text>
@@ -56,16 +57,29 @@ function IncorrectCard({ item, index, onDelete }: { item: IncorrectNote; index: 
         </Pressable>
       </View>
       <Text style={styles.statementText}>{item.statement}</Text>
-      <View style={styles.answerRow}>
-        <View style={styles.answerTag}>
-          <Text style={styles.answerTagLabel}>내 답:</Text>
-          <Text style={[styles.answerTagValue, { color: "#EF4444" }]}>{item.userAnswer}</Text>
+      {isVocab ? (
+        <View style={styles.vocabAnswerColumn}>
+          <View style={styles.vocabAnswerRow}>
+            <Text style={styles.answerTagLabel}>내 답:</Text>
+            <Text style={[styles.vocabAnswerText, { color: "#EF4444" }]}>{item.userAnswer}</Text>
+          </View>
+          <View style={styles.vocabAnswerRow}>
+            <Text style={styles.answerTagLabel}>정답:</Text>
+            <Text style={[styles.vocabAnswerText, { color: Colors.light.success }]}>{correctAnswer}</Text>
+          </View>
         </View>
-        <View style={styles.answerTag}>
-          <Text style={styles.answerTagLabel}>정답:</Text>
-          <Text style={[styles.answerTagValue, { color: Colors.light.success }]}>{correctAnswer}</Text>
+      ) : (
+        <View style={styles.answerRow}>
+          <View style={styles.answerTag}>
+            <Text style={styles.answerTagLabel}>내 답:</Text>
+            <Text style={[styles.answerTagValue, { color: "#EF4444" }]}>{item.userAnswer}</Text>
+          </View>
+          <View style={styles.answerTag}>
+            <Text style={styles.answerTagLabel}>정답:</Text>
+            <Text style={[styles.answerTagValue, { color: Colors.light.success }]}>{correctAnswer}</Text>
+          </View>
         </View>
-      </View>
+      )}
       <View style={styles.explanationBox}>
         <Ionicons name="bulb" size={14} color={Colors.light.tint} />
         <Text style={styles.explanationText}>{item.explanation}</Text>
@@ -188,6 +202,9 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: "#EF4444",
   },
+  cardVocab: {
+    borderLeftColor: "#00B4D8",
+  },
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -245,6 +262,23 @@ const styles = StyleSheet.create({
   answerTagValue: {
     fontFamily: "NotoSansKR_900Black",
     fontSize: 14,
+  },
+  vocabAnswerColumn: {
+    gap: 6,
+  },
+  vocabAnswerRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    backgroundColor: Colors.light.background,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  vocabAnswerText: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 13,
+    flex: 1,
   },
   explanationBox: {
     flexDirection: "row",

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -16,14 +16,14 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   withSequence,
+  withTiming,
   FadeInDown,
   FadeIn,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
 import { ProgressBar } from "@/components/ProgressBar";
 import { CheetahMascot } from "@/components/CheetahMascot";
 import { useStudy } from "@/contexts/StudyContext";
-import { classicPoetryVocab, VocabQuestion } from "@/data/vocabData";
+import { classicPoetryVocab } from "@/data/vocabData";
 import Colors from "@/constants/colors";
 
 function ChoiceButton({
@@ -91,14 +91,35 @@ function ChoiceButton({
   );
 }
 
+function CompletionCheckmark() {
+  const scale = useSharedValue(0);
+
+  useEffect(() => {
+    scale.value = withSequence(
+      withTiming(0, { duration: 0 }),
+      withSpring(1.2, { damping: 6, stiffness: 200 }),
+      withSpring(1, { damping: 8, stiffness: 300 })
+    );
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View style={[styles.completionCheckmark, animStyle]}>
+      <Ionicons name="checkmark-circle" size={96} color={Colors.light.success} />
+    </Animated.View>
+  );
+}
+
 export default function VocabTestScreen() {
   const insets = useSafeAreaInsets();
-  const { vocabProgress, updateVocabProgress } = useStudy();
+  const { vocabProgress, updateVocabProgress, addIncorrectNote, markVocabCompleted } = useStudy();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [results, setResults] = useState<boolean[]>([]);
   const [isFinished, setIsFinished] = useState(false);
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
@@ -120,9 +141,21 @@ export default function VocabTestScreen() {
       updateVocabProgress(currentQuestion.id);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      addIncorrectNote({
+        questionId: `vocab-${currentQuestion.id}`,
+        quizId: "vocab-classic-poetry",
+        quizTitle: "고전시가 어휘",
+        quizAuthor: currentQuestion.word,
+        categoryId: "vocab",
+        statement: `"${currentQuestion.word}"의 뜻은?`,
+        isTrue: false,
+        explanation: currentQuestion.explanation,
+        userAnswer: currentQuestion.options[index],
+        correctAnswer: currentQuestion.options[currentQuestion.correctIndex],
+        timestamp: Date.now(),
+      });
     }
-    setResults((prev) => [...prev, isCorrect]);
-  }, [isAnswered, currentQuestion]);
+  }, [isAnswered, currentQuestion, updateVocabProgress, addIncorrectNote]);
 
   const handleNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -131,12 +164,10 @@ export default function VocabTestScreen() {
       setSelectedIndex(null);
       setIsAnswered(false);
     } else {
+      markVocabCompleted();
       setIsFinished(true);
     }
-  }, [currentIndex, totalQuestions]);
-
-  const correctCount = results.filter(Boolean).length;
-  const percentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+  }, [currentIndex, totalQuestions, markVocabCompleted]);
 
   if (isFinished) {
     return (
@@ -145,58 +176,32 @@ export default function VocabTestScreen() {
           paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 40,
           paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20,
         }]}>
-          <CheetahMascot size={80} />
-          <Text style={styles.finishMessage}>
-            {percentage >= 80 ? "훌륭해요!" : percentage >= 60 ? "잘했어요!" : "다시 도전해요!"}
-          </Text>
-          <Text style={styles.finishSubtext}>고전시가 어휘 테스트</Text>
-
-          <LinearGradient
-            colors={[Colors.light.tint, Colors.light.tintDark]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.finishScoreCard}
-          >
-            <Text style={styles.finishPercentage}>{percentage}%</Text>
-            <View style={styles.finishScoreRow}>
-              <View style={styles.finishScoreItem}>
-                <Text style={styles.finishScoreValue}>{correctCount}</Text>
-                <Text style={styles.finishScoreLabel}>정답</Text>
-              </View>
-              <View style={styles.finishDivider} />
-              <View style={styles.finishScoreItem}>
-                <Text style={styles.finishScoreValue}>{totalQuestions - correctCount}</Text>
-                <Text style={styles.finishScoreLabel}>오답</Text>
-              </View>
-            </View>
-          </LinearGradient>
-
-          <View style={styles.finishButtons}>
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.back();
-              }}
-              style={({ pressed }) => [styles.finishSecondaryBtn, pressed && { opacity: 0.8 }]}
-            >
-              <Ionicons name="arrow-back" size={20} color={Colors.light.tint} />
-              <Text style={styles.finishSecondaryText}>홈으로</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                setCurrentIndex(0);
-                setSelectedIndex(null);
-                setIsAnswered(false);
-                setResults([]);
-                setIsFinished(false);
-              }}
-              style={({ pressed }) => [styles.finishPrimaryBtn, pressed && { opacity: 0.9 }]}
-            >
-              <Ionicons name="refresh" size={20} color="#FFF" />
-              <Text style={styles.finishPrimaryText}>다시 풀기</Text>
-            </Pressable>
+          <CompletionCheckmark />
+          <View style={styles.finishMascotRow}>
+            <CheetahMascot size={70} />
           </View>
+          <Text style={styles.finishTitle}>오늘의 어휘 학습 완료!</Text>
+          <Text style={styles.finishSubtext}>꾸준한 성장이 보입니다.</Text>
+
+          <View style={styles.finishCompletedCard}>
+            <Ionicons name="sparkles" size={24} color={Colors.light.tint} />
+            <Text style={styles.finishCompletedLabel}>고전시가 어휘 테스트</Text>
+            <View style={styles.finishCompletedBadge}>
+              <Ionicons name="checkmark" size={16} color="#FFF" />
+              <Text style={styles.finishCompletedBadgeText}>완료</Text>
+            </View>
+          </View>
+
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.back();
+            }}
+            style={({ pressed }) => [styles.finishHomeBtn, pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }]}
+          >
+            <Ionicons name="home" size={20} color="#FFF" />
+            <Text style={styles.finishHomeBtnText}>홈으로 돌아가기</Text>
+          </Pressable>
         </View>
       </View>
     );
@@ -303,7 +308,7 @@ export default function VocabTestScreen() {
             ]}
           >
             <Text style={styles.nextButtonText}>
-              {currentIndex < totalQuestions - 1 ? "다음" : "결과 보기"}
+              {currentIndex < totalQuestions - 1 ? "다음" : "완료"}
             </Text>
             <Ionicons name="arrow-forward" size={20} color="#FFF" />
           </Pressable>
@@ -491,101 +496,81 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center",
-    gap: 16,
+    gap: 12,
   },
-  finishMessage: {
+  completionCheckmark: {
+    marginBottom: 4,
+  },
+  finishMascotRow: {
+    marginBottom: 8,
+  },
+  finishTitle: {
     fontFamily: "NotoSansKR_900Black",
-    fontSize: 28,
+    fontSize: 24,
     color: Colors.light.text,
+    textAlign: "center",
   },
   finishSubtext: {
     fontFamily: "NotoSansKR_500Medium",
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.light.textMuted,
+    marginBottom: 20,
   },
-  finishScoreCard: {
-    width: "100%",
-    borderRadius: 22,
-    padding: 28,
-    alignItems: "center",
-    gap: 16,
-    shadowColor: Colors.light.tint,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  finishPercentage: {
-    fontFamily: "NotoSansKR_900Black",
-    fontSize: 48,
-    color: "#FFF",
-  },
-  finishScoreRow: {
+  finishCompletedCard: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 10,
+    backgroundColor: Colors.light.card,
+    borderRadius: 18,
+    padding: 18,
     width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+    borderWidth: 2,
+    borderColor: Colors.light.success,
   },
-  finishScoreItem: {
+  finishCompletedLabel: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 15,
+    color: Colors.light.text,
     flex: 1,
+  },
+  finishCompletedBadge: {
+    flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    backgroundColor: Colors.light.success,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  finishDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: "rgba(255,255,255,0.3)",
-  },
-  finishScoreValue: {
-    fontFamily: "NotoSansKR_900Black",
-    fontSize: 22,
+  finishCompletedBadgeText: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 12,
     color: "#FFF",
   },
-  finishScoreLabel: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
-  },
-  finishButtons: {
-    flexDirection: "row",
-    gap: 12,
-    width: "100%",
-    marginTop: 8,
-  },
-  finishSecondaryBtn: {
-    flex: 1,
+  finishHomeBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
-    height: 54,
-    borderRadius: 16,
-    backgroundColor: Colors.light.card,
-    borderWidth: 2,
-    borderColor: Colors.light.tint,
-  },
-  finishSecondaryText: {
-    fontFamily: "NotoSansKR_700Bold",
-    fontSize: 16,
-    color: Colors.light.tint,
-  },
-  finishPrimaryBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: 54,
-    borderRadius: 16,
+    gap: 8,
     backgroundColor: Colors.light.tint,
+    height: 54,
+    borderRadius: 16,
+    width: "100%",
+    marginTop: 12,
     shadowColor: Colors.light.tint,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
-  finishPrimaryText: {
+  finishHomeBtnText: {
     fontFamily: "NotoSansKR_700Bold",
-    fontSize: 16,
+    fontSize: 17,
     color: "#FFF",
   },
 });

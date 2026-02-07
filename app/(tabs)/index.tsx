@@ -20,7 +20,8 @@ import Colors from "@/constants/colors";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { dailyProgress, streak, getDDay, completedWorks, learningTime, vocabProgress } = useStudy();
+  const { dailyProgress, streak, getDDay, completedWorks, learningTime, vocabProgress, isVocabCompletedToday } = useStudy();
+  const vocabDone = isVocabCompletedToday();
   const dDay = getDDay();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
@@ -105,34 +106,51 @@ export default function HomeScreen() {
 
         <View style={styles.studySection}>
           <Text style={styles.sectionTitle}>어휘 테스트</Text>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push("/study/vocab-test");
-            }}
-            style={({ pressed }) => [
-              styles.vocabCard,
-              pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
-            ]}
-          >
-            <View style={styles.vocabCardLeft}>
-              <View style={styles.vocabIconBox}>
-                <Ionicons name="language" size={24} color="#FFF" />
-              </View>
-              <View style={styles.vocabInfo}>
-                <Text style={styles.vocabTitle}>{vocabProgress.currentDay}일차 고전시가 어휘 테스트</Text>
-                <Text style={styles.vocabProgress}>
-                  {vocabProgress.learnedCount} / {vocabProgress.totalCount}
-                </Text>
-                <ProgressBar
-                  progress={vocabProgress.totalCount > 0 ? vocabProgress.learnedCount / vocabProgress.totalCount : 0}
-                  height={6}
-                  color="#00B4D8"
-                />
+          {vocabDone ? (
+            <View style={styles.vocabCardCompleted}>
+              <View style={styles.vocabCardLeft}>
+                <View style={[styles.vocabIconBox, { backgroundColor: Colors.light.success }]}>
+                  <Ionicons name="checkmark" size={24} color="#FFF" />
+                </View>
+                <View style={styles.vocabInfo}>
+                  <Text style={styles.vocabTitle}>{vocabProgress.currentDay}일차 고전시가 어휘 테스트</Text>
+                  <View style={styles.vocabCompletedRow}>
+                    <Ionicons name="checkmark-circle" size={16} color={Colors.light.success} />
+                    <Text style={styles.vocabCompletedText}>오늘 학습 완료</Text>
+                  </View>
+                </View>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.light.textMuted} />
-          </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/study/vocab-test");
+              }}
+              style={({ pressed }) => [
+                styles.vocabCard,
+                pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+              ]}
+            >
+              <View style={styles.vocabCardLeft}>
+                <View style={styles.vocabIconBox}>
+                  <Ionicons name="language" size={24} color="#FFF" />
+                </View>
+                <View style={styles.vocabInfo}>
+                  <Text style={styles.vocabTitle}>{vocabProgress.currentDay}일차 고전시가 어휘 테스트</Text>
+                  <Text style={styles.vocabProgressText}>
+                    {vocabProgress.learnedCount} / {vocabProgress.totalCount}
+                  </Text>
+                  <ProgressBar
+                    progress={vocabProgress.totalCount > 0 ? vocabProgress.learnedCount / vocabProgress.totalCount : 0}
+                    height={6}
+                    color="#00B4D8"
+                  />
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={Colors.light.textMuted} />
+            </Pressable>
+          )}
         </View>
 
         <View style={styles.statsRow}>
@@ -311,10 +329,34 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.text,
   },
-  vocabProgress: {
+  vocabProgressText: {
     fontFamily: "NotoSansKR_400Regular",
     fontSize: 12,
     color: Colors.light.textMuted,
+  },
+  vocabCardCompleted: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    borderRadius: 18,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+    borderWidth: 2,
+    borderColor: Colors.light.success,
+  },
+  vocabCompletedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  vocabCompletedText: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 13,
+    color: Colors.light.success,
   },
   statsRow: {
     flexDirection: "row",

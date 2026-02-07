@@ -21,7 +21,8 @@ export interface IncorrectNote {
   statement: string;
   isTrue: boolean;
   explanation: string;
-  userAnswer: "O" | "X";
+  userAnswer: string;
+  correctAnswer?: string;
   timestamp: number;
 }
 
@@ -42,6 +43,7 @@ export interface VocabProgress {
   totalCount: number;
   completedIds: string[];
   currentDay: number;
+  completedDate: string | null;
 }
 
 interface StudyContextValue {
@@ -64,6 +66,8 @@ interface StudyContextValue {
   isBookmarked: (questionId: string) => boolean;
   addLearningTime: (seconds: number) => void;
   updateVocabProgress: (learnedId: string) => void;
+  markVocabCompleted: () => void;
+  isVocabCompletedToday: () => boolean;
   resetDailyLearningTime: () => void;
 }
 
@@ -126,6 +130,7 @@ const defaultVocabProgress: VocabProgress = {
   totalCount: 15,
   completedIds: [],
   currentDay: 1,
+  completedDate: null,
 };
 
 export function StudyProvider({ children }: { children: ReactNode }) {
@@ -303,6 +308,20 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const markVocabCompleted = useCallback(async () => {
+    const today = new Date().toDateString();
+    setVocabProgress((prev) => {
+      const updated = { ...prev, completedDate: today };
+      AsyncStorage.setItem(VOCAB_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const isVocabCompletedToday = useCallback(() => {
+    const today = new Date().toDateString();
+    return vocabProgress.completedDate === today;
+  }, [vocabProgress.completedDate]);
+
   const value = useMemo(
     () => ({
       dailyProgress,
@@ -324,9 +343,11 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       isBookmarked,
       addLearningTime,
       updateVocabProgress,
+      markVocabCompleted,
+      isVocabCompletedToday,
       resetDailyLearningTime,
     }),
-    [dailyProgress, streak, subCategories, completedWorks, incorrectNotes, bookmarks, learningTime, vocabProgress, unlockCategory, addProgress, getDDay, addCompletedWork, addIncorrectNote, removeIncorrectNote, addBookmark, removeBookmark, isBookmarked, addLearningTime, updateVocabProgress, resetDailyLearningTime]
+    [dailyProgress, streak, subCategories, completedWorks, incorrectNotes, bookmarks, learningTime, vocabProgress, unlockCategory, addProgress, getDDay, addCompletedWork, addIncorrectNote, removeIncorrectNote, addBookmark, removeBookmark, isBookmarked, addLearningTime, updateVocabProgress, markVocabCompleted, isVocabCompletedToday, resetDailyLearningTime]
   );
 
   return (
