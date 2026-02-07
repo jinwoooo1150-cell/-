@@ -12,6 +12,8 @@ interface SubCategory {
   completedLessons: number;
 }
 
+export type NoteType = "literature" | "vocab" | "exam";
+
 export interface IncorrectNote {
   questionId: string;
   quizId: string;
@@ -23,6 +25,8 @@ export interface IncorrectNote {
   explanation: string;
   userAnswer: string;
   correctAnswer?: string;
+  sourceTitle?: string;
+  noteType?: NoteType;
   timestamp: number;
 }
 
@@ -35,6 +39,8 @@ export interface BookmarkItem {
   statement: string;
   isTrue: boolean;
   explanation: string;
+  sourceTitle?: string;
+  noteType?: NoteType;
   timestamp: number;
 }
 

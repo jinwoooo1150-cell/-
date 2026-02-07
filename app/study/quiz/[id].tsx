@@ -24,6 +24,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { ProgressBar } from "@/components/ProgressBar";
 import { getQuizById } from "@/data/quizData";
+import { RelatedExamModal } from "@/components/RelatedExamModal";
 import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
 
@@ -158,6 +159,7 @@ export default function QuizScreen() {
   const [answerState, setAnswerState] = useState<AnswerState>("unanswered");
   const [selectedAnswer, setSelectedAnswer] = useState<"O" | "X" | null>(null);
   const [results, setResults] = useState<boolean[]>([]);
+  const [showExamModal, setShowExamModal] = useState(false);
   const startTimeRef = useRef(Date.now());
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
@@ -184,6 +186,7 @@ export default function QuizScreen() {
   const currentQuestion = quiz.questions[currentIndex];
   const progress = (currentIndex + (answerState !== "unanswered" ? 1 : 0)) / totalQuestions;
   const currentBookmarked = isBookmarked(currentQuestion.id);
+  const hasRelatedExams = (quiz.relatedExams?.length ?? 0) > 0;
 
   const handleToggleBookmark = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -302,6 +305,22 @@ export default function QuizScreen() {
           </View>
           <View style={styles.passageDivider} />
           <Text style={styles.passageText}>{quiz.passage}</Text>
+          {hasRelatedExams && (
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowExamModal(true);
+              }}
+              style={({ pressed }) => [
+                styles.relatedExamButton,
+                pressed && { opacity: 0.85 },
+              ]}
+            >
+              <Ionicons name="school" size={16} color="#8B5CF6" />
+              <Text style={styles.relatedExamButtonText}>연관 기출 {quiz.relatedExams!.length}문항</Text>
+              <Ionicons name="chevron-forward" size={16} color="#8B5CF6" />
+            </Pressable>
+          )}
         </View>
 
         <Animated.View
@@ -428,6 +447,18 @@ export default function QuizScreen() {
           </Animated.View>
         )}
       </View>
+
+      {hasRelatedExams && (
+        <RelatedExamModal
+          visible={showExamModal}
+          onClose={() => setShowExamModal(false)}
+          questions={quiz.relatedExams!}
+          quizId={quiz.id}
+          quizTitle={quiz.title}
+          quizAuthor={quiz.author}
+          categoryId={quiz.categoryId}
+        />
+      )}
     </View>
   );
 }
@@ -664,5 +695,22 @@ const styles = StyleSheet.create({
     fontFamily: "NotoSansKR_700Bold",
     fontSize: 17,
     color: "#FFF",
+  },
+  relatedExamButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 16,
+    paddingVertical: 12,
+    backgroundColor: "#F3EEFF",
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#DDD6FE",
+  },
+  relatedExamButtonText: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 13,
+    color: "#8B5CF6",
   },
 });
