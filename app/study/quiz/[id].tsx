@@ -251,8 +251,8 @@ export default function QuizScreen() {
           <View style={styles.passageMeta}>
             <Text style={styles.passageTitle}>{quiz.title}</Text>
             <View style={styles.passageMetaRow}>
-              <Text style={styles.passageAuthor}>{quiz.author}</Text>
               <Text style={styles.passageSource}>{quiz.source}</Text>
+              <Text style={styles.passageAuthor}>{quiz.author}</Text>
             </View>
           </View>
           <View style={styles.passageDivider} />
