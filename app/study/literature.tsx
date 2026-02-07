@@ -15,7 +15,15 @@ import Animated, {
 } from "react-native-reanimated";
 import { SubCategoryCard } from "@/components/SubCategoryCard";
 import { useStudy } from "@/contexts/StudyContext";
+import { getQuizzesByCategory } from "@/data/quizData";
 import Colors from "@/constants/colors";
+
+const categoryQuizMap: Record<string, string> = {
+  "modern-poem": "modern-poem",
+  "modern-novel": "modern-novel",
+  "classic-poetry": "classic-poetry",
+  "classic-novel": "classic-novel",
+};
 
 export default function LiteratureScreen() {
   const insets = useSafeAreaInsets();
@@ -24,8 +32,15 @@ export default function LiteratureScreen() {
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
-  const handleCategoryPress = () => {
+  const handleCategoryPress = (catId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const quizCategoryId = categoryQuizMap[catId];
+    if (quizCategoryId) {
+      const quizzes = getQuizzesByCategory(quizCategoryId);
+      if (quizzes.length > 0) {
+        router.push({ pathname: "/study/quiz/[id]", params: { id: quizzes[0].id } });
+      }
+    }
   };
 
   return (
@@ -63,7 +78,7 @@ export default function LiteratureScreen() {
                 progress={cat.progress}
                 completedLessons={cat.completedLessons}
                 totalLessons={cat.totalLessons}
-                onPress={handleCategoryPress}
+                onPress={() => handleCategoryPress(cat.id)}
               />
             </Animated.View>
           ))}

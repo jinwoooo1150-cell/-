@@ -23,6 +23,8 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="study/literature" options={{ headerShown: false }} />
+      <Stack.Screen name="study/quiz/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="study/quiz/result" options={{ headerShown: false, animation: "fade" }} />
     </Stack>
   );
 }
