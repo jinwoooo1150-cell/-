@@ -25,6 +25,9 @@ function RootLayoutNav() {
       <Stack.Screen name="study/literature" options={{ headerShown: false }} />
       <Stack.Screen name="study/quiz/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="study/quiz/result" options={{ headerShown: false, animation: "fade" }} />
+      <Stack.Screen name="study/incorrects" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="study/bookmarks" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="study/vocab-test" options={{ headerShown: false, animation: "slide_from_right" }} />
     </Stack>
   );
 }

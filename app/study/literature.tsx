@@ -27,7 +27,7 @@ const categoryQuizMap: Record<string, string> = {
 
 export default function LiteratureScreen() {
   const insets = useSafeAreaInsets();
-  const { subCategories } = useStudy();
+  const { subCategories, incorrectNotes, bookmarks } = useStudy();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
@@ -58,7 +58,36 @@ export default function LiteratureScreen() {
           <Ionicons name="arrow-back" size={24} color={Colors.light.text} />
         </Pressable>
         <Text style={styles.headerTitle}>문학</Text>
-        <View style={styles.headerSpacer} />
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/study/incorrects");
+            }}
+            style={styles.headerIconButton}
+          >
+            <Ionicons name="alert-circle-outline" size={22} color="#EF4444" />
+            {incorrectNotes.length > 0 && (
+              <View style={styles.badgeDot}>
+                <Text style={styles.badgeDotText}>{incorrectNotes.length}</Text>
+              </View>
+            )}
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/study/bookmarks");
+            }}
+            style={styles.headerIconButton}
+          >
+            <Ionicons name="bookmark-outline" size={22} color={Colors.light.tint} />
+            {bookmarks.length > 0 && (
+              <View style={[styles.badgeDot, { backgroundColor: Colors.light.tint }]}>
+                <Text style={styles.badgeDotText}>{bookmarks.length}</Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
       </View>
 
       <View style={[styles.content, {
@@ -114,8 +143,34 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.light.text,
   },
-  headerSpacer: {
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  headerIconButton: {
     width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  badgeDot: {
+    position: "absolute",
+    top: 4,
+    right: 2,
+    backgroundColor: "#EF4444",
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+  },
+  badgeDotText: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 9,
+    color: "#FFF",
   },
   content: {
     flex: 1,

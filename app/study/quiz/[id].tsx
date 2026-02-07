@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -24,6 +24,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { ProgressBar } from "@/components/ProgressBar";
 import { getQuizById } from "@/data/quizData";
+import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
 
 type AnswerState = "unanswered" | "correct" | "incorrect";
@@ -151,14 +152,25 @@ export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const quiz = getQuizById(id);
+  const { addIncorrectNote, addBookmark, removeBookmark, isBookmarked, addCompletedWork, addLearningTime } = useStudy();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerState, setAnswerState] = useState<AnswerState>("unanswered");
   const [selectedAnswer, setSelectedAnswer] = useState<"O" | "X" | null>(null);
   const [results, setResults] = useState<boolean[]>([]);
+  const startTimeRef = useRef(Date.now());
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
+
+  useEffect(() => {
+    return () => {
+      const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      if (elapsed > 0) {
+        addLearningTime(elapsed);
+      }
+    };
+  }, []);
 
   if (!quiz) {
     return (
@@ -171,6 +183,26 @@ export default function QuizScreen() {
   const totalQuestions = quiz.questions.length;
   const currentQuestion = quiz.questions[currentIndex];
   const progress = (currentIndex + (answerState !== "unanswered" ? 1 : 0)) / totalQuestions;
+  const currentBookmarked = isBookmarked(currentQuestion.id);
+
+  const handleToggleBookmark = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (currentBookmarked) {
+      removeBookmark(currentQuestion.id);
+    } else {
+      addBookmark({
+        questionId: currentQuestion.id,
+        quizId: quiz.id,
+        quizTitle: quiz.title,
+        quizAuthor: quiz.author,
+        categoryId: quiz.categoryId,
+        statement: currentQuestion.statement,
+        isTrue: currentQuestion.isTrue,
+        explanation: currentQuestion.explanation,
+        timestamp: Date.now(),
+      });
+    }
+  };
 
   const handleAnswer = useCallback(
     (answer: "O" | "X") => {
@@ -186,10 +218,22 @@ export default function QuizScreen() {
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setAnswerState("incorrect");
+        addIncorrectNote({
+          questionId: currentQuestion.id,
+          quizId: quiz.id,
+          quizTitle: quiz.title,
+          quizAuthor: quiz.author,
+          categoryId: quiz.categoryId,
+          statement: currentQuestion.statement,
+          isTrue: currentQuestion.isTrue,
+          explanation: currentQuestion.explanation,
+          userAnswer: answer,
+          timestamp: Date.now(),
+        });
       }
       setResults((prev) => [...prev, isCorrect]);
     },
-    [answerState, currentQuestion]
+    [answerState, currentQuestion, quiz, addIncorrectNote]
   );
 
   const handleNext = useCallback(() => {
@@ -199,6 +243,7 @@ export default function QuizScreen() {
       setAnswerState("unanswered");
       setSelectedAnswer(null);
     } else {
+      addCompletedWork(quiz.id);
       router.replace({
         pathname: "/study/quiz/result",
         params: {
@@ -209,7 +254,7 @@ export default function QuizScreen() {
         },
       });
     }
-  }, [currentIndex, totalQuestions, results, quiz]);
+  }, [currentIndex, totalQuestions, results, quiz, addCompletedWork]);
 
   const handleClose = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -264,10 +309,19 @@ export default function QuizScreen() {
           entering={Platform.OS !== "web" ? SlideInRight.duration(300).springify() : undefined}
           style={styles.questionSection}
         >
-          <View style={styles.questionBadge}>
-            <Text style={styles.questionBadgeText}>
-              Q{currentIndex + 1}
-            </Text>
+          <View style={styles.questionTopRow}>
+            <View style={styles.questionBadge}>
+              <Text style={styles.questionBadgeText}>
+                Q{currentIndex + 1}
+              </Text>
+            </View>
+            <Pressable onPress={handleToggleBookmark} hitSlop={8} style={styles.bookmarkButton}>
+              <Ionicons
+                name={currentBookmarked ? "bookmark" : "bookmark-outline"}
+                size={22}
+                color={currentBookmarked ? Colors.light.tint : Colors.light.textMuted}
+              />
+            </Pressable>
           </View>
           <Text style={styles.questionText}>{currentQuestion.statement}</Text>
         </Animated.View>
@@ -476,18 +530,28 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.light.tint,
   },
+  questionTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
   questionBadge: {
     backgroundColor: Colors.light.tint,
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    alignSelf: "flex-start",
-    marginBottom: 10,
   },
   questionBadgeText: {
     fontFamily: "NotoSansKR_700Bold",
     fontSize: 12,
     color: "#FFF",
+  },
+  bookmarkButton: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
   },
   questionText: {
     fontFamily: "NotoSansKR_500Medium",

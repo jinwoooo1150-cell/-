@@ -5,11 +5,13 @@ import {
   View,
   ScrollView,
   Platform,
+  Pressable,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import * as Haptics from "expo-haptics";
 import { CheetahMascot } from "@/components/CheetahMascot";
 import { ProgressBar } from "@/components/ProgressBar";
 import { StudyCard } from "@/components/StudyCard";
@@ -18,11 +20,20 @@ import Colors from "@/constants/colors";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { dailyProgress, streak, getDDay } = useStudy();
+  const { dailyProgress, streak, getDDay, completedWorks, learningTime, vocabProgress } = useStudy();
   const dDay = getDDay();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
+
+  const formatTime = (seconds: number) => {
+    if (seconds < 60) return `${seconds}초`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}분`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}시간 ${remainingMinutes}분`;
+  };
 
   return (
     <View style={styles.container}>
@@ -92,21 +103,53 @@ export default function HomeScreen() {
           />
         </View>
 
+        <View style={styles.studySection}>
+          <Text style={styles.sectionTitle}>어휘 테스트</Text>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/study/vocab-test");
+            }}
+            style={({ pressed }) => [
+              styles.vocabCard,
+              pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+            ]}
+          >
+            <View style={styles.vocabCardLeft}>
+              <View style={styles.vocabIconBox}>
+                <Ionicons name="language" size={24} color="#FFF" />
+              </View>
+              <View style={styles.vocabInfo}>
+                <Text style={styles.vocabTitle}>{vocabProgress.currentDay}일차 고전시가 어휘 테스트</Text>
+                <Text style={styles.vocabProgress}>
+                  {vocabProgress.learnedCount} / {vocabProgress.totalCount}
+                </Text>
+                <ProgressBar
+                  progress={vocabProgress.totalCount > 0 ? vocabProgress.learnedCount / vocabProgress.totalCount : 0}
+                  height={6}
+                  color="#00B4D8"
+                />
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={Colors.light.textMuted} />
+          </Pressable>
+        </View>
+
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Ionicons name="time-outline" size={24} color={Colors.light.tint} />
-            <Text style={styles.statValue}>42분</Text>
+            <Text style={styles.statValue}>{formatTime(learningTime)}</Text>
             <Text style={styles.statLabel}>오늘 학습</Text>
           </View>
           <View style={styles.statCard}>
-            <Ionicons name="trending-up-outline" size={24} color={Colors.light.success} />
-            <Text style={styles.statValue}>85%</Text>
-            <Text style={styles.statLabel}>정답률</Text>
+            <Ionicons name="checkmark-done-outline" size={24} color={Colors.light.success} />
+            <Text style={styles.statValue}>{completedWorks.length}</Text>
+            <Text style={styles.statLabel}>완료 작품</Text>
           </View>
           <View style={styles.statCard}>
-            <Ionicons name="trophy-outline" size={24} color="#F5A623" />
-            <Text style={styles.statValue}>12</Text>
-            <Text style={styles.statLabel}>완료 단원</Text>
+            <Ionicons name="flame-outline" size={24} color="#F5A623" />
+            <Text style={styles.statValue}>{streak}일</Text>
+            <Text style={styles.statLabel}>연속 학습</Text>
           </View>
         </View>
       </ScrollView>
@@ -233,6 +276,46 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: Colors.light.text,
   },
+  vocabCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    borderRadius: 18,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  vocabCardLeft: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  vocabIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#00B4D8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  vocabInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  vocabTitle: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 14,
+    color: Colors.light.text,
+  },
+  vocabProgress: {
+    fontFamily: "NotoSansKR_400Regular",
+    fontSize: 12,
+    color: Colors.light.textMuted,
+  },
   statsRow: {
     flexDirection: "row",
     gap: 10,
@@ -252,7 +335,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontFamily: "NotoSansKR_900Black",
-    fontSize: 20,
+    fontSize: 18,
     color: Colors.light.text,
   },
   statLabel: {
