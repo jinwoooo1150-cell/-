@@ -5,7 +5,6 @@ import {
   View,
   Pressable,
   Platform,
-  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,29 +19,12 @@ import Colors from "@/constants/colors";
 
 export default function LiteratureScreen() {
   const insets = useSafeAreaInsets();
-  const { subCategories, unlockCategory } = useStudy();
+  const { subCategories } = useStudy();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
-  const handleCategoryPress = (cat: typeof subCategories[0]) => {
-    if (!cat.unlocked) {
-      Alert.alert(
-        "잠긴 단원",
-        `"${cat.name}" 단원을 잠금 해제하시겠습니까?`,
-        [
-          { text: "취소", style: "cancel" },
-          {
-            text: "잠금 해제",
-            onPress: () => {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              unlockCategory(cat.id);
-            },
-          },
-        ]
-      );
-      return;
-    }
+  const handleCategoryPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
@@ -81,17 +63,10 @@ export default function LiteratureScreen() {
                 progress={cat.progress}
                 completedLessons={cat.completedLessons}
                 totalLessons={cat.totalLessons}
-                onPress={() => handleCategoryPress(cat)}
+                onPress={handleCategoryPress}
               />
             </Animated.View>
           ))}
-        </View>
-
-        <View style={styles.tipCard}>
-          <Ionicons name="bulb-outline" size={20} color={Colors.light.tint} />
-          <Text style={styles.tipText}>
-            잠긴 단원을 탭하면 잠금 해제할 수 있습니다
-          </Text>
         </View>
       </View>
     </View>
@@ -141,20 +116,5 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: "46%",
-  },
-  tipCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: Colors.light.cream,
-    borderRadius: 14,
-    padding: 14,
-    marginTop: 28,
-  },
-  tipText: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 13,
-    color: Colors.light.textSecondary,
-    flex: 1,
   },
 });

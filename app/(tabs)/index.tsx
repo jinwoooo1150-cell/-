@@ -5,7 +5,6 @@ import {
   View,
   ScrollView,
   Platform,
-  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,11 +16,9 @@ import { StudyCard } from "@/components/StudyCard";
 import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
 
-const { width } = Dimensions.get("window");
-
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { dailyProgress, streak, totalXP, getDDay } = useStudy();
+  const { dailyProgress, streak, getDDay } = useStudy();
   const dDay = getDDay();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
@@ -43,10 +40,6 @@ export default function HomeScreen() {
           <View style={styles.streakBadge}>
             <Ionicons name="flame" size={18} color={Colors.light.tint} />
             <Text style={styles.streakText}>{streak}</Text>
-          </View>
-          <View style={styles.xpBadge}>
-            <Ionicons name="diamond" size={16} color="#4A90D9" />
-            <Text style={styles.xpText}>{totalXP.toLocaleString()}</Text>
           </View>
         </View>
 
@@ -131,7 +124,7 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
     marginBottom: 8,
   },
@@ -153,25 +146,6 @@ const styles = StyleSheet.create({
     fontFamily: "NotoSansKR_700Bold",
     fontSize: 15,
     color: Colors.light.tint,
-  },
-  xpBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: Colors.light.card,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  xpText: {
-    fontFamily: "NotoSansKR_700Bold",
-    fontSize: 15,
-    color: "#4A90D9",
   },
   mascotSection: {
     alignItems: "center",

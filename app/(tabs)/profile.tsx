@@ -42,7 +42,7 @@ function ProfileMenuItem({ icon, title, value, showChevron = true }: ProfileMenu
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { streak, totalXP, subCategories } = useStudy();
+  const { streak, subCategories } = useStudy();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
@@ -77,36 +77,9 @@ export default function ProfileScreen() {
             <Text style={styles.statLabel}>연속 학습</Text>
           </View>
           <View style={styles.statCard}>
-            <Ionicons name="diamond" size={26} color="#4A90D9" />
-            <Text style={styles.statValue}>{totalXP.toLocaleString()}</Text>
-            <Text style={styles.statLabel}>총 XP</Text>
-          </View>
-          <View style={styles.statCard}>
             <Ionicons name="checkmark-done" size={26} color={Colors.light.success} />
             <Text style={styles.statValue}>{completedLessons}/{totalLessons}</Text>
             <Text style={styles.statLabel}>완료 레슨</Text>
-          </View>
-        </View>
-
-        <View style={styles.achievementsSection}>
-          <Text style={styles.sectionTitle}>달성 배지</Text>
-          <View style={styles.badgeRow}>
-            <View style={[styles.badge, styles.badgeActive]}>
-              <Ionicons name="star" size={24} color="#F5A623" />
-              <Text style={styles.badgeLabel}>첫 학습</Text>
-            </View>
-            <View style={[styles.badge, styles.badgeActive]}>
-              <Ionicons name="flame" size={24} color={Colors.light.tint} />
-              <Text style={styles.badgeLabel}>7일 연속</Text>
-            </View>
-            <View style={[styles.badge, styles.badgeLocked]}>
-              <Ionicons name="trophy" size={24} color={Colors.light.lockedText} />
-              <Text style={styles.badgeLabelLocked}>30일 연속</Text>
-            </View>
-            <View style={[styles.badge, styles.badgeLocked]}>
-              <Ionicons name="ribbon" size={24} color={Colors.light.lockedText} />
-              <Text style={styles.badgeLabelLocked}>만점왕</Text>
-            </View>
           </View>
         </View>
 
@@ -117,7 +90,7 @@ export default function ProfileScreen() {
             <View style={styles.menuDivider} />
             <ProfileMenuItem icon="moon-outline" title="다크 모드" value="자동" />
             <View style={styles.menuDivider} />
-            <ProfileMenuItem icon="help-circle-outline" title="도움말" />
+            <ProfileMenuItem icon="help-circle-outline" title="수오링고 사용법" />
             <View style={styles.menuDivider} />
             <ProfileMenuItem icon="information-circle-outline" title="앱 정보" value="v1.0.0" />
           </View>
@@ -187,52 +160,13 @@ const styles = StyleSheet.create({
     color: Colors.light.textMuted,
     textAlign: "center",
   },
-  achievementsSection: {
-    marginBottom: 28,
+  menuSection: {
     gap: 14,
   },
   sectionTitle: {
     fontFamily: "NotoSansKR_700Bold",
     fontSize: 18,
     color: Colors.light.text,
-  },
-  badgeRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  badge: {
-    flex: 1,
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 14,
-    borderRadius: 14,
-  },
-  badgeActive: {
-    backgroundColor: Colors.light.card,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  badgeLocked: {
-    backgroundColor: Colors.light.locked,
-    opacity: 0.6,
-  },
-  badgeLabel: {
-    fontFamily: "NotoSansKR_500Medium",
-    fontSize: 11,
-    color: Colors.light.text,
-    textAlign: "center",
-  },
-  badgeLabelLocked: {
-    fontFamily: "NotoSansKR_500Medium",
-    fontSize: 11,
-    color: Colors.light.lockedText,
-    textAlign: "center",
-  },
-  menuSection: {
-    gap: 14,
   },
   menuCard: {
     backgroundColor: Colors.light.card,

@@ -20,12 +20,12 @@ interface CourseItemProps {
   icon: string;
   color: string;
   progress: number;
-  lessons: string;
+  comingSoon: boolean;
   available: boolean;
   onPress: () => void;
 }
 
-function CourseItem({ title, icon, color, progress, lessons, available, onPress }: CourseItemProps) {
+function CourseItem({ title, icon, color, progress, comingSoon, available, onPress }: CourseItemProps) {
   const handlePress = () => {
     if (available) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -49,10 +49,16 @@ function CourseItem({ title, icon, color, progress, lessons, available, onPress 
         />
       </View>
       <View style={styles.courseInfo}>
-        <Text style={[styles.courseTitle, !available && styles.courseTitleLocked]}>
-          {title}
-        </Text>
-        <Text style={styles.courseLessons}>{lessons}</Text>
+        <View style={styles.courseTitleRow}>
+          <Text style={[styles.courseTitle, !available && styles.courseTitleLocked]}>
+            {title}
+          </Text>
+          {comingSoon && (
+            <View style={styles.comingSoonBadge}>
+              <Text style={styles.comingSoonText}>Coming soon!</Text>
+            </View>
+          )}
+        </View>
         {available && (
           <View style={styles.courseProgress}>
             <ProgressBar progress={progress} height={6} />
@@ -75,13 +81,16 @@ export default function StudyScreen() {
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
+  const completedLessons = subCategories.reduce((sum, c) => sum + c.completedLessons, 0);
+  const totalLessons = subCategories.reduce((sum, c) => sum + c.totalLessons, 0);
+
   const courses = [
     {
       title: "문학",
       icon: "book",
       color: Colors.light.tint,
       progress: 0.25,
-      lessons: "4개 단원",
+      comingSoon: false,
       available: true,
       route: "/study/literature",
     },
@@ -90,7 +99,7 @@ export default function StudyScreen() {
       icon: "document-text",
       color: "#4A90D9",
       progress: 0,
-      lessons: "3개 단원",
+      comingSoon: true,
       available: false,
       route: "",
     },
@@ -99,7 +108,7 @@ export default function StudyScreen() {
       icon: "chatbubbles",
       color: "#7B61FF",
       progress: 0,
-      lessons: "2개 단원",
+      comingSoon: true,
       available: false,
       route: "",
     },
@@ -108,7 +117,7 @@ export default function StudyScreen() {
       icon: "language",
       color: "#00B4D8",
       progress: 0,
-      lessons: "3개 단원",
+      comingSoon: true,
       available: false,
       route: "",
     },
@@ -132,23 +141,12 @@ export default function StudyScreen() {
         <View style={styles.overviewCard}>
           <View style={styles.overviewRow}>
             <View style={styles.overviewItem}>
-              <Text style={styles.overviewValue}>
-                {subCategories.filter((c) => c.unlocked).length}
-              </Text>
-              <Text style={styles.overviewLabel}>활성 단원</Text>
-            </View>
-            <View style={styles.overviewDivider} />
-            <View style={styles.overviewItem}>
-              <Text style={styles.overviewValue}>
-                {subCategories.reduce((sum, c) => sum + c.completedLessons, 0)}
-              </Text>
+              <Text style={styles.overviewValue}>{completedLessons}</Text>
               <Text style={styles.overviewLabel}>완료 레슨</Text>
             </View>
             <View style={styles.overviewDivider} />
             <View style={styles.overviewItem}>
-              <Text style={styles.overviewValue}>
-                {subCategories.reduce((sum, c) => sum + c.totalLessons, 0)}
-              </Text>
+              <Text style={styles.overviewValue}>{totalLessons}</Text>
               <Text style={styles.overviewLabel}>전체 레슨</Text>
             </View>
           </View>
@@ -162,7 +160,7 @@ export default function StudyScreen() {
               icon={course.icon}
               color={course.color}
               progress={course.progress}
-              lessons={course.lessons}
+              comingSoon={course.comingSoon}
               available={course.available}
               onPress={() => {
                 if (course.route) router.push(course.route as any);
@@ -260,6 +258,11 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 3,
   },
+  courseTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   courseTitle: {
     fontFamily: "NotoSansKR_700Bold",
     fontSize: 16,
@@ -268,10 +271,18 @@ const styles = StyleSheet.create({
   courseTitleLocked: {
     color: Colors.light.lockedText,
   },
-  courseLessons: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 12,
-    color: Colors.light.textMuted,
+  comingSoonBadge: {
+    backgroundColor: Colors.light.cream,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  comingSoonText: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 10,
+    color: Colors.light.tint,
   },
   courseProgress: {
     marginTop: 4,

@@ -54,7 +54,7 @@ const defaultSubCategories: SubCategory[] = [
     name: "고전시가",
     icon: "leaf-outline",
     iconFamily: "Ionicons",
-    unlocked: false,
+    unlocked: true,
     progress: 0,
     totalLessons: 18,
     completedLessons: 0,
@@ -64,7 +64,7 @@ const defaultSubCategories: SubCategory[] = [
     name: "고전소설",
     icon: "library-outline",
     iconFamily: "Ionicons",
-    unlocked: false,
+    unlocked: true,
     progress: 0,
     totalLessons: 22,
     completedLessons: 0,
@@ -74,7 +74,7 @@ const defaultSubCategories: SubCategory[] = [
 export function StudyProvider({ children }: { children: ReactNode }) {
   const [dailyProgress, setDailyProgress] = useState(0.4);
   const [streak, setStreak] = useState(7);
-  const [totalXP, setTotalXP] = useState(1250);
+  const [totalXP] = useState(0);
   const [subCategories, setSubCategories] = useState<SubCategory[]>(defaultSubCategories);
 
   useEffect(() => {
