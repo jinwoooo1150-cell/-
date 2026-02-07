@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface SubCategory {
@@ -12,19 +12,69 @@ interface SubCategory {
   completedLessons: number;
 }
 
+export interface IncorrectNote {
+  questionId: string;
+  quizId: string;
+  quizTitle: string;
+  quizAuthor: string;
+  categoryId: string;
+  statement: string;
+  isTrue: boolean;
+  explanation: string;
+  userAnswer: "O" | "X";
+  timestamp: number;
+}
+
+export interface BookmarkItem {
+  questionId: string;
+  quizId: string;
+  quizTitle: string;
+  quizAuthor: string;
+  categoryId: string;
+  statement: string;
+  isTrue: boolean;
+  explanation: string;
+  timestamp: number;
+}
+
+export interface VocabProgress {
+  learnedCount: number;
+  totalCount: number;
+  completedIds: string[];
+  currentDay: number;
+}
+
 interface StudyContextValue {
   dailyProgress: number;
   streak: number;
-  totalXP: number;
   subCategories: SubCategory[];
+  completedWorks: string[];
+  incorrectNotes: IncorrectNote[];
+  bookmarks: BookmarkItem[];
+  learningTime: number;
+  vocabProgress: VocabProgress;
   unlockCategory: (id: string) => void;
   addProgress: (id: string, amount: number) => void;
   getDDay: () => number;
+  addCompletedWork: (workId: string) => void;
+  addIncorrectNote: (note: IncorrectNote) => void;
+  removeIncorrectNote: (questionId: string) => void;
+  addBookmark: (bookmark: BookmarkItem) => void;
+  removeBookmark: (questionId: string) => void;
+  isBookmarked: (questionId: string) => boolean;
+  addLearningTime: (seconds: number) => void;
+  updateVocabProgress: (learnedId: string) => void;
+  resetDailyLearningTime: () => void;
 }
 
 const StudyContext = createContext<StudyContextValue | null>(null);
 
 const STORAGE_KEY = "suneung_study_data";
+const INCORRECTS_KEY = "suneung_incorrects";
+const BOOKMARKS_KEY = "suneung_bookmarks";
+const COMPLETED_KEY = "suneung_completed_works";
+const LEARNING_TIME_KEY = "suneung_learning_time";
+const VOCAB_KEY = "suneung_vocab_progress";
 
 const TARGET_DATE = new Date(2026, 10, 12);
 
@@ -35,9 +85,9 @@ const defaultSubCategories: SubCategory[] = [
     icon: "flower-outline",
     iconFamily: "Ionicons",
     unlocked: true,
-    progress: 0.35,
+    progress: 0,
     totalLessons: 20,
-    completedLessons: 7,
+    completedLessons: 0,
   },
   {
     id: "modern-novel",
@@ -45,9 +95,9 @@ const defaultSubCategories: SubCategory[] = [
     icon: "book-outline",
     iconFamily: "Ionicons",
     unlocked: true,
-    progress: 0.15,
+    progress: 0,
     totalLessons: 25,
-    completedLessons: 4,
+    completedLessons: 0,
   },
   {
     id: "classic-poetry",
@@ -71,35 +121,67 @@ const defaultSubCategories: SubCategory[] = [
   },
 ];
 
+const defaultVocabProgress: VocabProgress = {
+  learnedCount: 0,
+  totalCount: 15,
+  completedIds: [],
+  currentDay: 1,
+};
+
 export function StudyProvider({ children }: { children: ReactNode }) {
-  const [dailyProgress, setDailyProgress] = useState(0.4);
-  const [streak, setStreak] = useState(7);
-  const [totalXP] = useState(0);
+  const [dailyProgress, setDailyProgress] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [subCategories, setSubCategories] = useState<SubCategory[]>(defaultSubCategories);
+  const [completedWorks, setCompletedWorks] = useState<string[]>([]);
+  const [incorrectNotes, setIncorrectNotes] = useState<IncorrectNote[]>([]);
+  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
+  const [learningTime, setLearningTime] = useState(0);
+  const [vocabProgress, setVocabProgress] = useState<VocabProgress>(defaultVocabProgress);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    loadData();
+    loadAllData();
   }, []);
 
-  const loadData = async () => {
+  const loadAllData = async () => {
     try {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
+      const [studyData, incorrectsData, bookmarksData, completedData, timeData, vocabData] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_KEY),
+        AsyncStorage.getItem(INCORRECTS_KEY),
+        AsyncStorage.getItem(BOOKMARKS_KEY),
+        AsyncStorage.getItem(COMPLETED_KEY),
+        AsyncStorage.getItem(LEARNING_TIME_KEY),
+        AsyncStorage.getItem(VOCAB_KEY),
+      ]);
+
+      if (studyData) {
+        const data = JSON.parse(studyData);
         if (data.dailyProgress !== undefined) setDailyProgress(data.dailyProgress);
         if (data.streak !== undefined) setStreak(data.streak);
-        if (data.totalXP !== undefined) setTotalXP(data.totalXP);
         if (data.subCategories) setSubCategories(data.subCategories);
       }
+      if (incorrectsData) setIncorrectNotes(JSON.parse(incorrectsData));
+      if (bookmarksData) setBookmarks(JSON.parse(bookmarksData));
+      if (completedData) setCompletedWorks(JSON.parse(completedData));
+      if (timeData) {
+        const parsed = JSON.parse(timeData);
+        const today = new Date().toDateString();
+        if (parsed.date === today) {
+          setLearningTime(parsed.seconds);
+        }
+      }
+      if (vocabData) setVocabProgress(JSON.parse(vocabData));
+
+      setIsLoaded(true);
     } catch (e) {
       console.log("Failed to load study data");
+      setIsLoaded(true);
     }
   };
 
-  const saveData = async (data: {
+  const saveStudyData = useCallback(async (data: {
     dailyProgress: number;
     streak: number;
-    totalXP: number;
     subCategories: SubCategory[];
   }) => {
     try {
@@ -107,19 +189,19 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.log("Failed to save study data");
     }
-  };
+  }, []);
 
-  const unlockCategory = (id: string) => {
+  const unlockCategory = useCallback((id: string) => {
     setSubCategories((prev) => {
       const updated = prev.map((cat) =>
         cat.id === id ? { ...cat, unlocked: true } : cat
       );
-      saveData({ dailyProgress, streak, totalXP, subCategories: updated });
+      saveStudyData({ dailyProgress, streak, subCategories: updated });
       return updated;
     });
-  };
+  }, [dailyProgress, streak, saveStudyData]);
 
-  const addProgress = (id: string, amount: number) => {
+  const addProgress = useCallback((id: string, amount: number) => {
     setSubCategories((prev) => {
       const updated = prev.map((cat) => {
         if (cat.id !== id) return cat;
@@ -131,31 +213,120 @@ export function StudyProvider({ children }: { children: ReactNode }) {
         };
       });
       const newDaily = Math.min(dailyProgress + amount * 0.5, 1);
-      const newXP = totalXP + Math.round(amount * 100);
       setDailyProgress(newDaily);
-      setTotalXP(newXP);
-      saveData({ dailyProgress: newDaily, streak, totalXP: newXP, subCategories: updated });
+      saveStudyData({ dailyProgress: newDaily, streak, subCategories: updated });
       return updated;
     });
-  };
+  }, [dailyProgress, streak, saveStudyData]);
 
-  const getDDay = () => {
+  const getDDay = useCallback(() => {
     const now = new Date();
     const diff = TARGET_DATE.getTime() - now.getTime();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  };
+  }, []);
+
+  const addCompletedWork = useCallback(async (workId: string) => {
+    setCompletedWorks((prev) => {
+      if (prev.includes(workId)) return prev;
+      const updated = [...prev, workId];
+      AsyncStorage.setItem(COMPLETED_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const addIncorrectNote = useCallback(async (note: IncorrectNote) => {
+    setIncorrectNotes((prev) => {
+      const exists = prev.find((n) => n.questionId === note.questionId);
+      const updated = exists
+        ? prev.map((n) => (n.questionId === note.questionId ? note : n))
+        : [...prev, note];
+      AsyncStorage.setItem(INCORRECTS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const removeIncorrectNote = useCallback(async (questionId: string) => {
+    setIncorrectNotes((prev) => {
+      const updated = prev.filter((n) => n.questionId !== questionId);
+      AsyncStorage.setItem(INCORRECTS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const addBookmark = useCallback(async (bookmark: BookmarkItem) => {
+    setBookmarks((prev) => {
+      const exists = prev.find((b) => b.questionId === bookmark.questionId);
+      if (exists) return prev;
+      const updated = [...prev, bookmark];
+      AsyncStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const removeBookmark = useCallback(async (questionId: string) => {
+    setBookmarks((prev) => {
+      const updated = prev.filter((b) => b.questionId !== questionId);
+      AsyncStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const isBookmarked = useCallback((questionId: string) => {
+    return bookmarks.some((b) => b.questionId === questionId);
+  }, [bookmarks]);
+
+  const addLearningTime = useCallback(async (seconds: number) => {
+    setLearningTime((prev) => {
+      const updated = prev + seconds;
+      const today = new Date().toDateString();
+      AsyncStorage.setItem(LEARNING_TIME_KEY, JSON.stringify({ date: today, seconds: updated }));
+      return updated;
+    });
+  }, []);
+
+  const resetDailyLearningTime = useCallback(async () => {
+    setLearningTime(0);
+    const today = new Date().toDateString();
+    await AsyncStorage.setItem(LEARNING_TIME_KEY, JSON.stringify({ date: today, seconds: 0 }));
+  }, []);
+
+  const updateVocabProgress = useCallback(async (learnedId: string) => {
+    setVocabProgress((prev) => {
+      if (prev.completedIds.includes(learnedId)) return prev;
+      const updated = {
+        ...prev,
+        learnedCount: prev.learnedCount + 1,
+        completedIds: [...prev.completedIds, learnedId],
+      };
+      AsyncStorage.setItem(VOCAB_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   const value = useMemo(
     () => ({
       dailyProgress,
       streak,
-      totalXP,
       subCategories,
+      completedWorks,
+      incorrectNotes,
+      bookmarks,
+      learningTime,
+      vocabProgress,
       unlockCategory,
       addProgress,
       getDDay,
+      addCompletedWork,
+      addIncorrectNote,
+      removeIncorrectNote,
+      addBookmark,
+      removeBookmark,
+      isBookmarked,
+      addLearningTime,
+      updateVocabProgress,
+      resetDailyLearningTime,
     }),
-    [dailyProgress, streak, totalXP, subCategories]
+    [dailyProgress, streak, subCategories, completedWorks, incorrectNotes, bookmarks, learningTime, vocabProgress, unlockCategory, addProgress, getDDay, addCompletedWork, addIncorrectNote, removeIncorrectNote, addBookmark, removeBookmark, isBookmarked, addLearningTime, updateVocabProgress, resetDailyLearningTime]
   );
 
   return (

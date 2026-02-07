@@ -1,0 +1,46 @@
+사용자의 학습 기록과 오답, 북마크 데이터가 휘발되지 않고 스마트폰에 안전하게 저장되도록 '데이터 영속성(Persistence)' 로직을 강화한 최종 통합 프롬프트를 작성해 드립니다.
+
+이 명령어를 사용하면 사용자가 앱을 완전히 종료했다가 나중에 다시 접속해도, 공부하던 시간, 완료한 작품 수, 오답 리스트, 북마크가 그대로 유지됩니다.
+
+🚀 데이터 저장 기능이 강화된 최종 통합 프롬프트 (영문)
+"Update the Suolingo app to ensure all user data is permanently saved and retrieved using 'LocalStorage'. The app must maintain the following features even after a refresh or app restart:
+
+1. Data Persistence (Critical):
+
+Implement a system to Save and Load the following data to/from the browser's LocalStorage:
+
+Learning Time: Cumulative study time for the day.
+
+Completed Works: A list of IDs of works the user has finished.
+
+Incorrect Note (나의 오답): An array of question objects that were answered incorrectly.
+
+Bookmarks (북마크): An array of question objects that the user manually bookmarked.
+
+Vocab Progress: Current day's vocabulary test status and total learned count.
+
+2. HOME Screen Updates:
+
+Display the saved Learning Time and update the '완료 작품' count based on the saved 'Completed Works' list.
+
+Ensure the 'N일차 고전시가 어휘 테스트' card correctly shows the saved progress: '(Learned Vocab) / (Total Vocab)'.
+
+3. Learning & Test Logic:
+
+Auto-Save Incorrects: Every time a user gets a question wrong in any quiz, immediately push that question to the 'Incorrect Note' array in LocalStorage.
+
+Manual Bookmark: When the bookmark icon is toggled, sync the 'Bookmarks' array in LocalStorage instantly.
+
+Review & Delete: In the '나의 오답' and '북마크' screens, provide a delete button for each item that removes it from LocalStorage upon user confirmation.
+
+4. Vocabulary Test (HOME):
+
+Build a 15-question 4-choice test for '고전시가 어휘'. Use a JSON structure so I can add vocab data later.
+
+Correct/Incorrect feedback and explanations must be shown for each.
+
+5. UI/UX Refinement:
+
+Category lists (현대시, 현대소설, 등) must feature the Triangle(Incorrect) and Bookmark icons at the top right, leading to their respective saved-item screens.
+
+Maintain the premium orange 'Duolingo' style with Framer Motion animations."
