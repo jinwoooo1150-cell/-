@@ -19,7 +19,7 @@ import { getQuizzesByCategory } from "@/data/quizData";
 import Colors from "@/constants/colors";
 
 const categoryQuizMap: Record<string, string> = {
-  "modern-poem": "modern-poem",
+  "modern-poetry": "modern-poem",
   "modern-novel": "modern-novel",
   "classic-poetry": "classic-poetry",
   "classic-novel": "classic-novel",
