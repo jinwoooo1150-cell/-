@@ -249,11 +249,11 @@ export default function QuizScreen() {
       >
         <View style={styles.passageCard}>
           <View style={styles.passageMeta}>
-            <View style={styles.passageTitleRow}>
-              <Text style={styles.passageTitle}>{quiz.title}</Text>
+            <Text style={styles.passageTitle}>{quiz.title}</Text>
+            <View style={styles.passageMetaRow}>
+              <Text style={styles.passageAuthor}>{quiz.author}</Text>
               <Text style={styles.passageSource}>{quiz.source}</Text>
             </View>
-            <Text style={styles.passageAuthor}>{quiz.author}</Text>
           </View>
           <View style={styles.passageDivider} />
           <Text style={styles.passageText}>{quiz.passage}</Text>
@@ -431,27 +431,29 @@ const styles = StyleSheet.create({
   },
   passageMeta: {
     alignItems: "center",
-    gap: 4,
+    gap: 6,
     marginBottom: 14,
-  },
-  passageTitleRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 8,
   },
   passageTitle: {
     fontFamily: "NotoSansKR_900Black",
     fontSize: 20,
     color: Colors.light.text,
   },
-  passageSource: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 11,
-    color: Colors.light.textMuted,
+  passageMetaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 4,
   },
   passageAuthor: {
     fontFamily: "NotoSansKR_400Regular",
     fontSize: 13,
+    color: Colors.light.textMuted,
+  },
+  passageSource: {
+    fontFamily: "NotoSansKR_400Regular",
+    fontSize: 11,
     color: Colors.light.textMuted,
   },
   passageDivider: {
