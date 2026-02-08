@@ -11,70 +11,106 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  FadeInDown,
+} from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
-import { ProgressBar } from "@/components/ProgressBar";
 import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
 
-interface CourseItemProps {
+interface GrandUnitCardProps {
   title: string;
+  subtitle: string;
+  description: string;
   icon: string;
   iconFamily?: "Ionicons" | "MaterialCommunityIcons";
-  color: string;
-  progress: number;
-  comingSoon: boolean;
+  colors: string[];
   available: boolean;
   index: number;
+  count: string;
   onPress: () => void;
 }
 
-function CourseItem({ title, icon, iconFamily = "Ionicons", color, progress, comingSoon, available, index, onPress }: CourseItemProps) {
-  const handlePress = () => {
-    if (available) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      onPress();
-    } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    }
+function GrandUnitCard({ title, subtitle, description, icon, iconFamily = "Ionicons", colors, available, index, count, onPress }: GrandUnitCardProps) {
+  const scale = useSharedValue(1);
+
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    if (available) scale.value = withSpring(0.96, { damping: 15 });
+  };
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15 });
   };
 
   return (
-    <Animated.View entering={FadeInDown.delay(index * 80).duration(400)}>
-      <Pressable onPress={handlePress} style={({ pressed }) => [
-        styles.courseItem,
-        !available && styles.courseItemLocked,
-        pressed && available && { opacity: 0.9, transform: [{ scale: 0.98 }] },
-      ]}>
-        <View style={[styles.courseIcon, { backgroundColor: available ? color : Colors.light.locked }]}>
-          {iconFamily === "MaterialCommunityIcons" ? (
-            <MaterialCommunityIcons name={icon as any} size={24} color={available ? "#FFF" : Colors.light.lockedText} />
-          ) : (
-            <Ionicons name={icon as any} size={24} color={available ? "#FFF" : Colors.light.lockedText} />
-          )}
-        </View>
-        <View style={styles.courseInfo}>
-          <View style={styles.courseTitleRow}>
-            <Text style={[styles.courseTitle, !available && styles.courseTitleLocked]}>
-              {title}
-            </Text>
-            {comingSoon && (
-              <View style={styles.comingSoonBadge}>
-                <Text style={styles.comingSoonText}>준비중</Text>
+    <Animated.View entering={FadeInDown.delay(index * 120).duration(500)}>
+      <Pressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={() => {
+          if (available) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            onPress();
+          } else {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          }
+        }}
+      >
+        <Animated.View style={pressStyle}>
+          <LinearGradient
+            colors={available ? colors as [string, string, ...string[]] : ["#E5E7EB", "#D1D5DB"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[
+              styles.grandUnitCard,
+              available && styles.grandUnitCardShadow,
+            ]}
+          >
+            <View style={styles.grandUnitCardInner}>
+              <View style={styles.grandUnitLeft}>
+                <View style={styles.grandUnitIconBox}>
+                  {iconFamily === "MaterialCommunityIcons" ? (
+                    <MaterialCommunityIcons name={icon as any} size={32} color={available ? "#FFF" : "#9CA3AF"} />
+                  ) : (
+                    <Ionicons name={icon as any} size={32} color={available ? "#FFF" : "#9CA3AF"} />
+                  )}
+                </View>
+              </View>
+              <View style={styles.grandUnitRight}>
+                <View style={styles.grandUnitTitleRow}>
+                  <Text style={[styles.grandUnitTitle, !available && styles.grandUnitTitleLocked]}>{title}</Text>
+                  {!available && (
+                    <View style={styles.comingSoonBadge}>
+                      <Ionicons name="lock-closed" size={10} color="#9CA3AF" />
+                      <Text style={styles.comingSoonText}>준비중</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={[styles.grandUnitSubtitle, !available && styles.grandUnitSubtitleLocked]}>{subtitle}</Text>
+                <Text style={[styles.grandUnitDescription, !available && styles.grandUnitDescLocked]}>{description}</Text>
+                {available && (
+                  <View style={styles.grandUnitCountRow}>
+                    <Ionicons name="layers" size={14} color="rgba(255,255,255,0.7)" />
+                    <Text style={styles.grandUnitCount}>{count}</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+            {available && (
+              <View style={styles.grandUnitArrow}>
+                <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.6)" />
               </View>
             )}
-          </View>
-          {available && progress > 0 && (
-            <View style={styles.courseProgress}>
-              <ProgressBar progress={progress} height={6} color={color} />
-            </View>
-          )}
-        </View>
-        {available ? (
-          <Ionicons name="chevron-forward" size={20} color={Colors.light.textMuted} />
-        ) : (
-          <Ionicons name="lock-closed" size={18} color={Colors.light.lockedText} />
-        )}
+            <View style={styles.grandUnitDecor1} />
+            <View style={styles.grandUnitDecor2} />
+          </LinearGradient>
+        </Animated.View>
       </Pressable>
     </Animated.View>
   );
@@ -86,58 +122,6 @@ export default function StudyScreen() {
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
-
-  const completedLessons = subCategories.reduce((sum, c) => sum + c.completedLessons, 0);
-  const totalLessons = subCategories.reduce((sum, c) => sum + c.totalLessons, 0);
-
-  const courses = [
-    {
-      title: "현대시",
-      icon: "musical-notes",
-      color: "#FF8C00",
-      progress: 0,
-      comingSoon: false,
-      available: true,
-      route: "modern-poem",
-    },
-    {
-      title: "현대소설",
-      icon: "book",
-      color: "#E07800",
-      progress: 0,
-      comingSoon: false,
-      available: true,
-      route: "modern-novel",
-    },
-    {
-      title: "고전시가",
-      icon: "leaf",
-      color: "#D4A017",
-      progress: 0,
-      comingSoon: false,
-      available: true,
-      route: "classic-poetry",
-    },
-    {
-      title: "고전소설",
-      icon: "library",
-      color: "#C77800",
-      progress: 0,
-      comingSoon: false,
-      available: true,
-      route: "classic-novel",
-    },
-    {
-      title: "극 · 수필",
-      icon: "drama-masks",
-      iconFamily: "MaterialCommunityIcons" as const,
-      color: "#B0B0B0",
-      progress: 0,
-      comingSoon: true,
-      available: false,
-      route: "",
-    },
-  ];
 
   return (
     <View style={styles.container}>
@@ -152,21 +136,7 @@ export default function StudyScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.pageTitle}>학습</Text>
-        <Text style={styles.pageSubtitle}>문학 갈래별 학습</Text>
-
-        <View style={styles.overviewCard}>
-          <View style={styles.overviewRow}>
-            <View style={styles.overviewItem}>
-              <Text style={styles.overviewValue}>{completedLessons}</Text>
-              <Text style={styles.overviewLabel}>완료 레슨</Text>
-            </View>
-            <View style={styles.overviewDivider} />
-            <View style={styles.overviewItem}>
-              <Text style={styles.overviewValue}>{totalLessons}</Text>
-              <Text style={styles.overviewLabel}>전체 레슨</Text>
-            </View>
-          </View>
-        </View>
+        <Text style={styles.pageSubtitle}>수능 영역별 학습</Text>
 
         <View style={styles.actionCardsRow}>
           <Pressable
@@ -203,27 +173,34 @@ export default function StudyScreen() {
           </Pressable>
         </View>
 
-        <Text style={styles.sectionTitle}>갈래별 학습</Text>
-        <View style={styles.courseList}>
-          {courses.map((course, index) => (
-            <CourseItem
-              key={course.title}
-              title={course.title}
-              icon={course.icon}
-              iconFamily={(course.iconFamily || "Ionicons") as any}
-              color={course.color}
-              progress={course.progress}
-              comingSoon={course.comingSoon}
-              available={course.available}
-              index={index}
-              onPress={() => {
-                if (course.route) router.push({
-                  pathname: "/study/works",
-                  params: { categoryId: course.route },
-                } as any);
-              }}
-            />
-          ))}
+        <Text style={styles.sectionTitle}>영역 선택</Text>
+        <Text style={styles.sectionSubtitle}>학습할 대단원을 선택하세요</Text>
+
+        <View style={styles.grandUnitList}>
+          <GrandUnitCard
+            title="문학"
+            subtitle="Literature"
+            description="현대시, 현대소설, 고전시가, 고전소설 등 문학 갈래별 학습"
+            icon="book"
+            colors={["#FF8C00", "#E07800", "#C86800"]}
+            available={true}
+            index={0}
+            count="4개 갈래"
+            onPress={() => {
+              router.push("/study/categories" as any);
+            }}
+          />
+          <GrandUnitCard
+            title="독서"
+            subtitle="Non-fiction"
+            description="인문, 사회, 과학, 기술, 예술 영역 비문학 독해"
+            icon="newspaper"
+            colors={["#3B82F6", "#2563EB"]}
+            available={false}
+            index={1}
+            count=""
+            onPress={() => {}}
+          />
         </View>
       </ScrollView>
     </View>
@@ -249,41 +226,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.light.textMuted,
     marginBottom: 20,
-  },
-  overviewCard: {
-    backgroundColor: Colors.light.card,
-    borderRadius: 18,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  overviewRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  overviewItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 4,
-  },
-  overviewDivider: {
-    width: 1,
-    height: 36,
-    backgroundColor: Colors.light.border,
-  },
-  overviewValue: {
-    fontFamily: "NotoSansKR_900Black",
-    fontSize: 22,
-    color: Colors.light.tint,
-  },
-  overviewLabel: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 12,
-    color: Colors.light.textMuted,
   },
   actionCardsRow: {
     flexDirection: "row",
@@ -321,68 +263,130 @@ const styles = StyleSheet.create({
     color: Colors.light.textMuted,
   },
   sectionTitle: {
-    fontFamily: "NotoSansKR_700Bold",
-    fontSize: 18,
+    fontFamily: "NotoSansKR_900Black",
+    fontSize: 20,
     color: Colors.light.text,
-    marginBottom: 12,
+    marginBottom: 2,
   },
-  courseList: {
-    gap: 10,
+  sectionSubtitle: {
+    fontFamily: "NotoSansKR_400Regular",
+    fontSize: 13,
+    color: Colors.light.textMuted,
+    marginBottom: 16,
   },
-  courseItem: {
+  grandUnitList: {
+    gap: 16,
+  },
+  grandUnitCard: {
+    borderRadius: 22,
+    overflow: "hidden",
+    position: "relative",
+  },
+  grandUnitCardShadow: {
+    shadowColor: "#FF8C00",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    elevation: 6,
+  },
+  grandUnitCardInner: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.light.card,
-    borderRadius: 16,
-    padding: 16,
-    gap: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    padding: 24,
+    gap: 18,
   },
-  courseItemLocked: {
-    opacity: 0.6,
+  grandUnitLeft: {
+    justifyContent: "center",
   },
-  courseIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+  grandUnitIconBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
   },
-  courseInfo: {
+  grandUnitRight: {
     flex: 1,
     gap: 3,
   },
-  courseTitleRow: {
+  grandUnitTitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
-  courseTitle: {
-    fontFamily: "NotoSansKR_700Bold",
-    fontSize: 16,
-    color: Colors.light.text,
+  grandUnitTitle: {
+    fontFamily: "NotoSansKR_900Black",
+    fontSize: 26,
+    color: "#FFF",
   },
-  courseTitleLocked: {
-    color: Colors.light.lockedText,
+  grandUnitTitleLocked: {
+    color: "#9CA3AF",
+  },
+  grandUnitSubtitle: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 13,
+    color: "rgba(255,255,255,0.7)",
+  },
+  grandUnitSubtitleLocked: {
+    color: "#9CA3AF",
+  },
+  grandUnitDescription: {
+    fontFamily: "NotoSansKR_400Regular",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.6)",
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  grandUnitDescLocked: {
+    color: "#B0B0B0",
+  },
+  grandUnitCountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 6,
+  },
+  grandUnitCount: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.7)",
   },
   comingSoonBadge: {
-    backgroundColor: Colors.light.cream,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(0,0,0,0.06)",
     borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
   comingSoonText: {
     fontFamily: "NotoSansKR_500Medium",
-    fontSize: 10,
-    color: Colors.light.tint,
+    fontSize: 11,
+    color: "#9CA3AF",
   },
-  courseProgress: {
-    marginTop: 4,
+  grandUnitArrow: {
+    position: "absolute",
+    right: 20,
+    top: "50%",
+    marginTop: -12,
+  },
+  grandUnitDecor1: {
+    position: "absolute",
+    top: -20,
+    right: -20,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "rgba(255,255,255,0.06)",
+  },
+  grandUnitDecor2: {
+    position: "absolute",
+    bottom: -15,
+    left: -15,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255,255,255,0.04)",
   },
 });

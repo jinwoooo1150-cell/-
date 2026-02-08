@@ -33,8 +33,11 @@ export interface NarrativeSection {
   summary: string;
 }
 
+export type GrandUnit = "literature" | "non_fiction";
+
 export interface QuizPassage {
   id: string;
+  grandUnit: GrandUnit;
   categoryId: string;
   title: string;
   author: string;
@@ -49,9 +52,29 @@ export interface QuizPassage {
   characterMap?: CharacterMapData;
 }
 
+export const grandUnitConfig = {
+  literature: {
+    id: "literature" as GrandUnit,
+    name: "문학",
+    nameEn: "Literature",
+    categories: ["modern-poem", "modern-novel", "classic-poetry", "classic-novel"],
+  },
+  non_fiction: {
+    id: "non_fiction" as GrandUnit,
+    name: "독서",
+    nameEn: "Non-fiction",
+    categories: [],
+  },
+};
+
+export function getQuizzesByGrandUnit(grandUnit: GrandUnit): QuizPassage[] {
+  return quizPassages.filter((q) => q.grandUnit === grandUnit);
+}
+
 export const quizPassages: QuizPassage[] = [
   {
     id: "classic-novel-yucr-1",
+    grandUnit: "literature",
     categoryId: "classic-novel",
     title: "유충렬전",
     author: "작자 미상",
@@ -136,6 +159,7 @@ export const quizPassages: QuizPassage[] = [
   },
   {
     id: "classic-novel-yucr-2",
+    grandUnit: "literature",
     categoryId: "classic-novel",
     title: "유충렬전",
     author: "작자 미상",
@@ -217,6 +241,7 @@ export const quizPassages: QuizPassage[] = [
   },
   {
     id: "classic-novel-yucr-3",
+    grandUnit: "literature",
     categoryId: "classic-novel",
     title: "유충렬전",
     author: "작자 미상",
@@ -276,6 +301,7 @@ export const quizPassages: QuizPassage[] = [
   },
   {
     id: "modern-poem-1",
+    grandUnit: "literature",
     categoryId: "modern-poem",
     title: "진달래꽃",
     author: "김소월",
@@ -333,6 +359,7 @@ export const quizPassages: QuizPassage[] = [
   },
   {
     id: "modern-poem-2",
+    grandUnit: "literature",
     categoryId: "modern-poem",
     title: "서시",
     author: "윤동주",
@@ -390,6 +417,7 @@ export const quizPassages: QuizPassage[] = [
   },
   {
     id: "modern-novel-1",
+    grandUnit: "literature",
     categoryId: "modern-novel",
     title: "소나기",
     author: "황순원",
@@ -429,6 +457,7 @@ export const quizPassages: QuizPassage[] = [
   },
   {
     id: "classic-poetry-1",
+    grandUnit: "literature",
     categoryId: "classic-poetry",
     title: "청산별곡",
     author: "작자 미상",
@@ -472,6 +501,7 @@ export const quizPassages: QuizPassage[] = [
   },
   {
     id: "classic-novel-1",
+    grandUnit: "literature",
     categoryId: "classic-novel",
     title: "춘향전",
     author: "작자 미상",

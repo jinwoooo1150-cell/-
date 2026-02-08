@@ -287,7 +287,7 @@ export default function HomeScreen() {
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/study/literature");
+            router.push("/study/categories" as any);
           }}
           style={({ pressed }) => [
             styles.quickStartCard,
