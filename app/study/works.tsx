@@ -102,8 +102,8 @@ function WorkCard({
 export default function WorksScreen() {
   const insets = useSafeAreaInsets();
   const { completedWorks } = useStudy();
-  const params = useLocalSearchParams<{ category: string }>();
-  const categoryId = params.category || "";
+  const params = useLocalSearchParams<{ category?: string; categoryId?: string }>();
+  const categoryId = params.categoryId || params.category || "";
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;

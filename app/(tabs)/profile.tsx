@@ -90,7 +90,7 @@ export default function ProfileScreen() {
             <View style={styles.menuDivider} />
             <ProfileMenuItem icon="moon-outline" title="다크 모드" value="자동" />
             <View style={styles.menuDivider} />
-            <ProfileMenuItem icon="help-circle-outline" title="수오링고 사용법" />
+            <ProfileMenuItem icon="help-circle-outline" title="Su-o-lingo 사용법" />
             <View style={styles.menuDivider} />
             <ProfileMenuItem icon="information-circle-outline" title="앱 정보" value="v1.0.0" />
           </View>
