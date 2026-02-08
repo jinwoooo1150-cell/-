@@ -18,44 +18,37 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { useStudy } from "@/contexts/StudyContext";
+import { quizPassages } from "@/data/quizData";
 import Colors from "@/constants/colors";
 
-interface RoadmapNodeProps {
+interface CategoryCardProps {
   title: string;
   subtitle: string;
   icon: string;
   iconFamily?: "Ionicons" | "MaterialCommunityIcons";
   color: string;
   available: boolean;
-  completed: boolean;
-  position: "left" | "center" | "right";
   index: number;
+  count: number;
+  completedCount: number;
   onPress: () => void;
 }
 
-function RoadmapNode({ title, subtitle, icon, iconFamily = "Ionicons", color, available, completed, position, index, onPress }: RoadmapNodeProps) {
+function CategoryCard({ title, subtitle, icon, iconFamily = "Ionicons", color, available, index, count, completedCount, onPress }: CategoryCardProps) {
   const scale = useSharedValue(1);
   const pressStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
-  const handlePressIn = () => {
-    if (available) scale.value = withSpring(0.92, { damping: 15 });
-  };
-  const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15 });
-  };
-
-  const marginLeft = position === "left" ? 0 : position === "right" ? 140 : 70;
-
   return (
-    <Animated.View
-      entering={FadeInDown.delay(index * 100).duration(400)}
-      style={{ marginLeft, marginBottom: 8 }}
-    >
+    <Animated.View entering={FadeInDown.delay(index * 80).duration(400)}>
       <Pressable
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
+        onPressIn={() => {
+          if (available) scale.value = withSpring(0.96, { damping: 15 });
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, { damping: 15 });
+        }}
         onPress={() => {
           if (available) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -65,44 +58,36 @@ function RoadmapNode({ title, subtitle, icon, iconFamily = "Ionicons", color, av
           }
         }}
       >
-        <Animated.View style={[styles.nodeContainer, pressStyle]}>
-          <View style={[
-            styles.nodeCircle,
-            {
-              backgroundColor: available ? color : Colors.light.locked,
-              shadowColor: available ? color : "transparent",
-              shadowOpacity: available ? 0.35 : 0,
-            },
-            completed && styles.nodeCompleted,
-          ]}>
-            {completed ? (
-              <Ionicons name="checkmark" size={28} color="#FFF" />
-            ) : iconFamily === "MaterialCommunityIcons" ? (
-              <MaterialCommunityIcons name={icon as any} size={26} color={available ? "#FFF" : Colors.light.lockedText} />
+        <Animated.View style={[styles.categoryCard, pressStyle]}>
+          <View style={[styles.categoryIconBox, { backgroundColor: available ? color : Colors.light.locked }]}>
+            {iconFamily === "MaterialCommunityIcons" ? (
+              <MaterialCommunityIcons name={icon as any} size={24} color={available ? "#FFF" : Colors.light.lockedText} />
             ) : (
-              <Ionicons name={icon as any} size={26} color={available ? "#FFF" : Colors.light.lockedText} />
+              <Ionicons name={icon as any} size={24} color={available ? "#FFF" : Colors.light.lockedText} />
             )}
           </View>
-          <View style={styles.nodeTextContainer}>
-            <Text style={[styles.nodeTitle, !available && { color: Colors.light.lockedText }]}>{title}</Text>
-            <Text style={[styles.nodeSubtitle, !available && { color: Colors.light.lockedText }]}>{subtitle}</Text>
+          <View style={styles.categoryTextSection}>
+            <Text style={[styles.categoryTitle, !available && { color: Colors.light.lockedText }]}>{title}</Text>
+            <Text style={[styles.categorySubtitle, !available && { color: Colors.light.lockedText }]}>{subtitle}</Text>
           </View>
-          {!available && (
-            <Ionicons name="lock-closed" size={14} color={Colors.light.lockedText} style={{ marginLeft: 4 }} />
-          )}
+          <View style={styles.categoryRight}>
+            {available ? (
+              <>
+                <Text style={styles.categoryCount}>
+                  {completedCount}/{count}
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color={Colors.light.textMuted} />
+              </>
+            ) : (
+              <View style={styles.lockBadge}>
+                <Ionicons name="lock-closed" size={12} color={Colors.light.lockedText} />
+                <Text style={styles.lockText}>준비중</Text>
+              </View>
+            )}
+          </View>
         </Animated.View>
       </Pressable>
     </Animated.View>
-  );
-}
-
-function PathConnector({ fromPosition, toPosition }: { fromPosition: string; toPosition: string }) {
-  return (
-    <View style={[styles.pathLine, { marginLeft: 30 }]}>
-      <View style={styles.pathDot} />
-      <View style={styles.pathDot} />
-      <View style={styles.pathDot} />
-    </View>
   );
 }
 
@@ -113,15 +98,19 @@ export default function CategoriesScreen() {
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
-  const roadmapNodes = [
+  const getCountForCategory = (catId: string) =>
+    quizPassages.filter((q) => q.categoryId === catId).length;
+
+  const getCompletedForCategory = (catId: string) =>
+    quizPassages.filter((q) => q.categoryId === catId && completedWorks.includes(q.id)).length;
+
+  const categories = [
     {
       title: "현대시",
       subtitle: "Modern Poetry",
       icon: "musical-notes",
       color: "#FF8C00",
       available: true,
-      completed: false,
-      position: "left" as const,
       route: "modern-poem",
     },
     {
@@ -130,8 +119,6 @@ export default function CategoriesScreen() {
       icon: "book",
       color: "#E07800",
       available: true,
-      completed: false,
-      position: "center" as const,
       route: "modern-novel",
     },
     {
@@ -140,8 +127,6 @@ export default function CategoriesScreen() {
       icon: "leaf",
       color: "#D4A017",
       available: true,
-      completed: false,
-      position: "right" as const,
       route: "classic-poetry",
     },
     {
@@ -150,8 +135,6 @@ export default function CategoriesScreen() {
       icon: "library",
       color: "#C77800",
       available: true,
-      completed: false,
-      position: "left" as const,
       route: "classic-novel",
     },
     {
@@ -161,8 +144,6 @@ export default function CategoriesScreen() {
       iconFamily: "MaterialCommunityIcons" as const,
       color: "#B0B0B0",
       available: false,
-      completed: false,
-      position: "center" as const,
       route: "",
     },
   ];
@@ -183,7 +164,7 @@ export default function CategoriesScreen() {
         </Pressable>
         <View style={styles.headerCenter}>
           <Ionicons name="book" size={20} color={Colors.light.tint} />
-          <Text style={styles.headerTitle}>문학</Text>
+          <Text style={styles.headerTitle}>문학 갈래별 학습</Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -195,38 +176,31 @@ export default function CategoriesScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.sectionTitle}>학습 로드맵</Text>
-        <Text style={styles.sectionSubtitle}>문학 갈래별 학습 경로</Text>
+        <Text style={styles.sectionTitle}>갈래 선택</Text>
+        <Text style={styles.sectionSubtitle}>원하는 갈래를 자유롭게 선택하세요</Text>
 
-        <View style={styles.roadmapContainer}>
-          {roadmapNodes.map((node, index) => (
-            <React.Fragment key={node.title}>
-              <RoadmapNode
-                title={node.title}
-                subtitle={node.subtitle}
-                icon={node.icon}
-                iconFamily={(node.iconFamily || "Ionicons") as any}
-                color={node.color}
-                available={node.available}
-                completed={node.completed}
-                position={node.position}
-                index={index}
-                onPress={() => {
-                  if (node.route) {
-                    router.push({
-                      pathname: "/study/works",
-                      params: { categoryId: node.route },
-                    } as any);
-                  }
-                }}
-              />
-              {index < roadmapNodes.length - 1 && (
-                <PathConnector
-                  fromPosition={node.position}
-                  toPosition={roadmapNodes[index + 1].position}
-                />
-              )}
-            </React.Fragment>
+        <View style={styles.categoryList}>
+          {categories.map((cat, index) => (
+            <CategoryCard
+              key={cat.title}
+              title={cat.title}
+              subtitle={cat.subtitle}
+              icon={cat.icon}
+              iconFamily={(cat.iconFamily || "Ionicons") as any}
+              color={cat.color}
+              available={cat.available}
+              index={index}
+              count={cat.available ? getCountForCategory(cat.route) : 0}
+              completedCount={cat.available ? getCompletedForCategory(cat.route) : 0}
+              onPress={() => {
+                if (cat.route) {
+                  router.push({
+                    pathname: "/study/works",
+                    params: { categoryId: cat.route },
+                  } as any);
+                }
+              }}
+            />
           ))}
         </View>
       </ScrollView>
@@ -283,52 +257,65 @@ const styles = StyleSheet.create({
     color: Colors.light.textMuted,
     marginBottom: 20,
   },
-  roadmapContainer: {
-    paddingVertical: 8,
-  },
-  nodeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+  categoryList: {
     gap: 12,
   },
-  nodeCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  nodeCompleted: {
-    borderWidth: 3,
-    borderColor: Colors.light.success,
-  },
-  nodeTextContainer: {
-    gap: 1,
-  },
-  nodeTitle: {
-    fontFamily: "NotoSansKR_700Bold",
-    fontSize: 16,
-    color: Colors.light.text,
-  },
-  nodeSubtitle: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 11,
-    color: Colors.light.textMuted,
-  },
-  pathLine: {
+  categoryCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 20,
+    backgroundColor: Colors.light.card,
+    borderRadius: 18,
+    padding: 18,
+    gap: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  pathDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: Colors.light.tintGlow,
+  categoryIconBox: {
+    width: 50,
+    height: 50,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  categoryTextSection: {
+    flex: 1,
+    gap: 2,
+  },
+  categoryTitle: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 17,
+    color: Colors.light.text,
+  },
+  categorySubtitle: {
+    fontFamily: "NotoSansKR_400Regular",
+    fontSize: 12,
+    color: Colors.light.textMuted,
+  },
+  categoryRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  categoryCount: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 13,
+    color: Colors.light.tint,
+  },
+  lockBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: Colors.light.locked,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  lockText: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 11,
+    color: Colors.light.lockedText,
   },
 });
