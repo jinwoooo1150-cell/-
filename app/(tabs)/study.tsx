@@ -34,7 +34,18 @@ interface LitCategoryItemProps {
   onPress: () => void;
 }
 
-function LitCategoryItem({ title, subtitle, icon, iconFamily = "Ionicons", color, available, index, count, completedCount, onPress }: LitCategoryItemProps) {
+function LitCategoryItem({
+  title,
+  subtitle,
+  icon,
+  iconFamily = "Ionicons",
+  color,
+  available,
+  index,
+  count,
+  completedCount,
+  onPress,
+}: LitCategoryItemProps) {
   const scale = useSharedValue(1);
   const pressStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -59,25 +70,62 @@ function LitCategoryItem({ title, subtitle, icon, iconFamily = "Ionicons", color
         }}
       >
         <Animated.View style={[styles.litCard, pressStyle]}>
-          <View style={[styles.litIconBox, { backgroundColor: available ? color : Colors.light.locked }]}>
+          <View
+            style={[
+              styles.litIconBox,
+              { backgroundColor: available ? color : Colors.light.locked },
+            ]}
+          >
             {iconFamily === "MaterialCommunityIcons" ? (
-              <MaterialCommunityIcons name={icon as any} size={22} color={available ? "#FFF" : Colors.light.lockedText} />
+              <MaterialCommunityIcons
+                name={icon as any}
+                size={22}
+                color={available ? "#FFF" : Colors.light.lockedText}
+              />
             ) : (
-              <Ionicons name={icon as any} size={22} color={available ? "#FFF" : Colors.light.lockedText} />
+              <Ionicons
+                name={icon as any}
+                size={22}
+                color={available ? "#FFF" : Colors.light.lockedText}
+              />
             )}
           </View>
           <View style={styles.litTextSection}>
-            <Text style={[styles.litTitle, !available && { color: Colors.light.lockedText }]}>{title}</Text>
-            <Text style={[styles.litSubtitle, !available && { color: Colors.light.lockedText }]}>{subtitle}</Text>
+            <Text
+              style={[
+                styles.litTitle,
+                !available && { color: Colors.light.lockedText },
+              ]}
+            >
+              {title}
+            </Text>
+            <Text
+              style={[
+                styles.litSubtitle,
+                !available && { color: Colors.light.lockedText },
+              ]}
+            >
+              {subtitle}
+            </Text>
           </View>
           {available ? (
             <View style={styles.litRight}>
-              <Text style={styles.litCount}>{completedCount}/{count}</Text>
-              <Ionicons name="chevron-forward" size={18} color={Colors.light.textMuted} />
+              <Text style={styles.litCount}>
+                {completedCount}/{count}
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={Colors.light.textMuted}
+              />
             </View>
           ) : (
             <View style={styles.litLockBadge}>
-              <Ionicons name="lock-closed" size={11} color={Colors.light.lockedText} />
+              <Ionicons
+                name="lock-closed"
+                size={11}
+                color={Colors.light.lockedText}
+              />
             </View>
           )}
         </Animated.View>
@@ -96,14 +144,53 @@ export default function StudyScreen() {
   const getCountForCategory = (catId: string) =>
     quizPassages.filter((q) => q.categoryId === catId).length;
   const getCompletedForCategory = (catId: string) =>
-    quizPassages.filter((q) => q.categoryId === catId && completedWorks.includes(q.id)).length;
+    quizPassages.filter(
+      (q) => q.categoryId === catId && completedWorks.includes(q.id),
+    ).length;
 
   const litCategories = [
-    { title: "현대시", subtitle: "Modern Poetry", icon: "musical-notes", color: "#FF8C00", available: true, route: "modern-poem" },
-    { title: "현대소설", subtitle: "Modern Fiction", icon: "book", color: "#E07800", available: true, route: "modern-novel" },
-    { title: "고전시가", subtitle: "Classical Poetry", icon: "leaf", color: "#D4A017", available: true, route: "classic-poetry" },
-    { title: "고전소설", subtitle: "Classical Fiction", icon: "library", color: "#C77800", available: true, route: "classic-novel" },
-    { title: "극 · 수필", subtitle: "Drama & Essay", icon: "drama-masks", iconFamily: "MaterialCommunityIcons" as const, color: "#B0B0B0", available: false, route: "" },
+    // [수정됨] route를 "modern-poem" -> "modern-poetry"로 변경
+    {
+      title: "현대시",
+      subtitle: "Modern Poetry",
+      icon: "musical-notes",
+      color: "#FF8C00",
+      available: true,
+      route: "modern-poetry",
+    },
+    {
+      title: "현대소설",
+      subtitle: "Modern Fiction",
+      icon: "book",
+      color: "#E07800",
+      available: true,
+      route: "modern-novel",
+    },
+    {
+      title: "고전시가",
+      subtitle: "Classical Poetry",
+      icon: "leaf",
+      color: "#D4A017",
+      available: true,
+      route: "classic-poetry",
+    },
+    {
+      title: "고전소설",
+      subtitle: "Classical Fiction",
+      icon: "library",
+      color: "#C77800",
+      available: true,
+      route: "classic-novel",
+    },
+    {
+      title: "극 · 수필",
+      subtitle: "Drama & Essay",
+      icon: "drama-masks",
+      iconFamily: "MaterialCommunityIcons" as const,
+      color: "#B0B0B0",
+      available: false,
+      route: "",
+    },
   ];
 
   return (
@@ -113,7 +200,8 @@ export default function StudyScreen() {
           styles.scrollContent,
           {
             paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 20,
-            paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 100,
+            paddingBottom:
+              (Platform.OS === "web" ? webBottomInset : insets.bottom) + 100,
           },
         ]}
         showsVerticalScrollIndicator={false}
@@ -132,8 +220,14 @@ export default function StudyScreen() {
               pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
             ]}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: "#FFF0E0" }]}>
-              <Ionicons name="alert-circle" size={22} color={Colors.light.tint} />
+            <View
+              style={[styles.actionIconBox, { backgroundColor: "#FFF0E0" }]}
+            >
+              <Ionicons
+                name="alert-circle"
+                size={22}
+                color={Colors.light.tint}
+              />
             </View>
             <Text style={styles.actionTitle}>나의 오답</Text>
             <Text style={styles.actionCount}>{incorrectNotes.length}개</Text>
@@ -148,7 +242,9 @@ export default function StudyScreen() {
               pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
             ]}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: "#E8F4FF" }]}>
+            <View
+              style={[styles.actionIconBox, { backgroundColor: "#E8F4FF" }]}
+            >
               <Ionicons name="bookmark" size={22} color="#3B82F6" />
             </View>
             <Text style={styles.actionTitle}>북마크</Text>
@@ -157,7 +253,9 @@ export default function StudyScreen() {
         </View>
 
         <Text style={styles.sectionTitle}>문학 갈래</Text>
-        <Text style={styles.sectionSubtitle}>원하는 갈래를 자유롭게 선택하세요</Text>
+        <Text style={styles.sectionSubtitle}>
+          원하는 갈래를 자유롭게 선택하세요
+        </Text>
 
         <View style={styles.litList}>
           {litCategories.map((cat, index) => (
@@ -171,7 +269,9 @@ export default function StudyScreen() {
               available={cat.available}
               index={index}
               count={cat.available ? getCountForCategory(cat.route) : 0}
-              completedCount={cat.available ? getCompletedForCategory(cat.route) : 0}
+              completedCount={
+                cat.available ? getCompletedForCategory(cat.route) : 0
+              }
               onPress={() => {
                 if (cat.route) {
                   router.push({

@@ -1,3 +1,5 @@
+// app/study/quiz/[id].tsx
+
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   StyleSheet,
@@ -18,9 +20,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withTiming,
   withSequence,
-  withDelay,
   FadeIn,
   FadeInDown,
   FadeInUp,
@@ -29,10 +29,18 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import { ProgressBar } from "@/components/ProgressBar";
 import { CheetahMascot, CheetahMood } from "@/components/CheetahMascot";
-import { getQuizById, NarrativePhase, CharacterMapData, CharacterRelation } from "@/data/quizData";
+import {
+  getQuizById,
+  NarrativePhase,
+  CharacterMapData,
+  CharacterRelation,
+  NarrativeSection,
+} from "@/data/quizData";
 import { RelatedExamModal } from "@/components/RelatedExamModal";
 import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
+
+// --- Types & Constants ---
 
 type AnswerState = "unanswered" | "correct" | "incorrect";
 
@@ -43,151 +51,187 @@ const phaseLabels: Record<NarrativePhase, string> = {
   falling: "하강",
   resolution: "결말",
 };
+const phaseOrder: NarrativePhase[] = [
+  "exposition",
+  "rising",
+  "climax",
+  "falling",
+  "resolution",
+];
 
-const phaseOrder: NarrativePhase[] = ["exposition", "rising", "climax", "falling", "resolution"];
+// --- Modals ---
 
-const { width: screenWidth } = Dimensions.get("window");
-
-function NarrativeProgressBar({ currentPhase, sections }: { currentPhase: NarrativePhase; sections: { phase: NarrativePhase; title: string; summary: string }[] }) {
-  const currentIdx = phaseOrder.indexOf(currentPhase);
-
+function SimpleTextModal({
+  visible,
+  onClose,
+  title,
+  content,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  title: string;
+  content: string;
+}) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={npStyles.container}>
-      <View style={npStyles.track}>
-        {phaseOrder.map((phase, idx) => {
-          const isActive = idx <= currentIdx;
-          const isCurrent = idx === currentIdx;
-          const section = sections.find((s) => s.phase === phase);
-          return (
-            <View key={phase} style={npStyles.phaseItem}>
-              <View style={[
-                npStyles.dot,
-                isActive && npStyles.dotActive,
-                isCurrent && npStyles.dotCurrent,
-              ]}>
-                {isCurrent && <View style={npStyles.dotInner} />}
-              </View>
-              <Text style={[
-                npStyles.phaseLabel,
-                isActive && npStyles.phaseLabelActive,
-                isCurrent && npStyles.phaseLabelCurrent,
-              ]}>{phaseLabels[phase]}</Text>
-              {idx < phaseOrder.length - 1 && (
-                <View style={[npStyles.connector, isActive && npStyles.connectorActive]} />
-              )}
-            </View>
-          );
-        })}
-      </View>
-      {sections.find((s) => s.phase === currentPhase) && (
-        <View style={npStyles.summaryBox}>
-          <Text style={npStyles.summaryTitle}>
-            {sections.find((s) => s.phase === currentPhase)?.title}
-          </Text>
-          <Text style={npStyles.summaryText}>
-            {sections.find((s) => s.phase === currentPhase)?.summary}
-          </Text>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+    >
+      <View
+        style={[
+          styles.modalContainer,
+          { paddingTop: Platform.OS === "android" ? insets.top + 16 : 16 },
+        ]}
+      >
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>{title}</Text>
+          <Pressable onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={28} color={Colors.light.text} />
+          </Pressable>
         </View>
-      )}
-    </View>
+        <ScrollView contentContainerStyle={{ padding: 20 }}>
+          <Text style={styles.modalContentText}>{content}</Text>
+        </ScrollView>
+      </View>
+    </Modal>
   );
 }
 
-const npStyles = StyleSheet.create({
-  container: { marginBottom: 16 },
-  track: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", paddingHorizontal: 4 },
-  phaseItem: { alignItems: "center", flex: 1, position: "relative" },
-  dot: { width: 14, height: 14, borderRadius: 7, backgroundColor: Colors.light.border, marginBottom: 4, alignItems: "center", justifyContent: "center" },
-  dotActive: { backgroundColor: Colors.light.tintLight },
-  dotCurrent: { backgroundColor: Colors.light.tint, width: 18, height: 18, borderRadius: 9 },
-  dotInner: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#FFF" },
-  connector: { position: "absolute", top: 7, left: "60%" as any, right: "-40%" as any, height: 2, backgroundColor: Colors.light.border },
-  connectorActive: { backgroundColor: Colors.light.tintLight },
-  phaseLabel: { fontFamily: "NotoSansKR_400Regular", fontSize: 10, color: Colors.light.textMuted, textAlign: "center" },
-  phaseLabelActive: { color: Colors.light.tintDark },
-  phaseLabelCurrent: { fontFamily: "NotoSansKR_700Bold", color: Colors.light.tint },
-  summaryBox: { marginTop: 8, backgroundColor: Colors.light.cream, borderRadius: 10, padding: 10, borderLeftWidth: 3, borderLeftColor: Colors.light.tint },
-  summaryTitle: { fontFamily: "NotoSansKR_700Bold", fontSize: 12, color: Colors.light.text, marginBottom: 2 },
-  summaryText: { fontFamily: "NotoSansKR_400Regular", fontSize: 11, color: Colors.light.textSecondary, lineHeight: 16 },
-});
-
-function CharacterMapModal({ visible, onClose, data }: { visible: boolean; onClose: () => void; data: CharacterMapData }) {
+function FullPlotModal({
+  visible,
+  onClose,
+  sections,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  sections: NarrativeSection[];
+}) {
   const insets = useSafeAreaInsets();
-  const webTopInset = Platform.OS === "web" ? 67 : 0;
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+    >
+      <View
+        style={[
+          styles.modalContainer,
+          { paddingTop: Platform.OS === "android" ? insets.top + 16 : 16 },
+        ]}
+      >
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>전체 줄거리</Text>
+          <Pressable onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={28} color={Colors.light.text} />
+          </Pressable>
+        </View>
+        <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
+          {phaseOrder.map((phase) => {
+            const section = sections.find((s) => s.phase === phase);
+            if (!section) return null;
+            return (
+              <View key={phase} style={styles.plotSectionItem}>
+                <View style={styles.plotPhaseBadge}>
+                  <Text style={styles.plotPhaseText}>{phaseLabels[phase]}</Text>
+                </View>
+                <Text style={styles.plotTitle}>{section.title}</Text>
+                <Text style={styles.plotSummary}>{section.summary}</Text>
+              </View>
+            );
+          })}
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}
 
-  const getRelationColor = (type: CharacterRelation["type"]) => {
-    switch (type) {
-      case "supporter": return Colors.light.tint;
-      case "antagonist": return "#EF4444";
-      case "family": return "#3B82F6";
-      case "neutral": return Colors.light.textMuted;
-    }
-  };
+function CharacterMapModal({
+  visible,
+  onClose,
+  data,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  data: CharacterMapData;
+}) {
+  const insets = useSafeAreaInsets();
 
-  const getRelationStyle = (type: CharacterRelation["type"]) => {
-    return type === "antagonist" ? "dashed" as const : "solid" as const;
-  };
-
+  // Helper to get role color
   const getRoleBg = (role: string) => {
-    if (role === "주인공") return Colors.light.tint;
-    if (role === "적대자") return "#EF4444";
-    if (role === "조력자") return "#3B82F6";
-    if (role.includes("아버지") || role.includes("어머니")) return "#8B5CF6";
-    return Colors.light.textMuted;
+    if (role.includes("주인공")) return Colors.light.tint;
+    if (role.includes("적대자")) return "#EF4444";
+    if (role.includes("조력자")) return "#3B82F6";
+    return "#8B5CF6";
   };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <View style={[cmStyles.container, { paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 8 }]}>
-        <View style={cmStyles.header}>
-          <Pressable onPress={onClose} hitSlop={12}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+    >
+      <View
+        style={[
+          styles.modalContainer,
+          { paddingTop: Platform.OS === "android" ? insets.top + 16 : 16 },
+        ]}
+      >
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>인물 관계도</Text>
+          <Pressable onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={28} color={Colors.light.text} />
           </Pressable>
-          <Text style={cmStyles.headerTitle}>인물 관계도</Text>
-          <View style={{ width: 28 }} />
         </View>
-
-        <ScrollView contentContainerStyle={cmStyles.scrollContent} showsVerticalScrollIndicator={false}>
-          <View style={cmStyles.legendRow}>
-            <View style={cmStyles.legendItem}>
-              <View style={[cmStyles.legendLine, { backgroundColor: Colors.light.tint }]} />
-              <Text style={cmStyles.legendText}>조력/충성</Text>
-            </View>
-            <View style={cmStyles.legendItem}>
-              <View style={[cmStyles.legendLine, { backgroundColor: "#EF4444", borderStyle: "dashed" as any }]} />
-              <Text style={cmStyles.legendText}>적대/모함</Text>
-            </View>
-            <View style={cmStyles.legendItem}>
-              <View style={[cmStyles.legendLine, { backgroundColor: "#3B82F6" }]} />
-              <Text style={cmStyles.legendText}>가족</Text>
-            </View>
-          </View>
-
-          <View style={cmStyles.characterGrid}>
-            {data.characters.map((char) => (
-              <View key={char.name} style={cmStyles.characterCard}>
-                <View style={[cmStyles.charBadge, { backgroundColor: getRoleBg(char.role) }]}>
-                  <Text style={cmStyles.charBadgeText}>{char.role}</Text>
+        <ScrollView contentContainerStyle={{ padding: 20 }}>
+          <View style={styles.charGrid}>
+            {data.characters.map((c, i) => (
+              <View key={i} style={styles.charCard}>
+                <View
+                  style={[
+                    styles.charRoleBadge,
+                    { backgroundColor: getRoleBg(c.role) },
+                  ]}
+                >
+                  <Text style={styles.charRoleText}>{c.role}</Text>
                 </View>
-                <Text style={cmStyles.charName}>{char.name}</Text>
-                <Text style={cmStyles.charDesc}>{char.description}</Text>
+                <Text style={styles.charName}>{c.name}</Text>
+                <Text style={styles.charDesc}>{c.description}</Text>
               </View>
             ))}
           </View>
 
-          <Text style={cmStyles.relationsTitle}>관계</Text>
-          <View style={cmStyles.relationsContainer}>
-            {data.relations.map((rel, idx) => (
-              <View key={idx} style={cmStyles.relationRow}>
-                <Text style={cmStyles.relationFrom}>{rel.from}</Text>
-                <View style={cmStyles.relationArrow}>
-                  <View style={[cmStyles.relationLine, {
-                    backgroundColor: getRelationColor(rel.type),
-                    borderStyle: getRelationStyle(rel.type),
-                  }]} />
-                  <Text style={[cmStyles.relationLabel, { color: getRelationColor(rel.type) }]}>{rel.label}</Text>
+          <Text
+            style={[styles.modalTitle, { marginTop: 20, marginBottom: 10 }]}
+          >
+            관계
+          </Text>
+          <View style={{ gap: 8 }}>
+            {data.relations.map((r, i) => (
+              <View key={i} style={styles.relRow}>
+                <Text style={{ fontWeight: "bold" }}>{r.from}</Text>
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: "center",
+                    paddingHorizontal: 4,
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 10, color: "#888", marginBottom: 2 }}
+                  >
+                    {r.label}
+                  </Text>
+                  <View
+                    style={{
+                      height: 1,
+                      backgroundColor: "#DDD",
+                      width: "100%",
+                    }}
+                  />
                 </View>
-                <Text style={cmStyles.relationTo}>{rel.to}</Text>
+                <Text style={{ fontWeight: "bold" }}>{r.to}</Text>
               </View>
             ))}
           </View>
@@ -197,228 +241,142 @@ function CharacterMapModal({ visible, onClose, data }: { visible: boolean; onClo
   );
 }
 
-const cmStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.light.background },
-  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: Colors.light.border },
-  headerTitle: { fontFamily: "NotoSansKR_700Bold", fontSize: 18, color: Colors.light.text },
-  scrollContent: { padding: 20, paddingBottom: 40 },
-  legendRow: { flexDirection: "row", justifyContent: "center", gap: 20, marginBottom: 20 },
-  legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
-  legendLine: { width: 20, height: 3, borderRadius: 1.5 },
-  legendText: { fontFamily: "NotoSansKR_400Regular", fontSize: 11, color: Colors.light.textMuted },
-  characterGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 24 },
-  characterCard: { width: "47%" as any, backgroundColor: Colors.light.card, borderRadius: 14, padding: 14, gap: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
-  charBadge: { alignSelf: "flex-start", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
-  charBadgeText: { fontFamily: "NotoSansKR_500Medium", fontSize: 10, color: "#FFF" },
-  charName: { fontFamily: "NotoSansKR_900Black", fontSize: 18, color: Colors.light.text },
-  charDesc: { fontFamily: "NotoSansKR_400Regular", fontSize: 11, color: Colors.light.textSecondary, lineHeight: 16 },
-  relationsTitle: { fontFamily: "NotoSansKR_700Bold", fontSize: 16, color: Colors.light.text, marginBottom: 12 },
-  relationsContainer: { gap: 10 },
-  relationRow: { flexDirection: "row", alignItems: "center", backgroundColor: Colors.light.card, borderRadius: 12, padding: 12 },
-  relationFrom: { fontFamily: "NotoSansKR_700Bold", fontSize: 14, color: Colors.light.text, width: 70 },
-  relationArrow: { flex: 1, alignItems: "center", gap: 2 },
-  relationLine: { width: "80%" as any, height: 2, borderRadius: 1 },
-  relationLabel: { fontFamily: "NotoSansKR_500Medium", fontSize: 10 },
-  relationTo: { fontFamily: "NotoSansKR_700Bold", fontSize: 14, color: Colors.light.text, width: 70, textAlign: "right" },
-});
-
-function OXButton({
-  label,
-  type,
-  onPress,
-  disabled,
-  selected,
-  answerState,
-}: {
-  label: string;
-  type: "O" | "X";
-  onPress: () => void;
-  disabled: boolean;
-  selected: boolean;
-  answerState: AnswerState;
-}) {
-  const scale = useSharedValue(1);
-  const rippleOpacity = useSharedValue(0);
-  const rippleScale = useSharedValue(0);
-
-  const isCorrectAnswer =
-    (answerState === "correct" && selected) ||
-    (answerState === "incorrect" && !selected);
-
-  const bgColor =
-    answerState === "unanswered"
-      ? type === "O"
-        ? Colors.light.tint
-        : "#E07800"
-      : selected
-        ? answerState === "correct"
-          ? Colors.light.success
-          : "#EF4444"
-        : isCorrectAnswer
-          ? Colors.light.success
-          : "#D1D5DB";
-
-  const shadowColor =
-    answerState === "unanswered"
-      ? type === "O"
-        ? Colors.light.tintDark
-        : "#C06800"
-      : selected
-        ? answerState === "correct"
-          ? Colors.light.successDark
-          : "#DC2626"
-        : isCorrectAnswer
-          ? Colors.light.successDark
-          : "#9CA3AF";
-
-  const handlePressIn = () => {
-    if (disabled) return;
-    scale.value = withSpring(0.92, { damping: 15, stiffness: 400 });
-    rippleOpacity.value = withTiming(0.3, { duration: 100 });
-    rippleScale.value = withTiming(1.5, { duration: 300 });
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 12, stiffness: 200 });
-    rippleOpacity.value = withTiming(0, { duration: 300 });
-    rippleScale.value = withTiming(0, { duration: 300 });
-  };
-
-  const buttonStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const rippleStyle = useAnimatedStyle(() => ({
-    opacity: rippleOpacity.value,
-    transform: [{ scale: rippleScale.value }],
-  }));
-
-  return (
-    <Pressable
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      onPress={onPress}
-      disabled={disabled}
-      style={styles.oxButtonWrapper}
-    >
-      <Animated.View style={buttonStyle}>
-        <View style={[styles.oxButtonShadow, { backgroundColor: shadowColor }]}>
-          <View
-            style={[
-              styles.oxButton,
-              { backgroundColor: bgColor, overflow: "hidden" },
-              disabled && !selected && answerState !== "unanswered" && styles.oxButtonDimmed,
-            ]}
-          >
-            <Animated.View style={[{
-              position: "absolute",
-              width: 120,
-              height: 120,
-              borderRadius: 60,
-              backgroundColor: "rgba(255,255,255,0.4)",
-            }, rippleStyle]} />
-            <Text style={styles.oxButtonLabel}>{label}</Text>
-          </View>
-        </View>
-      </Animated.View>
-    </Pressable>
-  );
-}
-
-function BounceIcon({ correct }: { correct: boolean }) {
-  const bounceScale = useSharedValue(0);
-
-  React.useEffect(() => {
-    bounceScale.value = withSequence(
-      withSpring(1.3, { damping: 6, stiffness: 300 }),
-      withSpring(1, { damping: 8, stiffness: 200 })
-    );
-  }, []);
-
-  const iconStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: bounceScale.value }],
-  }));
-
-  return (
-    <Animated.View
-      style={[
-        styles.feedbackIcon,
-        { backgroundColor: correct ? Colors.light.success : "#EF4444" },
-        iconStyle,
-      ]}
-    >
-      <Ionicons
-        name={correct ? "checkmark" : "close"}
-        size={32}
-        color="#FFF"
-      />
-    </Animated.View>
-  );
-}
+// --- Main Component ---
 
 export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const quiz = getQuizById(id);
-  const { addIncorrectNote, addBookmark, removeBookmark, isBookmarked, addCompletedWork, addLearningTime } = useStudy();
+  const {
+    addIncorrectNote,
+    addBookmark,
+    removeBookmark,
+    isBookmarked,
+    addCompletedWork,
+    addLearningTime,
+  } = useStudy();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerState, setAnswerState] = useState<AnswerState>("unanswered");
-  const [selectedAnswer, setSelectedAnswer] = useState<"O" | "X" | null>(null);
   const [results, setResults] = useState<boolean[]>([]);
+
+  // Modal States
   const [showExamModal, setShowExamModal] = useState(false);
   const [showCharacterMap, setShowCharacterMap] = useState(false);
-  const [showOriginalText, setShowOriginalText] = useState(true);
-  const startTimeRef = useRef(Date.now());
+  const [showDescription, setShowDescription] = useState(false);
+  const [showFullPlot, setShowFullPlot] = useState(false);
+  const [showFullText, setShowFullText] = useState(false);
 
-  const webTopInset = Platform.OS === "web" ? 67 : 0;
-  const webBottomInset = Platform.OS === "web" ? 34 : 0;
+  const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
     return () => {
       const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      if (elapsed > 0) {
-        addLearningTime(elapsed);
-      }
+      if (elapsed > 0) addLearningTime(elapsed);
     };
   }, []);
 
-  if (!quiz) {
+  if (!quiz)
     return (
       <View style={styles.container}>
         <Text>Quiz not found</Text>
       </View>
     );
-  }
 
   const totalQuestions = quiz.questions.length;
   const currentQuestion = quiz.questions[currentIndex];
-  const progress = (currentIndex + (answerState !== "unanswered" ? 1 : 0)) / totalQuestions;
+  const progress =
+    (currentIndex + (answerState !== "unanswered" ? 1 : 0)) / totalQuestions;
   const currentBookmarked = isBookmarked(currentQuestion.id);
-  const hasRelatedExams = (quiz.relatedExams?.length ?? 0) > 0;
-  const hasNarrative = !!quiz.narrativePhase && !!quiz.narrativeSections;
-  const hasCharacterMap = !!quiz.characterMap;
-  const hasTranslation = !!quiz.originalText && !!quiz.modernText;
-  const isPoetry = quiz.categoryId === "classic-poetry";
 
-  const cheetahMood: CheetahMood =
-    answerState === "correct" ? "happy" :
-    answerState === "incorrect" ? "sad" : "neutral";
+  // 갈래별 조건 확인
+  const isModernPoetry = quiz.categoryId === "modern-poetry";
+  const isModernNovel = quiz.categoryId === "modern-novel";
+  const isClassicPoetry = quiz.categoryId === "classic-poetry";
+  const isClassicNovel = quiz.categoryId === "classic-novel";
+  const isNovel = isModernNovel || isClassicNovel;
 
-  const cheetahSpeech =
-    answerState === "correct" ? "잘했어! 정답이야!" :
-    answerState === "incorrect" ? "아쉽다... 다시 보자!" : undefined;
+  // 지문 표시 로직: 현대시는 전문, 나머지는 발췌문
+  const displayedPassage = isModernPoetry
+    ? quiz.passage
+    : currentQuestion.relatedExcerpt || "관련 지문이 없습니다.";
 
-  const passageText = hasTranslation
-    ? (showOriginalText ? quiz.originalText! : quiz.modernText!)
-    : quiz.passage;
+  // 탭 버튼 렌더링 로직
+  const renderTabs = () => {
+    return (
+      <View style={styles.tabRow}>
+        {/* 현대시, 고전시가: 작품 설명 */}
+        {(isModernPoetry || isClassicPoetry) && quiz.description && (
+          <Pressable
+            onPress={() => setShowDescription(true)}
+            style={styles.tabButton}
+          >
+            <Ionicons
+              name="document-text-outline"
+              size={16}
+              color={Colors.light.tint}
+            />
+            <Text style={styles.tabButtonText}>작품 설명</Text>
+          </Pressable>
+        )}
 
-  const handleToggleBookmark = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (currentBookmarked) {
-      removeBookmark(currentQuestion.id);
+        {/* 소설류: 인물 관계도 */}
+        {isNovel && quiz.characterMap && (
+          <Pressable
+            onPress={() => setShowCharacterMap(true)}
+            style={styles.tabButton}
+          >
+            <Ionicons
+              name="people-outline"
+              size={16}
+              color={Colors.light.tint}
+            />
+            <Text style={styles.tabButtonText}>인물 관계도</Text>
+          </Pressable>
+        )}
+
+        {/* 소설류: 전체 줄거리 */}
+        {isNovel && quiz.narrativeSections && (
+          <Pressable
+            onPress={() => setShowFullPlot(true)}
+            style={styles.tabButton}
+          >
+            <Ionicons
+              name="git-network-outline"
+              size={16}
+              color={Colors.light.tint}
+            />
+            <Text style={styles.tabButtonText}>전체 줄거리</Text>
+          </Pressable>
+        )}
+
+        {/* 현대소설, 고전소설, 고전시가: 수특 전문 */}
+        {(isNovel || isClassicPoetry) && (
+          <Pressable
+            onPress={() => setShowFullText(true)}
+            style={styles.tabButton}
+          >
+            <Ionicons name="book-outline" size={16} color={Colors.light.tint} />
+            <Text style={styles.tabButtonText}>수특 전문</Text>
+          </Pressable>
+        )}
+      </View>
+    );
+  };
+
+  const handleAnswer = (answer: "O" | "X") => {
+    if (answerState !== "unanswered") return;
+    const isCorrect =
+      (answer === "O" && currentQuestion.isTrue) ||
+      (answer === "X" && !currentQuestion.isTrue);
+
+    if (isCorrect) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setAnswerState("correct");
     } else {
-      addBookmark({
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setAnswerState("incorrect");
+      addIncorrectNote({
         questionId: currentQuestion.id,
         quizId: quiz.id,
         quizTitle: quiz.title,
@@ -427,49 +385,17 @@ export default function QuizScreen() {
         statement: currentQuestion.statement,
         isTrue: currentQuestion.isTrue,
         explanation: currentQuestion.explanation,
+        userAnswer: answer,
         timestamp: Date.now(),
       });
     }
+    setResults((prev) => [...prev, isCorrect]);
   };
 
-  const handleAnswer = useCallback(
-    (answer: "O" | "X") => {
-      if (answerState !== "unanswered") return;
-      setSelectedAnswer(answer);
-      const isCorrect =
-        (answer === "O" && currentQuestion.isTrue) ||
-        (answer === "X" && !currentQuestion.isTrue);
-
-      if (isCorrect) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setAnswerState("correct");
-      } else {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        setAnswerState("incorrect");
-        addIncorrectNote({
-          questionId: currentQuestion.id,
-          quizId: quiz.id,
-          quizTitle: quiz.title,
-          quizAuthor: quiz.author,
-          categoryId: quiz.categoryId,
-          statement: currentQuestion.statement,
-          isTrue: currentQuestion.isTrue,
-          explanation: currentQuestion.explanation,
-          userAnswer: answer,
-          timestamp: Date.now(),
-        });
-      }
-      setResults((prev) => [...prev, isCorrect]);
-    },
-    [answerState, currentQuestion, quiz, addIncorrectNote]
-  );
-
-  const handleNext = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleNext = () => {
     if (currentIndex < totalQuestions - 1) {
       setCurrentIndex((prev) => prev + 1);
       setAnswerState("unanswered");
-      setSelectedAnswer(null);
     } else {
       addCompletedWork(quiz.id);
       router.replace({
@@ -482,269 +408,188 @@ export default function QuizScreen() {
         },
       });
     }
-  }, [currentIndex, totalQuestions, results, quiz, addCompletedWork]);
-
-  const handleClose = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.back();
   };
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View
         style={[
           styles.header,
-          { paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 8 },
+          {
+            paddingTop:
+              Platform.OS === "android" ? insets.top + 10 : insets.top,
+          },
         ]}
       >
-        <Pressable onPress={handleClose} style={styles.closeButton}>
+        <Pressable onPress={() => router.back()} style={styles.closeButton}>
           <Ionicons name="close" size={28} color={Colors.light.text} />
         </Pressable>
-        <View style={styles.progressWrapper}>
-          <ProgressBar
-            progress={progress}
-            height={10}
-            color={Colors.light.tint}
-          />
-        </View>
-        <Text style={styles.questionCounter}>
-          {Math.min(currentIndex + 1, totalQuestions)}/{totalQuestions}
+        <ProgressBar progress={progress} height={8} color={Colors.light.tint} />
+        <Text style={styles.counter}>
+          {currentIndex + 1}/{totalQuestions}
         </Text>
       </View>
 
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 220 },
-        ]}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {hasNarrative && (
-          <NarrativeProgressBar
-            currentPhase={quiz.narrativePhase!}
-            sections={quiz.narrativeSections!}
-          />
-        )}
-
-        <View style={styles.passageCard}>
-          <View style={styles.passageMeta}>
-            <Text style={styles.passageTitle}>{quiz.title}</Text>
-            <View style={styles.passageMetaRow}>
-              <Text style={styles.passageSource}>{quiz.source}</Text>
-              <Text style={styles.passageAuthor}>{quiz.author}</Text>
-            </View>
-          </View>
-
-          {(hasCharacterMap || hasTranslation) && (
-            <View style={styles.featureRow}>
-              {hasCharacterMap && (
-                <Pressable
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowCharacterMap(true);
-                  }}
-                  style={({ pressed }) => [
-                    styles.featureButton,
-                    pressed && { opacity: 0.8 },
-                  ]}
-                >
-                  <Ionicons name="people" size={16} color={Colors.light.tint} />
-                  <Text style={styles.featureButtonText}>인물 관계도</Text>
-                </Pressable>
-              )}
-              {hasTranslation && (
-                <View style={styles.translationToggle}>
-                  <Text style={[styles.toggleLabel, showOriginalText && styles.toggleLabelActive]}>원문</Text>
-                  <Switch
-                    value={!showOriginalText}
-                    onValueChange={(val) => setShowOriginalText(!val)}
-                    trackColor={{ false: Colors.light.tintLight, true: "#3B82F6" }}
-                    thumbColor="#FFF"
-                    style={{ transform: [{ scale: 0.8 }] }}
-                  />
-                  <Text style={[styles.toggleLabel, !showOriginalText && styles.toggleLabelActive]}>현대어</Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          <View style={styles.passageDivider} />
-          <Text style={[
-            styles.passageText,
-            isPoetry && styles.poetryText,
-          ]}>{passageText}</Text>
-
-          {hasRelatedExams && (
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setShowExamModal(true);
-              }}
-              style={({ pressed }) => [
-                styles.relatedExamButton,
-                pressed && { opacity: 0.85 },
-              ]}
-            >
-              <Ionicons name="school" size={16} color="#8B5CF6" />
-              <Text style={styles.relatedExamButtonText}>연관 기출 {quiz.relatedExams!.length}문항</Text>
-              <Ionicons name="chevron-forward" size={16} color="#8B5CF6" />
-            </Pressable>
-          )}
+        {/* Top Info */}
+        <View style={styles.infoSection}>
+          <Text style={styles.title}>{quiz.title}</Text>
+          <Text style={styles.author}>{quiz.author}</Text>
         </View>
 
+        {/* Tabs */}
+        {renderTabs()}
+
+        {/* Passage Area */}
+        <View style={styles.passageCard}>
+          <Text style={styles.passageLabel}>
+            {isModernPoetry ? "작품 전문" : "관련 지문"}
+          </Text>
+          <View style={styles.divider} />
+          <Text style={styles.passageText}>{displayedPassage}</Text>
+        </View>
+
+        {/* Related Exam Button */}
+        {quiz.relatedExams && quiz.relatedExams.length > 0 && (
+          <Pressable
+            onPress={() => setShowExamModal(true)}
+            style={styles.relatedExamButton}
+          >
+            <Text style={styles.relatedExamText}>
+              연관 기출 풀기 ({quiz.relatedExams.length}문항)
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color="#8B5CF6" />
+          </Pressable>
+        )}
+
+        {/* Question Section */}
         <Animated.View
           key={currentIndex}
-          entering={Platform.OS !== "web" ? SlideInRight.duration(300).springify() : undefined}
-          style={styles.questionSection}
+          entering={SlideInRight}
+          style={styles.questionCard}
         >
-          <View style={styles.questionTopRow}>
-            <View style={styles.questionBadge}>
-              <Text style={styles.questionBadgeText}>
-                Q{currentIndex + 1}
-              </Text>
+          <View style={styles.qHeader}>
+            <View style={styles.qBadge}>
+              <Text style={styles.qBadgeText}>Q{currentIndex + 1}</Text>
             </View>
-            <Pressable onPress={handleToggleBookmark} hitSlop={8} style={styles.bookmarkButton}>
+            <Pressable
+              onPress={() => {
+                isBookmarked(currentQuestion.id)
+                  ? removeBookmark(currentQuestion.id)
+                  : addBookmark({
+                      questionId: currentQuestion.id,
+                      quizId: quiz.id,
+                      quizTitle: quiz.title,
+                      quizAuthor: quiz.author,
+                      categoryId: quiz.categoryId,
+                      statement: currentQuestion.statement,
+                      isTrue: currentQuestion.isTrue,
+                      explanation: currentQuestion.explanation,
+                      timestamp: Date.now(),
+                    });
+              }}
+            >
               <Ionicons
                 name={currentBookmarked ? "bookmark" : "bookmark-outline"}
                 size={22}
-                color={currentBookmarked ? Colors.light.tint : Colors.light.textMuted}
+                color={Colors.light.tint}
               />
             </Pressable>
           </View>
-          <Text style={styles.questionText}>{currentQuestion.statement}</Text>
+          <Text style={styles.qText}>{currentQuestion.statement}</Text>
         </Animated.View>
 
+        {/* Feedback Section (기존과 동일) */}
         {answerState !== "unanswered" && (
-          <Animated.View
-            entering={Platform.OS !== "web" ? FadeInDown.duration(400).springify() : undefined}
-            style={styles.feedbackSection}
-          >
-            <View style={styles.cheetahFeedback}>
-              <CheetahMascot size={60} mood={cheetahMood} speechBubble={cheetahSpeech} />
-            </View>
-            <BounceIcon correct={answerState === "correct"} />
-            <Text
-              style={[
-                styles.feedbackLabel,
-                {
-                  color:
-                    answerState === "correct"
-                      ? Colors.light.success
-                      : "#EF4444",
-                },
-              ]}
-            >
-              {answerState === "correct" ? "정답!" : "오답"}
-            </Text>
-            <View style={styles.explanationCard}>
-              <View style={styles.explanationHeader}>
-                <Ionicons
-                  name="bulb"
-                  size={18}
-                  color={Colors.light.tint}
-                />
-                <Text style={styles.explanationTitle}>해설</Text>
-              </View>
-              <Text style={styles.explanationText}>
-                {currentQuestion.explanation}
+          <Animated.View entering={FadeInDown} style={styles.feedbackSection}>
+            <CheetahMascot
+              size={60}
+              mood={answerState === "correct" ? "happy" : "sad"}
+            />
+            <View style={styles.explanationBox}>
+              <Text
+                style={{
+                  fontWeight: "bold",
+                  color: Colors.light.tint,
+                  marginBottom: 4,
+                }}
+              >
+                해설
               </Text>
+              <Text>{currentQuestion.explanation}</Text>
             </View>
           </Animated.View>
         )}
       </ScrollView>
 
-      <View
-        style={[
-          styles.bottomBar,
-          { paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 16 },
-        ]}
-      >
+      {/* O/X Buttons (Bottom Bar) */}
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
         {answerState === "unanswered" ? (
-          <Animated.View
-            entering={Platform.OS !== "web" ? FadeIn.duration(300) : undefined}
-            style={styles.oxRow}
-          >
-            <OXButton
-              label="O"
-              type="O"
-              onPress={() => handleAnswer("O")}
-              disabled={false}
-              selected={selectedAnswer === "O"}
-              answerState={answerState}
-            />
-            <OXButton
-              label="X"
-              type="X"
-              onPress={() => handleAnswer("X")}
-              disabled={false}
-              selected={selectedAnswer === "X"}
-              answerState={answerState}
-            />
-          </Animated.View>
-        ) : (
-          <Animated.View
-            entering={Platform.OS !== "web" ? FadeInUp.duration(300).springify() : undefined}
-            style={styles.answeredBottom}
-          >
-            <View style={styles.oxRowSmall}>
-              <OXButton
-                label="O"
-                type="O"
-                onPress={() => {}}
-                disabled={true}
-                selected={selectedAnswer === "O"}
-                answerState={answerState}
-              />
-              <OXButton
-                label="X"
-                type="X"
-                onPress={() => {}}
-                disabled={true}
-                selected={selectedAnswer === "X"}
-                answerState={answerState}
-              />
-            </View>
+          <View style={{ flexDirection: "row", gap: 16 }}>
             <Pressable
-              onPress={handleNext}
-              style={({ pressed }) => [
-                styles.nextButtonContainer,
-                pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
-              ]}
+              onPress={() => handleAnswer("O")}
+              style={[styles.oxBtn, { backgroundColor: Colors.light.tint }]}
             >
-              <LinearGradient
-                colors={[Colors.light.tint, Colors.light.tintDark]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.nextButton}
-              >
-                <Text style={styles.nextButtonText}>
-                  {currentIndex < totalQuestions - 1 ? "다음" : "결과 보기"}
-                </Text>
-                <Ionicons name="arrow-forward" size={20} color="#FFF" />
-              </LinearGradient>
+              <Text style={styles.oxText}>O</Text>
             </Pressable>
-          </Animated.View>
+            <Pressable
+              onPress={() => handleAnswer("X")}
+              style={[styles.oxBtn, { backgroundColor: "#E07800" }]}
+            >
+              <Text style={styles.oxText}>X</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable onPress={handleNext} style={styles.nextBtn}>
+            <Text style={styles.nextBtnText}>
+              {currentIndex < totalQuestions - 1 ? "다음 문제" : "결과 보기"}
+            </Text>
+          </Pressable>
         )}
       </View>
 
-      {hasRelatedExams && (
-        <RelatedExamModal
-          visible={showExamModal}
-          onClose={() => setShowExamModal(false)}
-          questions={quiz.relatedExams!}
-          quizId={quiz.id}
-          quizTitle={quiz.title}
-          quizAuthor={quiz.author}
-          categoryId={quiz.categoryId}
-        />
-      )}
-
-      {hasCharacterMap && (
+      {/* Modals */}
+      {showCharacterMap && quiz.characterMap && (
         <CharacterMapModal
           visible={showCharacterMap}
           onClose={() => setShowCharacterMap(false)}
-          data={quiz.characterMap!}
+          data={quiz.characterMap}
+        />
+      )}
+      {showDescription && quiz.description && (
+        <SimpleTextModal
+          visible={showDescription}
+          onClose={() => setShowDescription(false)}
+          title="작품 설명"
+          content={quiz.description}
+        />
+      )}
+      {showFullPlot && quiz.narrativeSections && (
+        <FullPlotModal
+          visible={showFullPlot}
+          onClose={() => setShowFullPlot(false)}
+          sections={quiz.narrativeSections}
+        />
+      )}
+      {showFullText && (
+        <SimpleTextModal
+          visible={showFullText}
+          onClose={() => setShowFullText(false)}
+          title="수특 전문"
+          content={quiz.passage}
+        />
+      )}
+      {showExamModal && quiz.relatedExams && (
+        <RelatedExamModal
+          visible={showExamModal}
+          onClose={() => setShowExamModal(false)}
+          questions={quiz.relatedExams}
+          quizId={quiz.id}
+          parentQuizData={quiz}
         />
       )}
     </View>
@@ -752,302 +597,196 @@ export default function QuizScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-  },
+  container: { flex: 1, backgroundColor: Colors.light.background },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingBottom: 12,
-    gap: 12,
-    backgroundColor: Colors.light.card,
+    gap: 10,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
+    borderColor: "#EEE",
   },
-  closeButton: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  progressWrapper: {
-    flex: 1,
-  },
-  questionCounter: {
+  closeButton: { padding: 4 },
+  counter: {
     fontFamily: "NotoSansKR_700Bold",
-    fontSize: 14,
     color: Colors.light.tint,
-    minWidth: 36,
+    width: 40,
     textAlign: "right",
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  passageCard: {
-    backgroundColor: Colors.light.card,
-    borderRadius: 20,
-    padding: 22,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-  },
-  passageMeta: {
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 12,
-  },
-  passageTitle: {
-    fontFamily: "NotoSansKR_900Black",
-    fontSize: 20,
-    color: Colors.light.text,
-  },
-  passageMetaRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    paddingHorizontal: 4,
-  },
-  passageAuthor: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 13,
-    color: Colors.light.textMuted,
-  },
-  passageSource: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 11,
-    color: Colors.light.textMuted,
-  },
-  featureRow: {
+  scrollContent: { padding: 20, paddingBottom: 120 },
+  infoSection: { alignItems: "center", marginBottom: 16 },
+  title: { fontFamily: "NotoSansKR_900Black", fontSize: 22 },
+  author: { fontFamily: "NotoSansKR_400Regular", color: "#666" },
+
+  tabRow: {
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 12,
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 16,
   },
-  featureButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: Colors.light.cream,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.light.tintGlow,
-  },
-  featureButtonText: {
-    fontFamily: "NotoSansKR_500Medium",
-    fontSize: 12,
-    color: Colors.light.tint,
-  },
-  translationToggle: {
+  tabButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: Colors.light.cream,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: "#FFF",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.light.border,
   },
-  toggleLabel: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 11,
-    color: Colors.light.textMuted,
-  },
-  toggleLabelActive: {
-    fontFamily: "NotoSansKR_700Bold",
-    color: Colors.light.tint,
-  },
-  passageDivider: {
-    height: 1,
-    backgroundColor: Colors.light.border,
-    marginBottom: 16,
-  },
-  passageText: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 15,
-    lineHeight: 28,
+  tabButtonText: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 12,
     color: Colors.light.text,
-    letterSpacing: 0.3,
   },
-  poetryText: {
-    lineHeight: 32,
-    letterSpacing: 0.5,
-  },
-  questionSection: {
-    backgroundColor: Colors.light.cream,
+
+  passageCard: {
+    backgroundColor: "#FFF",
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#EEE",
+  },
+  passageLabel: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#888",
+    marginBottom: 8,
+  },
+  divider: { height: 1, backgroundColor: "#EEE", marginBottom: 12 },
+  passageText: {
+    fontSize: 15,
+    lineHeight: 24,
+    fontFamily: "NotoSansKR_400Regular",
+  },
+
+  relatedExamButton: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F3EEFF",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  relatedExamText: { color: "#8B5CF6", fontWeight: "bold", marginRight: 4 },
+
+  questionCard: {
+    backgroundColor: "#FFF5E6",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
     borderWidth: 2,
     borderColor: Colors.light.tint,
   },
-  questionTopRow: {
+  qHeader: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 10,
   },
-  questionBadge: {
+  qBadge: {
     backgroundColor: Colors.light.tint,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
-  questionBadgeText: {
-    fontFamily: "NotoSansKR_700Bold",
-    fontSize: 12,
-    color: "#FFF",
-  },
-  bookmarkButton: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  questionText: {
-    fontFamily: "NotoSansKR_500Medium",
-    fontSize: 16,
-    lineHeight: 26,
-    color: Colors.light.text,
-  },
-  feedbackSection: {
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 20,
-  },
-  cheetahFeedback: {
-    marginBottom: 4,
-  },
-  feedbackIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  feedbackLabel: {
-    fontFamily: "NotoSansKR_900Black",
-    fontSize: 22,
-  },
-  explanationCard: {
+  qBadgeText: { color: "#FFF", fontWeight: "bold" },
+  qText: { fontSize: 17, fontWeight: "500", lineHeight: 26 },
+
+  feedbackSection: { alignItems: "center", gap: 10 },
+  explanationBox: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 12,
     width: "100%",
-    backgroundColor: Colors.light.card,
-    borderRadius: 16,
-    padding: 18,
-    gap: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
   },
-  explanationHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  explanationTitle: {
-    fontFamily: "NotoSansKR_700Bold",
-    fontSize: 14,
-    color: Colors.light.tint,
-  },
-  explanationText: {
-    fontFamily: "NotoSansKR_400Regular",
-    fontSize: 14,
-    lineHeight: 24,
-    color: Colors.light.textSecondary,
-  },
+
   bottomBar: {
     position: "absolute",
     bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: Colors.light.card,
+    width: "100%",
+    backgroundColor: "#FFF",
+    padding: 16,
     borderTopWidth: 1,
-    borderTopColor: Colors.light.border,
-    paddingTop: 14,
-    paddingHorizontal: 20,
+    borderColor: "#EEE",
   },
-  oxRow: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  oxRowSmall: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  answeredBottom: {
-    gap: 12,
-  },
-  oxButtonWrapper: {
+  oxBtn: {
     flex: 1,
-  },
-  oxButtonShadow: {
-    borderRadius: 18,
-    paddingBottom: 5,
-  },
-  oxButton: {
-    height: 64,
-    borderRadius: 18,
+    height: 56,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  oxButtonDimmed: {
-    opacity: 0.4,
-  },
-  oxButtonLabel: {
-    fontFamily: "NotoSansKR_900Black",
-    fontSize: 28,
-    color: "#FFF",
-    zIndex: 2,
-  },
-  nextButtonContainer: {
+  oxText: { fontSize: 24, fontWeight: "900", color: "#FFF" },
+  nextBtn: {
+    backgroundColor: Colors.light.tint,
+    height: 56,
     borderRadius: 16,
-    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  nextButton: {
+  nextBtnText: { fontSize: 18, fontWeight: "bold", color: "#FFF" },
+
+  // Modal Styles
+  modalContainer: { flex: 1, backgroundColor: "#FFF" },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderColor: "#EEE",
+  },
+  modalTitle: { fontSize: 18, fontWeight: "bold" },
+  modalContentText: { fontSize: 16, lineHeight: 26 },
+  plotSectionItem: {
+    marginBottom: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.light.tint,
+    paddingLeft: 12,
+  },
+  plotPhaseBadge: {
+    backgroundColor: Colors.light.tint,
+    alignSelf: "flex-start",
+    paddingHorizontal: 6,
+    borderRadius: 4,
+    marginBottom: 4,
+  },
+  plotPhaseText: { color: "#FFF", fontSize: 11, fontWeight: "bold" },
+  plotTitle: { fontSize: 15, fontWeight: "bold", marginBottom: 2 },
+  plotSummary: { color: "#555", fontSize: 13 },
+
+  // Character Map Styles
+  charGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 20,
+  },
+  charCard: {
+    width: "48%",
+    backgroundColor: "#F8F9FA",
+    padding: 12,
+    borderRadius: 8,
+  },
+  charRoleBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 6,
+    borderRadius: 4,
+    marginBottom: 4,
+  },
+  charRoleText: { color: "#FFF", fontSize: 10, fontWeight: "bold" },
+  charName: { fontWeight: "bold", fontSize: 16, marginBottom: 4 },
+  charDesc: { fontSize: 12, color: "#666" },
+  relRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    height: 54,
-    borderRadius: 16,
-  },
-  nextButtonText: {
-    fontFamily: "NotoSansKR_700Bold",
-    fontSize: 17,
-    color: "#FFF",
-  },
-  relatedExamButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    marginTop: 16,
-    paddingVertical: 12,
-    backgroundColor: "#F3EEFF",
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: "#DDD6FE",
-  },
-  relatedExamButtonText: {
-    fontFamily: "NotoSansKR_700Bold",
-    fontSize: 13,
-    color: "#8B5CF6",
+    backgroundColor: "#F8F9FA",
+    padding: 10,
+    borderRadius: 8,
   },
 });

@@ -22,14 +22,16 @@ import { getQuizzesByCategory, QuizPassage } from "@/data/quizData";
 import Colors from "@/constants/colors";
 
 const categoryNames: Record<string, string> = {
-  "modern-poem": "현대시",
+  // [수정됨] modern-poem -> modern-poetry
+  "modern-poetry": "현대시",
   "modern-novel": "현대소설",
   "classic-poetry": "고전시가",
   "classic-novel": "고전소설",
 };
 
 const categoryIcons: Record<string, string> = {
-  "modern-poem": "flower-outline",
+  // [수정됨] modern-poem -> modern-poetry
+  "modern-poetry": "flower-outline",
   "modern-novel": "book-outline",
   "classic-poetry": "leaf-outline",
   "classic-novel": "library-outline",
@@ -62,7 +64,11 @@ function WorkCard({
 
   return (
     <Animated.View
-      entering={Platform.OS !== "web" ? FadeInDown.delay(index * 80).springify() : undefined}
+      entering={
+        Platform.OS !== "web"
+          ? FadeInDown.delay(index * 80).springify()
+          : undefined
+      }
     >
       <Pressable
         onPressIn={handlePressIn}
@@ -74,21 +80,35 @@ function WorkCard({
             <View style={styles.cardTextSection}>
               <Text style={styles.cardTitle}>{item.title}</Text>
               <Text style={styles.cardMeta}>
-                {item.author}  ·  {item.source}
+                {item.author} · {item.source}
               </Text>
               <View style={styles.questionCountRow}>
-                <Ionicons name="help-circle-outline" size={14} color={Colors.light.textMuted} />
-                <Text style={styles.questionCountText}>{item.questions.length}문항</Text>
+                <Ionicons
+                  name="help-circle-outline"
+                  size={14}
+                  color={Colors.light.textMuted}
+                />
+                <Text style={styles.questionCountText}>
+                  {item.questions.length}문항
+                </Text>
               </View>
             </View>
             <View style={styles.cardRight}>
               {isCompleted ? (
                 <View style={styles.completedIcon}>
-                  <Ionicons name="checkmark-circle" size={28} color={Colors.light.success} />
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={28}
+                    color={Colors.light.success}
+                  />
                 </View>
               ) : (
                 <View style={styles.startIcon}>
-                  <Ionicons name="chevron-forward" size={22} color={Colors.light.tint} />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={22}
+                    color={Colors.light.tint}
+                  />
                 </View>
               )}
             </View>
@@ -102,7 +122,10 @@ function WorkCard({
 export default function WorksScreen() {
   const insets = useSafeAreaInsets();
   const { completedWorks } = useStudy();
-  const params = useLocalSearchParams<{ category?: string; categoryId?: string }>();
+  const params = useLocalSearchParams<{
+    category?: string;
+    categoryId?: string;
+  }>();
   const categoryId = params.categoryId || params.category || "";
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
@@ -111,7 +134,9 @@ export default function WorksScreen() {
   const quizzes = getQuizzesByCategory(categoryId);
   const categoryName = categoryNames[categoryId] || "문학";
   const categoryIcon = categoryIcons[categoryId] || "book-outline";
-  const completedCount = quizzes.filter((q) => completedWorks.includes(q.id)).length;
+  const completedCount = quizzes.filter((q) =>
+    completedWorks.includes(q.id),
+  ).length;
 
   const handleWorkPress = (quizId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -120,9 +145,14 @@ export default function WorksScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, {
-        paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 12,
-      }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 12,
+          },
+        ]}
+      >
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -133,7 +163,11 @@ export default function WorksScreen() {
           <Ionicons name="arrow-back" size={24} color={Colors.light.text} />
         </Pressable>
         <View style={styles.headerCenter}>
-          <Ionicons name={categoryIcon as any} size={20} color={Colors.light.tint} />
+          <Ionicons
+            name={categoryIcon as any}
+            size={20}
+            color={Colors.light.tint}
+          />
           <Text style={styles.headerTitle}>{categoryName}</Text>
         </View>
         <View style={styles.headerCountBadge}>
@@ -145,7 +179,11 @@ export default function WorksScreen() {
 
       {quizzes.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="document-text-outline" size={48} color={Colors.light.textMuted} />
+          <Ionicons
+            name="document-text-outline"
+            size={48}
+            color={Colors.light.textMuted}
+          />
           <Text style={styles.emptyTitle}>준비 중입니다</Text>
           <Text style={styles.emptySubtitle}>곧 새로운 지문이 추가됩니다</Text>
         </View>
@@ -163,7 +201,10 @@ export default function WorksScreen() {
           )}
           contentContainerStyle={[
             styles.listContent,
-            { paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20 },
+            {
+              paddingBottom:
+                (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20,
+            },
           ]}
           showsVerticalScrollIndicator={false}
         />

@@ -25,7 +25,12 @@ export interface CharacterMapData {
   relations: CharacterRelation[];
 }
 
-export type NarrativePhase = "exposition" | "rising" | "climax" | "falling" | "resolution";
+export type NarrativePhase =
+  | "exposition"
+  | "rising"
+  | "climax"
+  | "falling"
+  | "resolution";
 
 export interface NarrativeSection {
   phase: NarrativePhase;
@@ -57,7 +62,13 @@ export const grandUnitConfig = {
     id: "literature" as GrandUnit,
     name: "문학",
     nameEn: "Literature",
-    categories: ["modern-poem", "modern-novel", "classic-poetry", "classic-novel"],
+    // [수정됨] modern-poem -> modern-poetry
+    categories: [
+      "modern-poetry",
+      "modern-novel",
+      "classic-poetry",
+      "classic-novel",
+    ],
   },
   non_fiction: {
     id: "non_fiction" as GrandUnit,
@@ -80,22 +91,62 @@ export const quizPassages: QuizPassage[] = [
     author: "작자 미상",
     source: "수능특강 문학 112p",
     passage:
-      "충렬이 나이 겨우 다섯 살이라. 어머니 장씨 부인이 아이를 안고 피란하다가 정한담의 군사에게 잡히니, 장씨 부인은 바위 아래로 몸을 던져 목숨을 끊으려 하거늘, 하늘이 이 충신의 자식을 버리지 아니하여 한 줄기 오색 구름이 내려와 아이를 감싸니, 군사들이 놀라 물러가더라.\n\n이때 한 노승이 지나다가 아이의 울음소리를 듣고 찾아와 안아 들고 탄식하여 왈,\n\"이 아이는 장차 나라를 구할 재목이로다. 내 마땅히 데려가 기르리라.\"\n하고 아이를 업고 깊은 산중으로 들어가니라.",
+      '충렬이 나이 겨우 다섯 살이라. 어머니 장씨 부인이 아이를 안고 피란하다가 정한담의 군사에게 잡히니, 장씨 부인은 바위 아래로 몸을 던져 목숨을 끊으려 하거늘, 하늘이 이 충신의 자식을 버리지 아니하여 한 줄기 오색 구름이 내려와 아이를 감싸니, 군사들이 놀라 물러가더라.\n\n이때 한 노승이 지나다가 아이의 울음소리를 듣고 찾아와 안아 들고 탄식하여 왈,\n"이 아이는 장차 나라를 구할 재목이로다. 내 마땅히 데려가 기르리라."\n하고 아이를 업고 깊은 산중으로 들어가니라.',
     narrativePhase: "exposition",
     narrativeSections: [
-      { phase: "exposition", title: "유충렬의 위기", summary: "어린 충렬이 역적 정한담의 난으로 가족을 잃고 노승에게 구출됨" },
-      { phase: "rising", title: "성장과 수련", summary: "산중에서 무예와 학문을 연마하며 영웅으로 성장" },
-      { phase: "climax", title: "전장의 영웅", summary: "조정의 위기에 출전하여 적장들을 차례로 격파" },
-      { phase: "falling", title: "정한담 토벌", summary: "역적 정한담을 정벌하고 부모의 원수를 갚음" },
-      { phase: "resolution", title: "충효의 완성", summary: "공을 인정받아 벼슬에 오르고 부모와 재회" },
+      {
+        phase: "exposition",
+        title: "유충렬의 위기",
+        summary: "어린 충렬이 역적 정한담의 난으로 가족을 잃고 노승에게 구출됨",
+      },
+      {
+        phase: "rising",
+        title: "성장과 수련",
+        summary: "산중에서 무예와 학문을 연마하며 영웅으로 성장",
+      },
+      {
+        phase: "climax",
+        title: "전장의 영웅",
+        summary: "조정의 위기에 출전하여 적장들을 차례로 격파",
+      },
+      {
+        phase: "falling",
+        title: "정한담 토벌",
+        summary: "역적 정한담을 정벌하고 부모의 원수를 갚음",
+      },
+      {
+        phase: "resolution",
+        title: "충효의 완성",
+        summary: "공을 인정받아 벼슬에 오르고 부모와 재회",
+      },
     ],
     characterMap: {
       characters: [
-        { name: "유충렬", role: "주인공", description: "충신 유심의 아들, 영웅적 장수" },
-        { name: "유심", role: "아버지", description: "충신, 정한담의 모함으로 유배" },
-        { name: "장씨 부인", role: "어머니", description: "충렬의 어머니, 절개를 지킴" },
-        { name: "정한담", role: "적대자", description: "간신, 나라를 어지럽히는 역적" },
-        { name: "노승", role: "조력자", description: "충렬을 구하고 무예를 가르침" },
+        {
+          name: "유충렬",
+          role: "주인공",
+          description: "충신 유심의 아들, 영웅적 장수",
+        },
+        {
+          name: "유심",
+          role: "아버지",
+          description: "충신, 정한담의 모함으로 유배",
+        },
+        {
+          name: "장씨 부인",
+          role: "어머니",
+          description: "충렬의 어머니, 절개를 지킴",
+        },
+        {
+          name: "정한담",
+          role: "적대자",
+          description: "간신, 나라를 어지럽히는 역적",
+        },
+        {
+          name: "노승",
+          role: "조력자",
+          description: "충렬을 구하고 무예를 가르침",
+        },
         { name: "임금", role: "군주", description: "위기에 처한 조정의 왕" },
       ],
       relations: [
@@ -111,14 +162,16 @@ export const quizPassages: QuizPassage[] = [
     questions: [
       {
         id: "cn-yucr1-q1",
-        statement: "'오색 구름'은 하늘이 유충렬을 보호하는 초월적 존재임을 나타낸다.",
+        statement:
+          "'오색 구름'은 하늘이 유충렬을 보호하는 초월적 존재임을 나타낸다.",
         isTrue: true,
         explanation:
           "오색 구름은 천상적 존재의 개입을 상징하며, 유충렬이 하늘의 보호를 받는 비범한 인물임을 보여줍니다. 이는 영웅소설의 전형적인 '천우신조(天佑神助)' 모티프입니다.",
       },
       {
         id: "cn-yucr1-q2",
-        statement: "장씨 부인이 바위 아래로 몸을 던지려 한 것은 비겁한 도주의 행위이다.",
+        statement:
+          "장씨 부인이 바위 아래로 몸을 던지려 한 것은 비겁한 도주의 행위이다.",
         isTrue: false,
         explanation:
           "장씨 부인의 행위는 비겁한 도주가 아니라, 적에게 잡혀 욕을 당하느니 목숨을 끊겠다는 열녀의 절개를 보여주는 것입니다. 이는 유교적 가치관에서 높이 평가되는 행위입니다.",
@@ -132,7 +185,8 @@ export const quizPassages: QuizPassage[] = [
       },
       {
         id: "cn-yucr1-q4",
-        statement: "이 장면은 시간의 흐름에 따라 사건이 순차적으로 전개되고 있다.",
+        statement:
+          "이 장면은 시간의 흐름에 따라 사건이 순차적으로 전개되고 있다.",
         isTrue: true,
         explanation:
           "피란 → 포위 → 장씨 부인의 결심 → 오색 구름의 구원 → 노승의 등장 순으로 시간 순서에 따라 사건이 전개되며, 이는 고전소설의 전형적인 순행적 구조입니다.",
@@ -142,7 +196,8 @@ export const quizPassages: QuizPassage[] = [
       {
         id: "re-yucr1-1",
         sourceTitle: "2024학년도 수능",
-        statement: "고전 영웅소설에서 주인공의 고난은 후일 영웅적 활약의 서사적 필연성을 갖는다.",
+        statement:
+          "고전 영웅소설에서 주인공의 고난은 후일 영웅적 활약의 서사적 필연성을 갖는다.",
         isTrue: true,
         explanation:
           "영웅소설의 주인공이 어린 시절 겪는 고난(가족 이산, 생명 위협)은 이후 영웅으로 성장하여 원수를 갚고 나라를 구하는 서사의 필연적 전제가 됩니다. '고난 → 성장 → 활약'의 구조입니다.",
@@ -150,7 +205,8 @@ export const quizPassages: QuizPassage[] = [
       {
         id: "re-yucr1-2",
         sourceTitle: "2023학년도 6월 평가원",
-        statement: "이 작품의 서술자는 전지적 시점에서 인물의 내면까지 서술하고 있다.",
+        statement:
+          "이 작품의 서술자는 전지적 시점에서 인물의 내면까지 서술하고 있다.",
         isTrue: false,
         explanation:
           "이 장면에서 서술자는 인물의 행동과 외적 상황을 서술할 뿐, 내면 심리를 직접 서술하지 않습니다. '목숨을 끊으려 하거늘'은 행동 묘사이지 내면 서술이 아닙니다.",
@@ -165,21 +221,57 @@ export const quizPassages: QuizPassage[] = [
     author: "작자 미상",
     source: "수능특강 문학 115p",
     passage:
-      "충렬이 산중에서 십여 년을 지내며 노승에게 병법과 무예를 배우니, 열여덟 가지 무예에 통달하고 천문지리에 밝아 진실로 만부부당(萬夫不當)의 용맹을 갖추었더라.\n\n하루는 노승이 충렬을 불러 왈,\n\"네 이제 세상에 나가 뜻을 펼 때가 되었느니라. 너의 아버지 유심은 정한담의 모함으로 남쪽 땅에 귀양 가 계시고, 나라는 역적의 손에 위태로우니, 네 마땅히 임금을 도와 역적을 치고 아버지를 구하라.\"\n충렬이 눈물을 흘리며 큰 절을 올리고 하산하니, 이때 나이 열여섯이라.",
+      '충렬이 산중에서 십여 년을 지내며 노승에게 병법과 무예를 배우니, 열여덟 가지 무예에 통달하고 천문지리에 밝아 진실로 만부부당(萬夫不當)의 용맹을 갖추었더라.\n\n하루는 노승이 충렬을 불러 왈,\n"네 이제 세상에 나가 뜻을 펼 때가 되었느니라. 너의 아버지 유심은 정한담의 모함으로 남쪽 땅에 귀양 가 계시고, 나라는 역적의 손에 위태로우니, 네 마땅히 임금을 도와 역적을 치고 아버지를 구하라."\n충렬이 눈물을 흘리며 큰 절을 올리고 하산하니, 이때 나이 열여섯이라.',
     narrativePhase: "rising",
     narrativeSections: [
-      { phase: "exposition", title: "유충렬의 위기", summary: "어린 충렬이 역적 정한담의 난으로 가족을 잃고 노승에게 구출됨" },
-      { phase: "rising", title: "성장과 수련", summary: "산중에서 무예와 학문을 연마하며 영웅으로 성장" },
-      { phase: "climax", title: "전장의 영웅", summary: "조정의 위기에 출전하여 적장들을 차례로 격파" },
-      { phase: "falling", title: "정한담 토벌", summary: "역적 정한담을 정벌하고 부모의 원수를 갚음" },
-      { phase: "resolution", title: "충효의 완성", summary: "공을 인정받아 벼슬에 오르고 부모와 재회" },
+      {
+        phase: "exposition",
+        title: "유충렬의 위기",
+        summary: "어린 충렬이 역적 정한담의 난으로 가족을 잃고 노승에게 구출됨",
+      },
+      {
+        phase: "rising",
+        title: "성장과 수련",
+        summary: "산중에서 무예와 학문을 연마하며 영웅으로 성장",
+      },
+      {
+        phase: "climax",
+        title: "전장의 영웅",
+        summary: "조정의 위기에 출전하여 적장들을 차례로 격파",
+      },
+      {
+        phase: "falling",
+        title: "정한담 토벌",
+        summary: "역적 정한담을 정벌하고 부모의 원수를 갚음",
+      },
+      {
+        phase: "resolution",
+        title: "충효의 완성",
+        summary: "공을 인정받아 벼슬에 오르고 부모와 재회",
+      },
     ],
     characterMap: {
       characters: [
-        { name: "유충렬", role: "주인공", description: "충신 유심의 아들, 영웅적 장수" },
-        { name: "유심", role: "아버지", description: "충신, 정한담의 모함으로 유배" },
-        { name: "정한담", role: "적대자", description: "간신, 나라를 어지럽히는 역적" },
-        { name: "노승", role: "조력자", description: "충렬을 구하고 무예를 가르침" },
+        {
+          name: "유충렬",
+          role: "주인공",
+          description: "충신 유심의 아들, 영웅적 장수",
+        },
+        {
+          name: "유심",
+          role: "아버지",
+          description: "충신, 정한담의 모함으로 유배",
+        },
+        {
+          name: "정한담",
+          role: "적대자",
+          description: "간신, 나라를 어지럽히는 역적",
+        },
+        {
+          name: "노승",
+          role: "조력자",
+          description: "충렬을 구하고 무예를 가르침",
+        },
         { name: "임금", role: "군주", description: "위기에 처한 조정의 왕" },
       ],
       relations: [
@@ -193,28 +285,32 @@ export const quizPassages: QuizPassage[] = [
     questions: [
       {
         id: "cn-yucr2-q1",
-        statement: "'만부부당(萬夫不當)'은 충렬의 뛰어난 무예 실력을 강조하는 표현이다.",
+        statement:
+          "'만부부당(萬夫不當)'은 충렬의 뛰어난 무예 실력을 강조하는 표현이다.",
         isTrue: true,
         explanation:
           "만부부당(萬夫不當)은 '만 명의 적도 당해내지 못한다'는 뜻으로, 유충렬의 압도적인 무예 실력을 과장법을 통해 강조하는 영웅소설의 전형적 표현입니다.",
       },
       {
         id: "cn-yucr2-q2",
-        statement: "노승이 충렬에게 하산을 권하는 것은 충렬의 '충(忠)'과 '효(孝)'를 동시에 실현하게 하려는 것이다.",
+        statement:
+          "노승이 충렬에게 하산을 권하는 것은 충렬의 '충(忠)'과 '효(孝)'를 동시에 실현하게 하려는 것이다.",
         isTrue: true,
         explanation:
           "'임금을 도와 역적을 치고(충)' '아버지를 구하라(효)'는 노승의 말에서 충과 효의 동시 실현이라는 유교적 이상이 제시됩니다. 이는 조선 시대 영웅소설의 핵심 가치관입니다.",
       },
       {
         id: "cn-yucr2-q3",
-        statement: "충렬이 산중에서 십여 년간 수련한 것은 현실적인 시간 경과를 반영한다.",
+        statement:
+          "충렬이 산중에서 십여 년간 수련한 것은 현실적인 시간 경과를 반영한다.",
         isTrue: false,
         explanation:
           "고전 영웅소설에서 주인공의 수련 기간은 현실적 시간보다는 서사적 관습에 따른 것입니다. 비현실적으로 짧은 시간에 모든 무예를 익히는 것은 영웅의 비범함을 강조하는 장치입니다.",
       },
       {
         id: "cn-yucr2-q4",
-        statement: "이 장면에서 충렬의 눈물은 노승과의 이별에 대한 슬픔만을 의미한다.",
+        statement:
+          "이 장면에서 충렬의 눈물은 노승과의 이별에 대한 슬픔만을 의미한다.",
         isTrue: false,
         explanation:
           "충렬의 눈물은 노승과의 이별 슬픔뿐 아니라, 고난받는 아버지에 대한 효심, 나라의 위기에 대한 충의, 그리고 사명감이 복합적으로 표출된 것입니다.",
@@ -224,7 +320,8 @@ export const quizPassages: QuizPassage[] = [
       {
         id: "re-yucr2-1",
         sourceTitle: "2022학년도 수능",
-        statement: "영웅소설에서 주인공의 하산은 개인적 성장의 완료와 사회적 역할 시작을 의미한다.",
+        statement:
+          "영웅소설에서 주인공의 하산은 개인적 성장의 완료와 사회적 역할 시작을 의미한다.",
         isTrue: true,
         explanation:
           "하산은 산중 수련(개인적 성장)의 완료를 상징하며, 세상으로 나가 충과 효를 실현하는 사회적 역할의 시작을 의미합니다. 이는 '성장 → 시련 → 활약'의 전환점입니다.",
@@ -232,7 +329,8 @@ export const quizPassages: QuizPassage[] = [
       {
         id: "re-yucr2-2",
         sourceTitle: "2021학년도 9월 평가원",
-        statement: "노승의 예언은 작품 전체 서사의 방향을 제시하는 서사적 장치이다.",
+        statement:
+          "노승의 예언은 작품 전체 서사의 방향을 제시하는 서사적 장치이다.",
         isTrue: true,
         explanation:
           "노승이 제시하는 과업(역적 토벌, 아버지 구출)은 이후 작품 서사의 핵심 줄기를 미리 알려주는 '복선' 및 '예언'의 서사적 장치로 기능합니다.",
@@ -247,19 +345,47 @@ export const quizPassages: QuizPassage[] = [
     author: "작자 미상",
     source: "수능완성 문학 98p",
     passage:
-      "이때 정한담이 대군을 이끌고 도성을 위협하니, 조정이 크게 놀라 장수를 구하나 대적할 자 없더라. 충렬이 도성에 이르러 임금 앞에 나아가 아뢰되,\n\"소장이 비록 나이 어리오나 일편단심 충의로써 역적을 소탕하겠나이다.\"\n임금이 크게 기뻐하여 충렬을 대원수에 봉하고 군사 십만을 내어주시니, 충렬이 삼군을 호령하여 출전하매 위풍이 늠름하여 산천이 떨리고 적진이 두려워하더라.",
+      '이때 정한담이 대군을 이끌고 도성을 위협하니, 조정이 크게 놀라 장수를 구하나 대적할 자 없더라. 충렬이 도성에 이르러 임금 앞에 나아가 아뢰되,\n"소장이 비록 나이 어리오나 일편단심 충의로써 역적을 소탕하겠나이다."\n임금이 크게 기뻐하여 충렬을 대원수에 봉하고 군사 십만을 내어주시니, 충렬이 삼군을 호령하여 출전하매 위풍이 늠름하여 산천이 떨리고 적진이 두려워하더라.',
     narrativePhase: "climax",
     narrativeSections: [
-      { phase: "exposition", title: "유충렬의 위기", summary: "어린 충렬이 역적 정한담의 난으로 가족을 잃고 노승에게 구출됨" },
-      { phase: "rising", title: "성장과 수련", summary: "산중에서 무예와 학문을 연마하며 영웅으로 성장" },
-      { phase: "climax", title: "전장의 영웅", summary: "조정의 위기에 출전하여 적장들을 차례로 격파" },
-      { phase: "falling", title: "정한담 토벌", summary: "역적 정한담을 정벌하고 부모의 원수를 갚음" },
-      { phase: "resolution", title: "충효의 완성", summary: "공을 인정받아 벼슬에 오르고 부모와 재회" },
+      {
+        phase: "exposition",
+        title: "유충렬의 위기",
+        summary: "어린 충렬이 역적 정한담의 난으로 가족을 잃고 노승에게 구출됨",
+      },
+      {
+        phase: "rising",
+        title: "성장과 수련",
+        summary: "산중에서 무예와 학문을 연마하며 영웅으로 성장",
+      },
+      {
+        phase: "climax",
+        title: "전장의 영웅",
+        summary: "조정의 위기에 출전하여 적장들을 차례로 격파",
+      },
+      {
+        phase: "falling",
+        title: "정한담 토벌",
+        summary: "역적 정한담을 정벌하고 부모의 원수를 갚음",
+      },
+      {
+        phase: "resolution",
+        title: "충효의 완성",
+        summary: "공을 인정받아 벼슬에 오르고 부모와 재회",
+      },
     ],
     characterMap: {
       characters: [
-        { name: "유충렬", role: "주인공", description: "충신 유심의 아들, 영웅적 장수" },
-        { name: "정한담", role: "적대자", description: "간신, 나라를 어지럽히는 역적" },
+        {
+          name: "유충렬",
+          role: "주인공",
+          description: "충신 유심의 아들, 영웅적 장수",
+        },
+        {
+          name: "정한담",
+          role: "적대자",
+          description: "간신, 나라를 어지럽히는 역적",
+        },
         { name: "임금", role: "군주", description: "위기에 처한 조정의 왕" },
       ],
       relations: [
@@ -271,7 +397,8 @@ export const quizPassages: QuizPassage[] = [
     questions: [
       {
         id: "cn-yucr3-q1",
-        statement: "'일편단심'이라는 표현은 충렬의 변하지 않는 충성심을 강조한다.",
+        statement:
+          "'일편단심'이라는 표현은 충렬의 변하지 않는 충성심을 강조한다.",
         isTrue: true,
         explanation:
           "일편단심(一片丹心)은 '한 조각 붉은 마음'이라는 뜻으로, 유충렬의 변함없는 충성심을 강조합니다. 이는 영웅의 덕목 중 '충(忠)'을 부각하는 관용적 표현입니다.",
@@ -285,14 +412,16 @@ export const quizPassages: QuizPassage[] = [
       },
       {
         id: "cn-yucr3-q3",
-        statement: "임금이 어린 충렬을 대원수에 봉한 것은 인재 부족이라는 상황적 필연성에 기인한다.",
+        statement:
+          "임금이 어린 충렬을 대원수에 봉한 것은 인재 부족이라는 상황적 필연성에 기인한다.",
         isTrue: true,
         explanation:
           "'장수를 구하나 대적할 자 없더라'는 상황은 나이 어린 충렬이 대원수가 되는 서사적 필연성을 제공합니다. 위기 상황이 영웅 등장의 배경이 되는 것은 영웅소설의 전형적 구조입니다.",
       },
       {
         id: "cn-yucr3-q4",
-        statement: "이 장면은 영웅소설의 '위기-영웅 등장-문제 해결' 서사 구조를 보여준다.",
+        statement:
+          "이 장면은 영웅소설의 '위기-영웅 등장-문제 해결' 서사 구조를 보여준다.",
         isTrue: true,
         explanation:
           "정한담의 위협(위기) → 유충렬의 등장(영웅 등장) → 출전(문제 해결 시작)이라는 영웅소설의 전형적 서사 공식이 이 장면에 집약되어 있습니다.",
@@ -302,7 +431,8 @@ export const quizPassages: QuizPassage[] = [
   {
     id: "modern-poem-1",
     grandUnit: "literature",
-    categoryId: "modern-poem",
+    // [수정됨] modern-poem -> modern-poetry
+    categoryId: "modern-poetry",
     title: "진달래꽃",
     author: "김소월",
     source: "수능특강 문학 45p",
@@ -332,7 +462,8 @@ export const quizPassages: QuizPassage[] = [
       },
       {
         id: "mp1-q4",
-        statement: "이 시에서 화자는 자신의 감정을 행동으로 간접 전달하고 있다.",
+        statement:
+          "이 시에서 화자는 자신의 감정을 행동으로 간접 전달하고 있다.",
         isTrue: true,
         explanation:
           "'고이 보내 드리우리다', '가실 길에 뿌리우리다' 등 구체적인 행동 묘사를 통해 감정을 간접적으로 전달하고 있습니다.",
@@ -342,7 +473,8 @@ export const quizPassages: QuizPassage[] = [
       {
         id: "re-mp1-1",
         sourceTitle: "2023학년도 수능",
-        statement: "화자가 꽃을 뿌리는 행위는 이별의 슬픔을 의식적으로 억제하려는 태도를 보여준다.",
+        statement:
+          "화자가 꽃을 뿌리는 행위는 이별의 슬픔을 의식적으로 억제하려는 태도를 보여준다.",
         isTrue: true,
         explanation:
           "화자는 이별의 고통을 겉으로 드러내지 않고, 꽃을 뿌리는 행위를 통해 아름다운 이별을 연출하면서 슬픔을 내면화하고 있습니다.",
@@ -350,7 +482,8 @@ export const quizPassages: QuizPassage[] = [
       {
         id: "re-mp1-2",
         sourceTitle: "2022학년도 9월 평가원",
-        statement: "'사뿐히 즈려밟고'는 화자가 임에게 고통을 주고 싶은 마음을 표현한 것이다.",
+        statement:
+          "'사뿐히 즈려밟고'는 화자가 임에게 고통을 주고 싶은 마음을 표현한 것이다.",
         isTrue: false,
         explanation:
           "이는 임에게 고통을 주려는 것이 아니라, 임의 발걸음을 편안하게 해주려는 자기희생적 사랑의 역설적 표현입니다.",
@@ -360,7 +493,8 @@ export const quizPassages: QuizPassage[] = [
   {
     id: "modern-poem-2",
     grandUnit: "literature",
-    categoryId: "modern-poem",
+    // [수정됨] modern-poem -> modern-poetry
+    categoryId: "modern-poetry",
     title: "서시",
     author: "윤동주",
     source: "수능특강 문학 78p",
@@ -390,7 +524,8 @@ export const quizPassages: QuizPassage[] = [
       },
       {
         id: "mp2-q4",
-        statement: "'모든 죽어 가는 것을 사랑해야지'에서 화자는 허무주의적 세계관을 드러내고 있다.",
+        statement:
+          "'모든 죽어 가는 것을 사랑해야지'에서 화자는 허무주의적 세계관을 드러내고 있다.",
         isTrue: false,
         explanation:
           "이 구절은 소멸해가는 것들에 대한 깊은 연민과 사랑을 표현합니다. 생명에 대한 경외와 공동체적 사랑의 의지입니다.",
@@ -400,7 +535,8 @@ export const quizPassages: QuizPassage[] = [
       {
         id: "re-mp2-1",
         sourceTitle: "2024학년도 수능",
-        statement: "'별'과 '바람'은 각각 이상과 현실적 시련을 상징하는 대립적 소재이다.",
+        statement:
+          "'별'과 '바람'은 각각 이상과 현실적 시련을 상징하는 대립적 소재이다.",
         isTrue: true,
         explanation:
           "'별'은 이상적 가치(순수, 양심)를, '바람'은 현실에서 겪는 시련을 상징합니다. 두 소재의 대립을 통해 화자의 내적 갈등이 형상화됩니다.",
@@ -441,14 +577,16 @@ export const quizPassages: QuizPassage[] = [
       },
       {
         id: "mn1-q3",
-        statement: "소녀가 징검다리 한가운데로 자리를 옮긴 것은 소년에게 다가가려는 행동이다.",
+        statement:
+          "소녀가 징검다리 한가운데로 자리를 옮긴 것은 소년에게 다가가려는 행동이다.",
         isTrue: true,
         explanation:
           "소녀가 개울 기슭에서 징검다리 한가운데로 옮긴 것은 소년에게 더 가까이 다가가려는 무의식적 행동으로 해석됩니다.",
       },
       {
         id: "mn1-q4",
-        statement: "이 작품에서 자연 배경은 인물들의 순수한 감정을 부각하는 역할을 한다.",
+        statement:
+          "이 작품에서 자연 배경은 인물들의 순수한 감정을 부각하는 역할을 한다.",
         isTrue: true,
         explanation:
           "개울, 징검다리, 버들가지 등의 자연물은 소년과 소녀의 순수하고 맑은 감정을 부각시키는 배경으로 기능합니다.",
@@ -507,7 +645,7 @@ export const quizPassages: QuizPassage[] = [
     author: "작자 미상",
     source: "수능완성 문학 89p",
     passage:
-      "이 도령이 방자를 불러,\n\"저기 그네 뛰는 저 계집이 누구냐?\"\n\"예, 저것은 퇴기 월매의 딸이요, 이름은 춘향이라 하옵니다. 나이 열여섯에 자색이 절륜하고 문장과 가무에 능하오나, 기생의 딸이라 양반이 상대할 바 아니옵니다.\"\n\"그 말이 무슨 말이냐. 사람이 사람을 사랑하는 데 신분이 무슨 상관이냐.\"\n이 도령의 눈에는 그네를 뛰는 춘향의 모습이 선녀와 같았다.",
+      '이 도령이 방자를 불러,\n"저기 그네 뛰는 저 계집이 누구냐?"\n"예, 저것은 퇴기 월매의 딸이요, 이름은 춘향이라 하옵니다. 나이 열여섯에 자색이 절륜하고 문장과 가무에 능하오나, 기생의 딸이라 양반이 상대할 바 아니옵니다."\n"그 말이 무슨 말이냐. 사람이 사람을 사랑하는 데 신분이 무슨 상관이냐."\n이 도령의 눈에는 그네를 뛰는 춘향의 모습이 선녀와 같았다.',
     questions: [
       {
         id: "cn1-q1",
@@ -532,7 +670,8 @@ export const quizPassages: QuizPassage[] = [
       },
       {
         id: "cn1-q4",
-        statement: "이 작품에서 '그네 뛰기' 장면은 계절적 배경으로 봄(단오)을 암시한다.",
+        statement:
+          "이 작품에서 '그네 뛰기' 장면은 계절적 배경으로 봄(단오)을 암시한다.",
         isTrue: true,
         explanation:
           "그네뛰기는 단오의 대표적인 민속놀이로, 봄날 단오의 계절적 배경을 암시합니다.",
