@@ -85,6 +85,9 @@ export function getQuizzesByGrandUnit(grandUnit: GrandUnit): QuizPassage[] {
 export function getQuizzesByCategory(categoryId: string): QuizPassage[] {
   return quizPassages.filter((q) => q.categoryId === categoryId);
 }
+export function getQuizById(id: string): QuizPassage | undefined {
+  return quizPassages.find((q) => q.id === id);
+}
 
 // 데이터 배열 시작
 export const quizPassages: QuizPassage[] = [
