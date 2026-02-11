@@ -1,25 +1,17 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Pressable,
-  Platform,
-} from "react-native";
+import { StyleSheet, Text, View, Pressable, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  FadeInDown,
-} from "react-native-reanimated";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { SubCategoryCard } from "@/components/SubCategoryCard";
 import { useStudy } from "@/contexts/StudyContext";
 import { getQuizzesByCategory } from "@/data/quizData";
 import Colors from "@/constants/colors";
 
 const categoryQuizMap: Record<string, string> = {
-  "modern-poetry": "modern-poem",
+  "modern-poetry": "modern-poetry",
   "modern-novel": "modern-novel",
   "classic-poetry": "classic-poetry",
   "classic-novel": "classic-novel",
@@ -36,15 +28,23 @@ export default function LiteratureScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const quizCategoryId = categoryQuizMap[catId];
     if (quizCategoryId) {
-      router.push({ pathname: "/study/works", params: { category: quizCategoryId } });
+      router.push({
+        pathname: "/study/works",
+        params: { category: quizCategoryId },
+      });
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, {
-        paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 12,
-      }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 12,
+          },
+        ]}
+      >
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -77,9 +77,18 @@ export default function LiteratureScreen() {
             }}
             style={styles.headerIconButton}
           >
-            <Ionicons name="bookmark-outline" size={22} color={Colors.light.tint} />
+            <Ionicons
+              name="bookmark-outline"
+              size={22}
+              color={Colors.light.tint}
+            />
             {bookmarks.length > 0 && (
-              <View style={[styles.badgeDot, { backgroundColor: Colors.light.tint }]}>
+              <View
+                style={[
+                  styles.badgeDot,
+                  { backgroundColor: Colors.light.tint },
+                ]}
+              >
                 <Text style={styles.badgeDotText}>{bookmarks.length}</Text>
               </View>
             )}
@@ -87,14 +96,24 @@ export default function LiteratureScreen() {
         </View>
       </View>
 
-      <View style={[styles.content, {
-        paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20,
-      }]}>
+      <View
+        style={[
+          styles.content,
+          {
+            paddingBottom:
+              (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20,
+          },
+        ]}
+      >
         <View style={styles.grid}>
           {subCategories.map((cat, index) => (
             <Animated.View
               key={cat.id}
-              entering={Platform.OS !== "web" ? FadeInDown.delay(index * 100).springify() : undefined}
+              entering={
+                Platform.OS !== "web"
+                  ? FadeInDown.delay(index * 100).springify()
+                  : undefined
+              }
               style={styles.gridItem}
             >
               <SubCategoryCard

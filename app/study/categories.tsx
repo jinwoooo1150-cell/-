@@ -34,7 +34,18 @@ interface CategoryCardProps {
   onPress: () => void;
 }
 
-function CategoryCard({ title, subtitle, icon, iconFamily = "Ionicons", color, available, index, count, completedCount, onPress }: CategoryCardProps) {
+function CategoryCard({
+  title,
+  subtitle,
+  icon,
+  iconFamily = "Ionicons",
+  color,
+  available,
+  index,
+  count,
+  completedCount,
+  onPress,
+}: CategoryCardProps) {
   const scale = useSharedValue(1);
   const pressStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -59,16 +70,43 @@ function CategoryCard({ title, subtitle, icon, iconFamily = "Ionicons", color, a
         }}
       >
         <Animated.View style={[styles.categoryCard, pressStyle]}>
-          <View style={[styles.categoryIconBox, { backgroundColor: available ? color : Colors.light.locked }]}>
+          <View
+            style={[
+              styles.categoryIconBox,
+              { backgroundColor: available ? color : Colors.light.locked },
+            ]}
+          >
             {iconFamily === "MaterialCommunityIcons" ? (
-              <MaterialCommunityIcons name={icon as any} size={24} color={available ? "#FFF" : Colors.light.lockedText} />
+              <MaterialCommunityIcons
+                name={icon as any}
+                size={24}
+                color={available ? "#FFF" : Colors.light.lockedText}
+              />
             ) : (
-              <Ionicons name={icon as any} size={24} color={available ? "#FFF" : Colors.light.lockedText} />
+              <Ionicons
+                name={icon as any}
+                size={24}
+                color={available ? "#FFF" : Colors.light.lockedText}
+              />
             )}
           </View>
           <View style={styles.categoryTextSection}>
-            <Text style={[styles.categoryTitle, !available && { color: Colors.light.lockedText }]}>{title}</Text>
-            <Text style={[styles.categorySubtitle, !available && { color: Colors.light.lockedText }]}>{subtitle}</Text>
+            <Text
+              style={[
+                styles.categoryTitle,
+                !available && { color: Colors.light.lockedText },
+              ]}
+            >
+              {title}
+            </Text>
+            <Text
+              style={[
+                styles.categorySubtitle,
+                !available && { color: Colors.light.lockedText },
+              ]}
+            >
+              {subtitle}
+            </Text>
           </View>
           <View style={styles.categoryRight}>
             {available ? (
@@ -76,11 +114,19 @@ function CategoryCard({ title, subtitle, icon, iconFamily = "Ionicons", color, a
                 <Text style={styles.categoryCount}>
                   {completedCount}/{count}
                 </Text>
-                <Ionicons name="chevron-forward" size={20} color={Colors.light.textMuted} />
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={Colors.light.textMuted}
+                />
               </>
             ) : (
               <View style={styles.lockBadge}>
-                <Ionicons name="lock-closed" size={12} color={Colors.light.lockedText} />
+                <Ionicons
+                  name="lock-closed"
+                  size={12}
+                  color={Colors.light.lockedText}
+                />
                 <Text style={styles.lockText}>준비중</Text>
               </View>
             )}
@@ -102,7 +148,9 @@ export default function CategoriesScreen() {
     quizPassages.filter((q) => q.categoryId === catId).length;
 
   const getCompletedForCategory = (catId: string) =>
-    quizPassages.filter((q) => q.categoryId === catId && completedWorks.includes(q.id)).length;
+    quizPassages.filter(
+      (q) => q.categoryId === catId && completedWorks.includes(q.id),
+    ).length;
 
   const categories = [
     {
@@ -111,7 +159,7 @@ export default function CategoriesScreen() {
       icon: "musical-notes",
       color: "#FF8C00",
       available: true,
-      route: "modern-poem",
+      route: "modern-poetry",
     },
     {
       title: "현대소설",
@@ -150,9 +198,14 @@ export default function CategoriesScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, {
-        paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 12,
-      }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 12,
+          },
+        ]}
+      >
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -172,12 +225,17 @@ export default function CategoriesScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 40 },
+          {
+            paddingBottom:
+              (Platform.OS === "web" ? webBottomInset : insets.bottom) + 40,
+          },
         ]}
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.sectionTitle}>갈래 선택</Text>
-        <Text style={styles.sectionSubtitle}>원하는 갈래를 자유롭게 선택하세요</Text>
+        <Text style={styles.sectionSubtitle}>
+          원하는 갈래를 자유롭게 선택하세요
+        </Text>
 
         <View style={styles.categoryList}>
           {categories.map((cat, index) => (
@@ -191,7 +249,9 @@ export default function CategoriesScreen() {
               available={cat.available}
               index={index}
               count={cat.available ? getCountForCategory(cat.route) : 0}
-              completedCount={cat.available ? getCompletedForCategory(cat.route) : 0}
+              completedCount={
+                cat.available ? getCompletedForCategory(cat.route) : 0
+              }
               onPress={() => {
                 if (cat.route) {
                   router.push({
