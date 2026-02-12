@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -6,15 +6,16 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Colors from "@/constants/colors"; // Default import로 수정
+import Colors from "@/constants/colors";
 import { RelatedExamQuestion } from "@/data/quizData";
 
 // Colors.primary가 없으므로 Colors.light.tint 사용
 const PRIMARY_COLOR = Colors.light.tint;
 
-// Colors.gray가 없으므로 파일 내부에 회색조 정의 (Tailwind 스타일)
+// Colors.gray가 없으므로 파일 내부에 회색조 정의
 const Grays = {
   50: "#F9FAFB",
   200: "#E5E7EB",
@@ -28,15 +29,57 @@ const Grays = {
 interface RelatedExamModalProps {
   visible: boolean;
   onClose: () => void;
-  exam: RelatedExamQuestion | null;
+  questions: RelatedExamQuestion[]; // 단일 객체(exam)에서 배열(questions)로 변경
+  quizId?: string; // 부모에서 넘겨주는 prop 허용 (사용은 안 하더라도 타입 에러 방지)
+  parentQuizData?: any;
 }
 
 export function RelatedExamModal({
   visible,
   onClose,
-  exam,
+  questions,
 }: RelatedExamModalProps) {
-  if (!exam) return null;
+  // 현재 풀고 있는 문제의 인덱스
+  const [currentIndex, setCurrentIndex] = useState(0);
+  // 정답 확인 여부
+  const [isSolved, setIsSolved] = useState(false);
+  // 사용자가 맞췄는지 여부
+  const [isUserCorrect, setIsUserCorrect] = useState(false);
+
+  // 모달이 열릴 때마다 상태 초기화
+  useEffect(() => {
+    if (visible) {
+      setCurrentIndex(0);
+      setIsSolved(false);
+      setIsUserCorrect(false);
+    }
+  }, [visible]);
+
+  // questions가 없거나 비어있으면 렌더링 안 함
+  if (!questions || questions.length === 0) return null;
+
+  const currentQuestion = questions[currentIndex];
+  const isLastQuestion = currentIndex === questions.length - 1;
+
+  // O/X 버튼 클릭 핸들러
+  const handleAnswer = (userChoice: "O" | "X") => {
+    const isTrue = userChoice === "O";
+    const correct = isTrue === currentQuestion.isTrue;
+
+    setIsUserCorrect(correct);
+    setIsSolved(true);
+  };
+
+  // 다음 문제로 이동 핸들러
+  const handleNext = () => {
+    if (isLastQuestion) {
+      onClose();
+    } else {
+      setCurrentIndex((prev) => prev + 1);
+      setIsSolved(false);
+      setIsUserCorrect(false);
+    }
+  };
 
   return (
     <Modal
@@ -47,11 +90,16 @@ export function RelatedExamModal({
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
+          {/* Header */}
           <View style={styles.header}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>기출 연동</Text>
+              <Text style={styles.badgeText}>
+                기출 연동 {currentIndex + 1}/{questions.length}
+              </Text>
             </View>
-            <Text style={styles.source}>{exam.sourceTitle}</Text>
+            <Text style={styles.source} numberOfLines={1}>
+              {currentQuestion.sourceTitle}
+            </Text>
             <TouchableOpacity
               onPress={onClose}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -64,37 +112,77 @@ export function RelatedExamModal({
             style={styles.content}
             showsVerticalScrollIndicator={false}
           >
-            {/* [New] 연관 작품 지문이 있으면 표시하는 영역 */}
-            {exam.relatedPassage && (
+            {/* 연관 작품 지문 표시 */}
+            {currentQuestion.relatedPassage && (
               <View style={styles.passageContainer}>
                 <Text style={styles.passageLabel}>[연관 작품]</Text>
-                <Text style={styles.passageText}>{exam.relatedPassage}</Text>
+                <Text style={styles.passageText}>
+                  {currentQuestion.relatedPassage}
+                </Text>
               </View>
             )}
 
+            {/* 문제 질문 */}
             <View style={styles.questionBox}>
-              <Text style={styles.statement}>{exam.statement}</Text>
+              <Text style={styles.statement}>{currentQuestion.statement}</Text>
             </View>
 
-            <View style={styles.answerSection}>
-              <View
-                style={[
-                  styles.resultTag,
-                  exam.isTrue ? styles.correctTag : styles.incorrectTag,
-                ]}
-              >
-                <Text
+            {/* 정답 및 해설 영역 (풀기 전에는 숨김) */}
+            {isSolved && (
+              <View style={styles.answerSection}>
+                <View
                   style={[
-                    styles.resultText,
-                    exam.isTrue ? styles.correctText : styles.incorrectText,
+                    styles.resultTag,
+                    isUserCorrect ? styles.correctTag : styles.incorrectTag,
                   ]}
                 >
-                  정답: {exam.isTrue ? "O" : "X"}
+                  <Text
+                    style={[
+                      styles.resultText,
+                      isUserCorrect ? styles.correctText : styles.incorrectText,
+                    ]}
+                  >
+                    {isUserCorrect ? "정답입니다!" : "오답입니다"} (정답:{" "}
+                    {currentQuestion.isTrue ? "O" : "X"})
+                  </Text>
+                </View>
+                <Text style={styles.explanation}>
+                  {currentQuestion.explanation}
                 </Text>
               </View>
-              <Text style={styles.explanation}>{exam.explanation}</Text>
-            </View>
+            )}
           </ScrollView>
+
+          {/* 하단 컨트롤 영역 */}
+          <View style={styles.footer}>
+            {!isSolved ? (
+              // 풀기 전: O/X 버튼
+              <View style={styles.oxButtonContainer}>
+                <Pressable
+                  style={[styles.oxButton, { backgroundColor: PRIMARY_COLOR }]}
+                  onPress={() => handleAnswer("O")}
+                >
+                  <Text style={styles.oxButtonText}>O</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.oxButton, { backgroundColor: "#E07800" }]}
+                  onPress={() => handleAnswer("X")}
+                >
+                  <Text style={styles.oxButtonText}>X</Text>
+                </Pressable>
+              </View>
+            ) : (
+              // 푼 후: 다음 문제 버튼
+              <Pressable style={styles.nextButton} onPress={handleNext}>
+                <Text style={styles.nextButtonText}>
+                  {isLastQuestion ? "닫기" : "다음 문제"}
+                </Text>
+                {!isLastQuestion && (
+                  <Ionicons name="arrow-forward" size={18} color="#FFF" />
+                )}
+              </Pressable>
+            )}
+          </View>
         </View>
       </View>
     </Modal>
@@ -113,8 +201,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     width: "100%",
-    maxHeight: "80%", // 모달 최대 높이 제한
-    padding: 24,
+    height: "70%", // 높이 고정 (스크롤을 위해)
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -124,11 +212,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Grays[200],
     gap: 8,
   },
   badge: {
-    backgroundColor: PRIMARY_COLOR + "15", // 투명도 추가
+    backgroundColor: PRIMARY_COLOR + "15",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -145,7 +235,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   content: {
-    flexGrow: 0, // 내용물만큼만 크기 차지
+    flex: 1,
+    padding: 24,
   },
   passageContainer: {
     backgroundColor: Grays[50],
@@ -180,6 +271,7 @@ const styles = StyleSheet.create({
     backgroundColor: Grays[50],
     padding: 16,
     borderRadius: 12,
+    marginBottom: 20,
   },
   resultTag: {
     alignSelf: "flex-start",
@@ -208,5 +300,41 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Grays[700],
     lineHeight: 24,
+  },
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: Grays[200],
+    backgroundColor: "#FFF",
+  },
+  oxButtonContainer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  oxButton: {
+    flex: 1,
+    height: 50,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  oxButtonText: {
+    color: "#FFF",
+    fontSize: 20,
+    fontWeight: "800",
+  },
+  nextButton: {
+    backgroundColor: PRIMARY_COLOR,
+    height: 50,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  nextButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "700",
   },
 });
