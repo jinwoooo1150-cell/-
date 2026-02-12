@@ -450,6 +450,7 @@ export default function QuizScreen() {
             {isModernPoetry ? "작품 전문" : "관련 지문"}
           </Text>
           <View style={styles.divider} />
+          {/* [수정] 단순 Text로 복귀하되 스타일로 줄바꿈 제어 */}
           <Text style={styles.passageText}>{displayedPassage}</Text>
         </View>
 
@@ -500,10 +501,11 @@ export default function QuizScreen() {
               />
             </Pressable>
           </View>
+          {/* [핵심 수정] 단순 Text로 복귀 */}
           <Text style={styles.qText}>{currentQuestion.statement}</Text>
         </Animated.View>
 
-        {/* Feedback Section (기존과 동일) */}
+        {/* Feedback Section */}
         {answerState !== "unanswered" && (
           <Animated.View entering={FadeInDown} style={styles.feedbackSection}>
             <CheetahMascot
@@ -520,7 +522,10 @@ export default function QuizScreen() {
               >
                 해설
               </Text>
-              <Text>{currentQuestion.explanation}</Text>
+              {/* [수정] 해설 텍스트 단순화 */}
+              <Text style={styles.explanationText}>
+                {currentQuestion.explanation}
+              </Text>
             </View>
           </Animated.View>
         )}
@@ -650,6 +655,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: "#EEE",
+    width: "100%", // [추가] 너비 강제
   },
   passageLabel: {
     fontSize: 12,
@@ -658,10 +664,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   divider: { height: 1, backgroundColor: "#EEE", marginBottom: 12 },
+
   passageText: {
     fontSize: 15,
     lineHeight: 24,
     fontFamily: "NotoSansKR_400Regular",
+    flexShrink: 1, // [수정] 줄바꿈 강제
   },
 
   relatedExamButton: {
@@ -682,6 +690,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 2,
     borderColor: Colors.light.tint,
+    width: "100%", // [핵심 수정] 부모 너비를 강제하여 텍스트 오버플로우 방지
   },
   qHeader: {
     flexDirection: "row",
@@ -695,14 +704,26 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   qBadgeText: { color: "#FFF", fontWeight: "bold" },
-  qText: { fontSize: 17, fontWeight: "500", lineHeight: 26 },
+
+  qText: {
+    fontSize: 17,
+    fontWeight: "500",
+    lineHeight: 26,
+    flexShrink: 1, // [핵심 수정] 컨테이너 너비 내에서 줄어들도록(줄바꿈) 설정
+  },
 
   feedbackSection: { alignItems: "center", gap: 10 },
   explanationBox: {
     backgroundColor: "#FFF",
     padding: 16,
     borderRadius: 12,
-    width: "100%",
+    width: "100%", // [추가] 너비 강제
+  },
+  explanationText: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: "#333",
+    flexShrink: 1, // [추가] 줄바꿈 강제
   },
 
   bottomBar: {

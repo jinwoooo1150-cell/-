@@ -12,10 +12,10 @@ import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/colors";
 import { RelatedExamQuestion } from "@/data/quizData";
 
-// Colors.primary가 없으므로 Colors.light.tint 사용
-const PRIMARY_COLOR = Colors.light.tint;
+// 테마 색상 안전하게 가져오기 (기본값 설정)
+const PRIMARY_COLOR = Colors.light?.tint || "#2f95dc";
 
-// Colors.gray가 없으므로 파일 내부에 회색조 정의
+// 회색조 팔레트
 const Grays = {
   50: "#F9FAFB",
   200: "#E5E7EB",
@@ -29,8 +29,8 @@ const Grays = {
 interface RelatedExamModalProps {
   visible: boolean;
   onClose: () => void;
-  questions: RelatedExamQuestion[]; // 단일 객체(exam)에서 배열(questions)로 변경
-  quizId?: string; // 부모에서 넘겨주는 prop 허용 (사용은 안 하더라도 타입 에러 방지)
+  questions: RelatedExamQuestion[];
+  quizId?: string;
   parentQuizData?: any;
 }
 
@@ -39,14 +39,10 @@ export function RelatedExamModal({
   onClose,
   questions,
 }: RelatedExamModalProps) {
-  // 현재 풀고 있는 문제의 인덱스
   const [currentIndex, setCurrentIndex] = useState(0);
-  // 정답 확인 여부
   const [isSolved, setIsSolved] = useState(false);
-  // 사용자가 맞췄는지 여부
   const [isUserCorrect, setIsUserCorrect] = useState(false);
 
-  // 모달이 열릴 때마다 상태 초기화
   useEffect(() => {
     if (visible) {
       setCurrentIndex(0);
@@ -55,13 +51,11 @@ export function RelatedExamModal({
     }
   }, [visible]);
 
-  // questions가 없거나 비어있으면 렌더링 안 함
   if (!questions || questions.length === 0) return null;
 
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
-  // O/X 버튼 클릭 핸들러
   const handleAnswer = (userChoice: "O" | "X") => {
     const isTrue = userChoice === "O";
     const correct = isTrue === currentQuestion.isTrue;
@@ -70,7 +64,6 @@ export function RelatedExamModal({
     setIsSolved(true);
   };
 
-  // 다음 문제로 이동 핸들러
   const handleNext = () => {
     if (isLastQuestion) {
       onClose();
@@ -97,6 +90,7 @@ export function RelatedExamModal({
                 기출 연동 {currentIndex + 1}/{questions.length}
               </Text>
             </View>
+            {/* 제목이 길 경우를 대비해 flex: 1 적용 */}
             <Text style={styles.source} numberOfLines={1}>
               {currentQuestion.sourceTitle}
             </Text>
@@ -110,24 +104,33 @@ export function RelatedExamModal({
 
           <ScrollView
             style={styles.content}
+            contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
           >
+            {/* [핵심 수정] 텍스트 줄바꿈 강제를 위한 Row Wrapper 패턴 적용 */}
+
             {/* 연관 작품 지문 표시 */}
             {currentQuestion.relatedPassage && (
               <View style={styles.passageContainer}>
                 <Text style={styles.passageLabel}>[연관 작품]</Text>
-                <Text style={styles.passageText}>
-                  {currentQuestion.relatedPassage}
-                </Text>
+                <View style={styles.textWrapper}>
+                  <Text style={styles.passageText}>
+                    {currentQuestion.relatedPassage}
+                  </Text>
+                </View>
               </View>
             )}
 
             {/* 문제 질문 */}
             <View style={styles.questionBox}>
-              <Text style={styles.statement}>{currentQuestion.statement}</Text>
+              <View style={styles.textWrapper}>
+                <Text style={styles.statement}>
+                  {currentQuestion.statement}
+                </Text>
+              </View>
             </View>
 
-            {/* 정답 및 해설 영역 (풀기 전에는 숨김) */}
+            {/* 정답 및 해설 영역 */}
             {isSolved && (
               <View style={styles.answerSection}>
                 <View
@@ -146,17 +149,18 @@ export function RelatedExamModal({
                     {currentQuestion.isTrue ? "O" : "X"})
                   </Text>
                 </View>
-                <Text style={styles.explanation}>
-                  {currentQuestion.explanation}
-                </Text>
+                <View style={styles.textWrapper}>
+                  <Text style={styles.explanation}>
+                    {currentQuestion.explanation}
+                  </Text>
+                </View>
               </View>
             )}
           </ScrollView>
 
-          {/* 하단 컨트롤 영역 */}
+          {/* Footer */}
           <View style={styles.footer}>
             {!isSolved ? (
-              // 풀기 전: O/X 버튼
               <View style={styles.oxButtonContainer}>
                 <Pressable
                   style={[styles.oxButton, { backgroundColor: PRIMARY_COLOR }]}
@@ -172,7 +176,6 @@ export function RelatedExamModal({
                 </Pressable>
               </View>
             ) : (
-              // 푼 후: 다음 문제 버튼
               <Pressable style={styles.nextButton} onPress={handleNext}>
                 <Text style={styles.nextButtonText}>
                   {isLastQuestion ? "닫기" : "다음 문제"}
@@ -201,7 +204,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     width: "100%",
-    height: "70%", // 높이 고정 (스크롤을 위해)
+    height: "70%",
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -236,7 +239,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 24,
+  },
+  contentContainer: {
+    padding: 24, // 스크롤 뷰 내부 패딩
+  },
+  // [핵심] 줄바꿈을 강제하기 위한 래퍼 스타일
+  textWrapper: {
+    flexDirection: "row", // 가로 배치를 통해 너비 제약을 활성화
+    width: "100%",
   },
   passageContainer: {
     backgroundColor: Grays[50],
@@ -257,15 +267,20 @@ const styles = StyleSheet.create({
     color: Grays[800],
     lineHeight: 22,
     fontFamily: "NotoSansKR_400Regular",
+    flex: 1, // 부모(Row)의 남은 공간을 채우면서
+    flexWrap: "wrap", // 공간 부족 시 줄바꿈
   },
   questionBox: {
     marginBottom: 20,
+    width: "100%",
   },
   statement: {
     fontSize: 18,
     fontWeight: "600",
     color: Grays[900],
     lineHeight: 28,
+    flex: 1, // 부모(Row) 너비에 맞춰 줄바꿈 강제
+    flexWrap: "wrap",
   },
   answerSection: {
     backgroundColor: Grays[50],
@@ -300,6 +315,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Grays[700],
     lineHeight: 24,
+    flex: 1, // 줄바꿈 강제
+    flexWrap: "wrap",
   },
   footer: {
     padding: 20,
