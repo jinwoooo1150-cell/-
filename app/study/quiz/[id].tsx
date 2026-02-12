@@ -263,7 +263,7 @@ export default function QuizScreen() {
   // Modal States
   const [showExamModal, setShowExamModal] = useState(false);
   const [showCharacterMap, setShowCharacterMap] = useState(false);
-  const [showDescription, setShowDescription] = useState(false);
+  // const [showDescription, setShowDescription] = useState(false); // [삭제] description 없음
   const [showFullPlot, setShowFullPlot] = useState(false);
   const [showFullText, setShowFullText] = useState(false);
 
@@ -296,29 +296,14 @@ export default function QuizScreen() {
   const isClassicNovel = quiz.categoryId === "classic-novel";
   const isNovel = isModernNovel || isClassicNovel;
 
-  // 지문 표시 로직: 현대시는 전문, 나머지는 발췌문
-  const displayedPassage = isModernPoetry
-    ? quiz.passage
-    : currentQuestion.relatedExcerpt || "관련 지문이 없습니다.";
+  // [수정] 데이터에 없는 속성 제거하고 공통 passage 사용
+  const displayedPassage = quiz.passage;
 
   // 탭 버튼 렌더링 로직
   const renderTabs = () => {
     return (
       <View style={styles.tabRow}>
-        {/* 현대시, 고전시가: 작품 설명 */}
-        {(isModernPoetry || isClassicPoetry) && quiz.description && (
-          <Pressable
-            onPress={() => setShowDescription(true)}
-            style={styles.tabButton}
-          >
-            <Ionicons
-              name="document-text-outline"
-              size={16}
-              color={Colors.light.tint}
-            />
-            <Text style={styles.tabButtonText}>작품 설명</Text>
-          </Pressable>
-        )}
+        {/* [삭제] description 속성이 없으므로 '작품 설명' 버튼 제거 */}
 
         {/* 소설류: 인물 관계도 */}
         {isNovel && quiz.characterMap && (
@@ -450,8 +435,10 @@ export default function QuizScreen() {
             {isModernPoetry ? "작품 전문" : "관련 지문"}
           </Text>
           <View style={styles.divider} />
-          {/* [수정] 단순 Text로 복귀하되 스타일로 줄바꿈 제어 */}
-          <Text style={styles.passageText}>{displayedPassage}</Text>
+          {/* [수정] flexShrink와 textBreakStrategy 추가 (줄바꿈 해결) */}
+          <Text style={styles.passageText} textBreakStrategy="simple">
+            {displayedPassage}
+          </Text>
         </View>
 
         {/* Related Exam Button */}
@@ -501,8 +488,10 @@ export default function QuizScreen() {
               />
             </Pressable>
           </View>
-          {/* [핵심 수정] 단순 Text로 복귀 */}
-          <Text style={styles.qText}>{currentQuestion.statement}</Text>
+          {/* [핵심 수정] 줄바꿈 강제 스타일 및 전략 적용 */}
+          <Text style={styles.qText} textBreakStrategy="simple">
+            {currentQuestion.statement}
+          </Text>
         </Animated.View>
 
         {/* Feedback Section */}
@@ -522,8 +511,8 @@ export default function QuizScreen() {
               >
                 해설
               </Text>
-              {/* [수정] 해설 텍스트 단순화 */}
-              <Text style={styles.explanationText}>
+              {/* [수정] 해설도 줄바꿈 적용 */}
+              <Text style={styles.explanationText} textBreakStrategy="simple">
                 {currentQuestion.explanation}
               </Text>
             </View>
@@ -565,14 +554,8 @@ export default function QuizScreen() {
           data={quiz.characterMap}
         />
       )}
-      {showDescription && quiz.description && (
-        <SimpleTextModal
-          visible={showDescription}
-          onClose={() => setShowDescription(false)}
-          title="작품 설명"
-          content={quiz.description}
-        />
-      )}
+      {/* [삭제] description 모달 제거 */}
+
       {showFullPlot && quiz.narrativeSections && (
         <FullPlotModal
           visible={showFullPlot}
@@ -655,7 +638,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: "#EEE",
-    width: "100%", // [추가] 너비 강제
+    width: "100%", // 너비 강제
   },
   passageLabel: {
     fontSize: 12,
@@ -669,7 +652,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     fontFamily: "NotoSansKR_400Regular",
-    flexShrink: 1, // [수정] 줄바꿈 강제
+    width: "100%", // 너비 강제
+    flexShrink: 1, // [필수] 줄어들 수 있도록 설정
   },
 
   relatedExamButton: {
@@ -690,7 +674,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 2,
     borderColor: Colors.light.tint,
-    width: "100%", // [핵심 수정] 부모 너비를 강제하여 텍스트 오버플로우 방지
+    width: "100%", // 너비 강제
   },
   qHeader: {
     flexDirection: "row",
@@ -709,7 +693,9 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "500",
     lineHeight: 26,
-    flexShrink: 1, // [핵심 수정] 컨테이너 너비 내에서 줄어들도록(줄바꿈) 설정
+    width: "100%", // 너비 강제
+    flexShrink: 1, // [핵심 해결] 텍스트가 부모 영역에 맞춰 줄바꿈됨
+    flexWrap: "wrap", // [추가] 명시적 줄바꿈
   },
 
   feedbackSection: { alignItems: "center", gap: 10 },
@@ -717,13 +703,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     padding: 16,
     borderRadius: 12,
-    width: "100%", // [추가] 너비 강제
+    width: "100%",
   },
   explanationText: {
     fontSize: 14,
     lineHeight: 22,
     color: "#333",
-    flexShrink: 1, // [추가] 줄바꿈 강제
+    width: "100%",
+    flexShrink: 1, // [필수] 해설 부분 줄바꿈
   },
 
   bottomBar: {
