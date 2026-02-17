@@ -1,6 +1,6 @@
 // app/study/quiz/[id].tsx
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,31 +9,20 @@ import {
   Pressable,
   Platform,
   Modal,
-  Dimensions,
   Switch,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withSequence,
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  SlideInRight,
-} from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
+import Animated, { FadeInDown, SlideInRight } from "react-native-reanimated";
 import { ProgressBar } from "@/components/ProgressBar";
-import { CheetahMascot, CheetahMood } from "@/components/CheetahMascot";
+import { CheetahMascot } from "@/components/CheetahMascot";
 import {
   getQuizById,
   NarrativePhase,
   CharacterMapData,
-  CharacterRelation,
   NarrativeSection,
 } from "@/data/quizData";
 import { RelatedExamModal } from "@/components/RelatedExamModal";
@@ -61,6 +50,7 @@ const phaseOrder: NarrativePhase[] = [
 
 // --- Modals ---
 
+// [수정] 단순 텍스트 모달 (작품 해설용으로 재사용)
 function SimpleTextModal({
   visible,
   onClose,
@@ -158,7 +148,6 @@ function CharacterMapModal({
 }) {
   const insets = useSafeAreaInsets();
 
-  // Helper to get role color
   const getRoleBg = (role: string) => {
     if (role.includes("주인공")) return Colors.light.tint;
     if (role.includes("적대자")) return "#EF4444";
@@ -246,6 +235,11 @@ function CharacterMapModal({
 export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
+
+  // 화면 크기 감지 (태블릿 가로모드 대응)
+  const { width } = useWindowDimensions();
+  const isLargeScreen = width > 768;
+
   const quiz = getQuizById(id);
   const {
     addIncorrectNote,
@@ -260,12 +254,14 @@ export default function QuizScreen() {
   const [answerState, setAnswerState] = useState<AnswerState>("unanswered");
   const [results, setResults] = useState<boolean[]>([]);
 
+  // 현대어 풀이 토글 상태
+  const [showModern, setShowModern] = useState(false);
+
   // Modal States
   const [showExamModal, setShowExamModal] = useState(false);
   const [showCharacterMap, setShowCharacterMap] = useState(false);
-  // const [showDescription, setShowDescription] = useState(false); // [삭제] description 없음
   const [showFullPlot, setShowFullPlot] = useState(false);
-  const [showFullText, setShowFullText] = useState(false);
+  const [showCommentary, setShowCommentary] = useState(false); // 작품 해설 모달
 
   const startTimeRef = useRef(Date.now());
 
@@ -296,15 +292,15 @@ export default function QuizScreen() {
   const isClassicNovel = quiz.categoryId === "classic-novel";
   const isNovel = isModernNovel || isClassicNovel;
 
-  // [수정] 데이터에 없는 속성 제거하고 공통 passage 사용
-  const displayedPassage = quiz.passage;
+  // 지문 표시 로직: 현대어 모드면 modernText, 아니면 passage (전문)
+  const passageToDisplay =
+    showModern && quiz.modernText ? quiz.modernText : quiz.passage;
+  const hasModernText = !!quiz.modernText;
 
-  // 탭 버튼 렌더링 로직
+  // 탭 버튼 렌더링 로직 (수특 전문 버튼 삭제됨)
   const renderTabs = () => {
     return (
       <View style={styles.tabRow}>
-        {/* [삭제] description 속성이 없으므로 '작품 설명' 버튼 제거 */}
-
         {/* 소설류: 인물 관계도 */}
         {isNovel && quiz.characterMap && (
           <Pressable
@@ -335,14 +331,18 @@ export default function QuizScreen() {
           </Pressable>
         )}
 
-        {/* 현대소설, 고전소설, 고전시가: 수특 전문 */}
-        {(isNovel || isClassicPoetry) && (
+        {/* 고전시가 등: 작품 해설 (데이터가 있을 경우) */}
+        {quiz.commentary && (
           <Pressable
-            onPress={() => setShowFullText(true)}
+            onPress={() => setShowCommentary(true)}
             style={styles.tabButton}
           >
-            <Ionicons name="book-outline" size={16} color={Colors.light.tint} />
-            <Text style={styles.tabButtonText}>수특 전문</Text>
+            <Ionicons
+              name="document-text-outline"
+              size={16}
+              color={Colors.light.tint}
+            />
+            <Text style={styles.tabButtonText}>작품 해설</Text>
           </Pressable>
         )}
       </View>
@@ -395,6 +395,136 @@ export default function QuizScreen() {
     }
   };
 
+  // [UI 모듈] 지문 영역
+  const renderPassageArea = () => (
+    <View style={styles.passageCard}>
+      <View style={styles.passageHeaderRow}>
+        <Text style={styles.passageLabel}>
+          {isModernPoetry ? "작품 전문" : "지문 (전문)"}
+        </Text>
+        {/* 현대어 해설 토글 */}
+        {hasModernText && (
+          <View style={styles.toggleContainer}>
+            <Text
+              style={[
+                styles.toggleLabel,
+                showModern && { color: Colors.light.tint, fontWeight: "bold" },
+              ]}
+            >
+              현대어 해설
+            </Text>
+            <Switch
+              trackColor={{ false: "#E0E0E0", true: Colors.light.tint + "80" }}
+              thumbColor={showModern ? Colors.light.tint : "#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={setShowModern}
+              value={showModern}
+              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+            />
+          </View>
+        )}
+      </View>
+      <View style={styles.divider} />
+      <Text style={styles.passageText} textBreakStrategy="simple">
+        {passageToDisplay}
+      </Text>
+    </View>
+  );
+
+  // [UI 모듈] 문제 영역
+  const renderQuestionArea = () => (
+    <>
+      <Animated.View
+        key={currentIndex}
+        entering={SlideInRight}
+        style={styles.questionCard}
+      >
+        <View style={styles.qHeader}>
+          <View style={styles.qBadge}>
+            <Text style={styles.qBadgeText}>Q{currentIndex + 1}</Text>
+          </View>
+          <Pressable
+            onPress={() => {
+              isBookmarked(currentQuestion.id)
+                ? removeBookmark(currentQuestion.id)
+                : addBookmark({
+                    questionId: currentQuestion.id,
+                    quizId: quiz.id,
+                    quizTitle: quiz.title,
+                    quizAuthor: quiz.author,
+                    categoryId: quiz.categoryId,
+                    statement: currentQuestion.statement,
+                    isTrue: currentQuestion.isTrue,
+                    explanation: currentQuestion.explanation,
+                    timestamp: Date.now(),
+                  });
+            }}
+          >
+            <Ionicons
+              name={currentBookmarked ? "bookmark" : "bookmark-outline"}
+              size={22}
+              color={Colors.light.tint}
+            />
+          </Pressable>
+        </View>
+        <Text style={styles.qText} textBreakStrategy="simple">
+          {currentQuestion.statement}
+        </Text>
+      </Animated.View>
+
+      {answerState !== "unanswered" && (
+        <Animated.View entering={FadeInDown} style={styles.feedbackSection}>
+          <CheetahMascot
+            size={60}
+            mood={answerState === "correct" ? "happy" : "sad"}
+          />
+          <View style={styles.explanationBox}>
+            <Text
+              style={{
+                fontWeight: "bold",
+                color: Colors.light.tint,
+                marginBottom: 4,
+              }}
+            >
+              해설
+            </Text>
+            <Text style={styles.explanationText} textBreakStrategy="simple">
+              {currentQuestion.explanation}
+            </Text>
+          </View>
+        </Animated.View>
+      )}
+    </>
+  );
+
+  // [UI 모듈] 하단 버튼 (O/X 또는 다음)
+  const renderBottomButtons = () => (
+    <>
+      {answerState === "unanswered" ? (
+        <View style={{ flexDirection: "row", gap: 16 }}>
+          <Pressable
+            onPress={() => handleAnswer("O")}
+            style={[styles.oxBtn, { backgroundColor: Colors.light.tint }]}
+          >
+            <Text style={styles.oxText}>O</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => handleAnswer("X")}
+            style={[styles.oxBtn, { backgroundColor: "#E07800" }]}
+          >
+            <Text style={styles.oxText}>X</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Pressable onPress={handleNext} style={styles.nextBtn}>
+          <Text style={styles.nextBtnText}>
+            {currentIndex < totalQuestions - 1 ? "다음 문제" : "결과 보기"}
+          </Text>
+        </Pressable>
+      )}
+    </>
+  );
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -416,135 +546,81 @@ export default function QuizScreen() {
         </Text>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Top Info */}
-        <View style={styles.infoSection}>
-          <Text style={styles.title}>{quiz.title}</Text>
-          <Text style={styles.author}>{quiz.author}</Text>
+      {/* --- 레이아웃 분기 --- */}
+      {isLargeScreen ? (
+        // [태블릿] 2단 분할 레이아웃
+        <View style={styles.splitLayoutContainer}>
+          {/* 왼쪽 패널: 정보 + 지문 (스크롤) */}
+          <View style={styles.splitLeftPanel}>
+            <ScrollView
+              contentContainerStyle={styles.splitScrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.infoSection}>
+                <Text style={styles.title}>{quiz.title}</Text>
+                <Text style={styles.author}>{quiz.author}</Text>
+              </View>
+              {renderTabs()}
+              {renderPassageArea()}
+              {quiz.relatedExams && quiz.relatedExams.length > 0 && (
+                <Pressable
+                  onPress={() => setShowExamModal(true)}
+                  style={styles.relatedExamButton}
+                >
+                  <Text style={styles.relatedExamText}>
+                    연관 기출 풀기 ({quiz.relatedExams.length}문항)
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color="#8B5CF6" />
+                </Pressable>
+              )}
+            </ScrollView>
+          </View>
+
+          {/* 오른쪽 패널: 문제 + 피드백 (스크롤) + 하단 버튼 고정 */}
+          <View style={styles.splitRightPanel}>
+            <ScrollView
+              contentContainerStyle={styles.splitScrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {renderQuestionArea()}
+            </ScrollView>
+            <View style={styles.splitBottomBar}>{renderBottomButtons()}</View>
+          </View>
         </View>
-
-        {/* Tabs */}
-        {renderTabs()}
-
-        {/* Passage Area */}
-        <View style={styles.passageCard}>
-          <Text style={styles.passageLabel}>
-            {isModernPoetry ? "작품 전문" : "관련 지문"}
-          </Text>
-          <View style={styles.divider} />
-          {/* [수정] flexShrink와 textBreakStrategy 추가 (줄바꿈 해결) */}
-          <Text style={styles.passageText} textBreakStrategy="simple">
-            {displayedPassage}
-          </Text>
-        </View>
-
-        {/* Related Exam Button */}
-        {quiz.relatedExams && quiz.relatedExams.length > 0 && (
-          <Pressable
-            onPress={() => setShowExamModal(true)}
-            style={styles.relatedExamButton}
+      ) : (
+        // [모바일] 단일 스크롤 레이아웃
+        <>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
           >
-            <Text style={styles.relatedExamText}>
-              연관 기출 풀기 ({quiz.relatedExams.length}문항)
-            </Text>
-            <Ionicons name="chevron-forward" size={16} color="#8B5CF6" />
-          </Pressable>
-        )}
-
-        {/* Question Section */}
-        <Animated.View
-          key={currentIndex}
-          entering={SlideInRight}
-          style={styles.questionCard}
-        >
-          <View style={styles.qHeader}>
-            <View style={styles.qBadge}>
-              <Text style={styles.qBadgeText}>Q{currentIndex + 1}</Text>
+            <View style={styles.infoSection}>
+              <Text style={styles.title}>{quiz.title}</Text>
+              <Text style={styles.author}>{quiz.author}</Text>
             </View>
-            <Pressable
-              onPress={() => {
-                isBookmarked(currentQuestion.id)
-                  ? removeBookmark(currentQuestion.id)
-                  : addBookmark({
-                      questionId: currentQuestion.id,
-                      quizId: quiz.id,
-                      quizTitle: quiz.title,
-                      quizAuthor: quiz.author,
-                      categoryId: quiz.categoryId,
-                      statement: currentQuestion.statement,
-                      isTrue: currentQuestion.isTrue,
-                      explanation: currentQuestion.explanation,
-                      timestamp: Date.now(),
-                    });
-              }}
-            >
-              <Ionicons
-                name={currentBookmarked ? "bookmark" : "bookmark-outline"}
-                size={22}
-                color={Colors.light.tint}
-              />
-            </Pressable>
-          </View>
-          {/* [핵심 수정] 줄바꿈 강제 스타일 및 전략 적용 */}
-          <Text style={styles.qText} textBreakStrategy="simple">
-            {currentQuestion.statement}
-          </Text>
-        </Animated.View>
-
-        {/* Feedback Section */}
-        {answerState !== "unanswered" && (
-          <Animated.View entering={FadeInDown} style={styles.feedbackSection}>
-            <CheetahMascot
-              size={60}
-              mood={answerState === "correct" ? "happy" : "sad"}
-            />
-            <View style={styles.explanationBox}>
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  color: Colors.light.tint,
-                  marginBottom: 4,
-                }}
+            {renderTabs()}
+            {renderPassageArea()}
+            {quiz.relatedExams && quiz.relatedExams.length > 0 && (
+              <Pressable
+                onPress={() => setShowExamModal(true)}
+                style={styles.relatedExamButton}
               >
-                해설
-              </Text>
-              {/* [수정] 해설도 줄바꿈 적용 */}
-              <Text style={styles.explanationText} textBreakStrategy="simple">
-                {currentQuestion.explanation}
-              </Text>
-            </View>
-          </Animated.View>
-        )}
-      </ScrollView>
+                <Text style={styles.relatedExamText}>
+                  연관 기출 풀기 ({quiz.relatedExams.length}문항)
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color="#8B5CF6" />
+              </Pressable>
+            )}
+            {renderQuestionArea()}
+          </ScrollView>
 
-      {/* O/X Buttons (Bottom Bar) */}
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
-        {answerState === "unanswered" ? (
-          <View style={{ flexDirection: "row", gap: 16 }}>
-            <Pressable
-              onPress={() => handleAnswer("O")}
-              style={[styles.oxBtn, { backgroundColor: Colors.light.tint }]}
-            >
-              <Text style={styles.oxText}>O</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => handleAnswer("X")}
-              style={[styles.oxBtn, { backgroundColor: "#E07800" }]}
-            >
-              <Text style={styles.oxText}>X</Text>
-            </Pressable>
+          <View
+            style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}
+          >
+            {renderBottomButtons()}
           </View>
-        ) : (
-          <Pressable onPress={handleNext} style={styles.nextBtn}>
-            <Text style={styles.nextBtnText}>
-              {currentIndex < totalQuestions - 1 ? "다음 문제" : "결과 보기"}
-            </Text>
-          </Pressable>
-        )}
-      </View>
+        </>
+      )}
 
       {/* Modals */}
       {showCharacterMap && quiz.characterMap && (
@@ -554,8 +630,6 @@ export default function QuizScreen() {
           data={quiz.characterMap}
         />
       )}
-      {/* [삭제] description 모달 제거 */}
-
       {showFullPlot && quiz.narrativeSections && (
         <FullPlotModal
           visible={showFullPlot}
@@ -563,12 +637,13 @@ export default function QuizScreen() {
           sections={quiz.narrativeSections}
         />
       )}
-      {showFullText && (
+      {/* 작품 해설 모달 */}
+      {showCommentary && quiz.commentary && (
         <SimpleTextModal
-          visible={showFullText}
-          onClose={() => setShowFullText(false)}
-          title="수특 전문"
-          content={quiz.passage}
+          visible={showCommentary}
+          onClose={() => setShowCommentary(false)}
+          title="작품 해설"
+          content={quiz.commentary}
         />
       )}
       {showExamModal && quiz.relatedExams && (
@@ -638,13 +713,27 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: "#EEE",
-    width: "100%", // 너비 강제
+    width: "100%",
+  },
+  passageHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
   },
   passageLabel: {
     fontSize: 12,
     fontWeight: "bold",
     color: "#888",
-    marginBottom: 8,
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  toggleLabel: {
+    fontSize: 12,
+    color: "#888",
   },
   divider: { height: 1, backgroundColor: "#EEE", marginBottom: 12 },
 
@@ -652,8 +741,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     fontFamily: "NotoSansKR_400Regular",
-    width: "100%", // 너비 강제
-    flexShrink: 1, // [필수] 줄어들 수 있도록 설정
+    width: "100%",
+    flexShrink: 1,
   },
 
   relatedExamButton: {
@@ -674,7 +763,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 2,
     borderColor: Colors.light.tint,
-    width: "100%", // 너비 강제
+    width: "100%",
   },
   qHeader: {
     flexDirection: "row",
@@ -693,9 +782,9 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "500",
     lineHeight: 26,
-    width: "100%", // 너비 강제
-    flexShrink: 1, // [핵심 해결] 텍스트가 부모 영역에 맞춰 줄바꿈됨
-    flexWrap: "wrap", // [추가] 명시적 줄바꿈
+    width: "100%",
+    flexShrink: 1,
+    flexWrap: "wrap",
   },
 
   feedbackSection: { alignItems: "center", gap: 10 },
@@ -710,7 +799,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: "#333",
     width: "100%",
-    flexShrink: 1, // [필수] 해설 부분 줄바꿈
+    flexShrink: 1,
   },
 
   bottomBar: {
@@ -738,6 +827,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   nextBtnText: { fontSize: 18, fontWeight: "bold", color: "#FFF" },
+
+  // Split Layout Styles
+  splitLayoutContainer: {
+    flex: 1,
+    flexDirection: "row",
+    backgroundColor: Colors.light.background,
+  },
+  splitLeftPanel: {
+    flex: 1,
+    borderRightWidth: 1,
+    borderRightColor: "#EEE",
+  },
+  splitRightPanel: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  splitScrollContent: {
+    padding: 24,
+    paddingBottom: 100,
+  },
+  splitBottomBar: {
+    padding: 24,
+    backgroundColor: "#FFF",
+    borderTopWidth: 1,
+    borderTopColor: "#EEE",
+  },
 
   // Modal Styles
   modalContainer: { flex: 1, backgroundColor: "#FFF" },

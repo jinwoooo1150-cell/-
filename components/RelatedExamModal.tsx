@@ -12,12 +12,10 @@ import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/colors";
 import { RelatedExamQuestion } from "@/data/quizData";
 
-// 테마 색상 안전하게 가져오기 (기본값 설정)
 const PRIMARY_COLOR = Colors.light?.tint || "#2f95dc";
-
-// 회색조 팔레트
 const Grays = {
   50: "#F9FAFB",
+  100: "#F3F4F6",
   200: "#E5E7EB",
   500: "#6B7280",
   600: "#4B5563",
@@ -34,6 +32,9 @@ interface RelatedExamModalProps {
   parentQuizData?: any;
 }
 
+// 탭 타입 정의
+type TabType = "passage" | "modern" | "commentary";
+
 export function RelatedExamModal({
   visible,
   onClose,
@@ -43,11 +44,15 @@ export function RelatedExamModal({
   const [isSolved, setIsSolved] = useState(false);
   const [isUserCorrect, setIsUserCorrect] = useState(false);
 
+  // [추가] 현재 선택된 탭 상태 (기본값: 원문)
+  const [activeTab, setActiveTab] = useState<TabType>("passage");
+
   useEffect(() => {
     if (visible) {
       setCurrentIndex(0);
       setIsSolved(false);
       setIsUserCorrect(false);
+      setActiveTab("passage"); // 모달 열릴 때 원문으로 초기화
     }
   }, [visible]);
 
@@ -56,10 +61,14 @@ export function RelatedExamModal({
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
+  // 탭 변경 핸들러
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+  };
+
   const handleAnswer = (userChoice: "O" | "X") => {
     const isTrue = userChoice === "O";
     const correct = isTrue === currentQuestion.isTrue;
-
     setIsUserCorrect(correct);
     setIsSolved(true);
   };
@@ -71,6 +80,24 @@ export function RelatedExamModal({
       setCurrentIndex((prev) => prev + 1);
       setIsSolved(false);
       setIsUserCorrect(false);
+      setActiveTab("passage"); // 다음 문제로 넘어가면 원문으로 초기화
+    }
+  };
+
+  // 현재 탭에 따른 텍스트 내용 반환
+  const getTabContent = () => {
+    switch (activeTab) {
+      case "modern":
+        return (
+          currentQuestion.relatedModernText ||
+          "현대어 풀이가 제공되지 않습니다."
+        );
+      case "commentary":
+        return (
+          currentQuestion.relatedCommentary || "작품 해설이 제공되지 않습니다."
+        );
+      default:
+        return currentQuestion.relatedPassage || "지문이 없습니다.";
     }
   };
 
@@ -90,14 +117,10 @@ export function RelatedExamModal({
                 기출 연동 {currentIndex + 1}/{questions.length}
               </Text>
             </View>
-            {/* 제목이 길 경우를 대비해 flex: 1 적용 */}
             <Text style={styles.source} numberOfLines={1}>
               {currentQuestion.sourceTitle}
             </Text>
-            <TouchableOpacity
-              onPress={onClose}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
+            <TouchableOpacity onPress={onClose} hitSlop={10}>
               <Ionicons name="close" size={24} color={Grays[500]} />
             </TouchableOpacity>
           </View>
@@ -105,32 +128,79 @@ export function RelatedExamModal({
           <ScrollView
             style={styles.content}
             contentContainerStyle={styles.contentContainer}
-            showsVerticalScrollIndicator={false}
           >
-            {/* [핵심 수정] 텍스트 줄바꿈 강제를 위한 Row Wrapper 패턴 적용 */}
-
-            {/* 연관 작품 지문 표시 */}
-            {currentQuestion.relatedPassage && (
+            {/* [수정] 탭 버튼 영역 */}
+            {(currentQuestion.relatedPassage ||
+              currentQuestion.relatedModernText ||
+              currentQuestion.relatedCommentary) && (
               <View style={styles.passageContainer}>
-                <Text style={styles.passageLabel}>[연관 작품]</Text>
-                <View style={styles.textWrapper}>
-                  <Text style={styles.passageText}>
-                    {currentQuestion.relatedPassage}
-                  </Text>
+                <View style={styles.tabBar}>
+                  <Pressable
+                    onPress={() => handleTabChange("passage")}
+                    style={[
+                      styles.tabItem,
+                      activeTab === "passage" && styles.activeTabItem,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.tabText,
+                        activeTab === "passage" && styles.activeTabText,
+                      ]}
+                    >
+                      원문
+                    </Text>
+                  </Pressable>
+                  {currentQuestion.relatedModernText && (
+                    <Pressable
+                      onPress={() => handleTabChange("modern")}
+                      style={[
+                        styles.tabItem,
+                        activeTab === "modern" && styles.activeTabItem,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.tabText,
+                          activeTab === "modern" && styles.activeTabText,
+                        ]}
+                      >
+                        현대어
+                      </Text>
+                    </Pressable>
+                  )}
+                  {currentQuestion.relatedCommentary && (
+                    <Pressable
+                      onPress={() => handleTabChange("commentary")}
+                      style={[
+                        styles.tabItem,
+                        activeTab === "commentary" && styles.activeTabItem,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.tabText,
+                          activeTab === "commentary" && styles.activeTabText,
+                        ]}
+                      >
+                        해설
+                      </Text>
+                    </Pressable>
+                  )}
+                </View>
+
+                <View style={styles.passageContent}>
+                  <Text style={styles.passageText}>{getTabContent()}</Text>
                 </View>
               </View>
             )}
 
             {/* 문제 질문 */}
             <View style={styles.questionBox}>
-              <View style={styles.textWrapper}>
-                <Text style={styles.statement}>
-                  {currentQuestion.statement}
-                </Text>
-              </View>
+              <Text style={styles.statement}>{currentQuestion.statement}</Text>
             </View>
 
-            {/* 정답 및 해설 영역 */}
+            {/* 정답 및 해설 */}
             {isSolved && (
               <View style={styles.answerSection}>
                 <View
@@ -149,11 +219,9 @@ export function RelatedExamModal({
                     {currentQuestion.isTrue ? "O" : "X"})
                   </Text>
                 </View>
-                <View style={styles.textWrapper}>
-                  <Text style={styles.explanation}>
-                    {currentQuestion.explanation}
-                  </Text>
-                </View>
+                <Text style={styles.explanation}>
+                  {currentQuestion.explanation}
+                </Text>
               </View>
             )}
           </ScrollView>
@@ -180,9 +248,7 @@ export function RelatedExamModal({
                 <Text style={styles.nextButtonText}>
                   {isLastQuestion ? "닫기" : "다음 문제"}
                 </Text>
-                {!isLastQuestion && (
-                  <Ionicons name="arrow-forward" size={18} color="#FFF" />
-                )}
+                <Ionicons name="arrow-forward" size={18} color="#FFF" />
               </Pressable>
             )}
           </View>
@@ -204,13 +270,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     width: "100%",
-    height: "70%",
+    height: "80%",
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
   },
   header: {
     flexDirection: "row",
@@ -226,61 +287,44 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
   },
-  badgeText: {
-    color: PRIMARY_COLOR,
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  source: {
-    flex: 1,
-    fontSize: 14,
-    color: Grays[500],
-    fontWeight: "500",
-  },
-  content: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 24, // 스크롤 뷰 내부 패딩
-  },
-  // [핵심] 줄바꿈을 강제하기 위한 래퍼 스타일
-  textWrapper: {
-    flexDirection: "row", // 가로 배치를 통해 너비 제약을 활성화
-    width: "100%",
-  },
+  badgeText: { color: PRIMARY_COLOR, fontSize: 12, fontWeight: "700" },
+  source: { flex: 1, fontSize: 14, color: Grays[500], fontWeight: "500" },
+  content: { flex: 1 },
+  contentContainer: { padding: 24 },
+
+  // 탭 스타일
   passageContainer: {
     backgroundColor: Grays[50],
-    padding: 16,
     borderRadius: 12,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: Grays[200],
+    overflow: "hidden",
   },
-  passageLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: Grays[600],
-    marginBottom: 8,
+  tabBar: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: Grays[200],
+    backgroundColor: "#fff",
   },
+  tabItem: { flex: 1, paddingVertical: 12, alignItems: "center" },
+  activeTabItem: { borderBottomWidth: 2, borderBottomColor: PRIMARY_COLOR },
+  tabText: { fontSize: 13, color: Grays[500], fontWeight: "600" },
+  activeTabText: { color: PRIMARY_COLOR },
+  passageContent: { padding: 16 },
   passageText: {
     fontSize: 14,
     color: Grays[800],
     lineHeight: 22,
     fontFamily: "NotoSansKR_400Regular",
-    flex: 1, // 부모(Row)의 남은 공간을 채우면서
-    flexWrap: "wrap", // 공간 부족 시 줄바꿈
   },
-  questionBox: {
-    marginBottom: 20,
-    width: "100%",
-  },
+
+  questionBox: { marginBottom: 20 },
   statement: {
     fontSize: 18,
     fontWeight: "600",
     color: Grays[900],
     lineHeight: 28,
-    flex: 1, // 부모(Row) 너비에 맞춰 줄바꿈 강제
-    flexWrap: "wrap",
   },
   answerSection: {
     backgroundColor: Grays[50],
@@ -295,39 +339,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
   },
-  correctTag: {
-    backgroundColor: "#E6F4F1",
-  },
-  incorrectTag: {
-    backgroundColor: "#FFF0EB",
-  },
-  resultText: {
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  correctText: {
-    color: "#00A86B",
-  },
-  incorrectText: {
-    color: "#FF4B4B",
-  },
-  explanation: {
-    fontSize: 15,
-    color: Grays[700],
-    lineHeight: 24,
-    flex: 1, // 줄바꿈 강제
-    flexWrap: "wrap",
-  },
+  correctTag: { backgroundColor: "#E6F4F1" },
+  incorrectTag: { backgroundColor: "#FFF0EB" },
+  resultText: { fontSize: 14, fontWeight: "700" },
+  correctText: { color: "#00A86B" },
+  incorrectText: { color: "#FF4B4B" },
+  explanation: { fontSize: 15, color: Grays[700], lineHeight: 24 },
   footer: {
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: Grays[200],
     backgroundColor: "#FFF",
   },
-  oxButtonContainer: {
-    flexDirection: "row",
-    gap: 12,
-  },
+  oxButtonContainer: { flexDirection: "row", gap: 12 },
   oxButton: {
     flex: 1,
     height: 50,
@@ -335,11 +359,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  oxButtonText: {
-    color: "#FFF",
-    fontSize: 20,
-    fontWeight: "800",
-  },
+  oxButtonText: { color: "#FFF", fontSize: 20, fontWeight: "800" },
   nextButton: {
     backgroundColor: PRIMARY_COLOR,
     height: 50,
@@ -349,9 +369,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  nextButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "700",
-  },
+  nextButtonText: { color: "#FFF", fontSize: 16, fontWeight: "700" },
 });
