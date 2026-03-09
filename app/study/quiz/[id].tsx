@@ -21,7 +21,6 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { CheetahMascot } from "@/components/CheetahMascot";
 import {
   getQuizById,
-  NarrativePhase,
   CharacterMapData,
   NarrativeSection,
 } from "@/data/quizData";
@@ -33,20 +32,20 @@ import Colors from "@/constants/colors";
 
 type AnswerState = "unanswered" | "correct" | "incorrect";
 
-const phaseLabels: Record<NarrativePhase, string> = {
+const phaseOrder = [
+  "exposition",
+  "rising",
+  "climax",
+  "falling",
+  "resolution",
+] as const;
+const phaseLabels: Record<(typeof phaseOrder)[number], string> = {
   exposition: "발단",
   rising: "전개",
   climax: "절정",
   falling: "하강",
   resolution: "결말",
 };
-const phaseOrder: NarrativePhase[] = [
-  "exposition",
-  "rising",
-  "climax",
-  "falling",
-  "resolution",
-];
 
 // --- Modals ---
 
