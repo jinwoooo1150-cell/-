@@ -27,6 +27,10 @@ const categoryNames: Record<string, string> = {
   "modern-novel": "현대소설",
   "classic-poetry": "고전시가",
   "classic-novel": "고전소설",
+  "classical-novel": "고전소설",
+  "drama-essay": "극 · 수필",
+  "mixed-genre": "갈래 복합",
+  "practice-test": "실전 문제",
 };
 
 const categoryIcons: Record<string, string> = {
@@ -35,6 +39,10 @@ const categoryIcons: Record<string, string> = {
   "modern-novel": "book-outline",
   "classic-poetry": "leaf-outline",
   "classic-novel": "library-outline",
+  "classical-novel": "library-outline",
+  "drama-essay": "albums-outline",
+  "mixed-genre": "layers-outline",
+  "practice-test": "school-outline",
 };
 
 function WorkCard({
@@ -126,7 +134,8 @@ export default function WorksScreen() {
     category?: string;
     categoryId?: string;
   }>();
-  const categoryId = params.categoryId || params.category || "";
+  const rawCategoryId = params.categoryId || params.category || "";
+  const categoryId = rawCategoryId === "classic-novel" ? "classical-novel" : rawCategoryId;
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
