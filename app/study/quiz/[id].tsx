@@ -542,10 +542,12 @@ export default function QuizScreen() {
         <Pressable onPress={() => router.back()} style={styles.closeButton}>
           <Ionicons name="close" size={28} color={Colors.light.text} />
         </Pressable>
-        <ProgressBar progress={progress} height={8} color={Colors.light.tint} />
-        <Text style={styles.counter}>
-          {currentIndex + 1}/{totalQuestions}
-        </Text>
+        <View style={styles.headerProgressContainer}>
+          <ProgressBar progress={progress} height={8} color={Colors.light.tint} />
+          <Text style={styles.counter}>
+            {currentIndex + (answerState !== "unanswered" ? 1 : 0)}/{totalQuestions}
+          </Text>
+        </View>
       </View>
 
       {/* --- 레이아웃 분기 --- */}
@@ -673,10 +675,17 @@ const styles = StyleSheet.create({
     borderColor: "#EEE",
   },
   closeButton: { padding: 4 },
+  headerProgressContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    minWidth: 0,
+  },
   counter: {
     fontFamily: "NotoSansKR_700Bold",
     color: Colors.light.tint,
-    width: 40,
+    flexShrink: 0,
     textAlign: "right",
   },
   scrollContent: { padding: 20, paddingBottom: 120 },
