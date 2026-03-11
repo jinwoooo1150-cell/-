@@ -544,10 +544,15 @@ export default function QuizScreen() {
         </Pressable>
         <View style={styles.headerProgressContainer}>
           <View style={styles.progressBarWrapper}>
-            <ProgressBar progress={progress} height={8} color={Colors.light.tint} />
+            <ProgressBar
+              progress={progress}
+              height={8}
+              color={Colors.light.tint}
+            />
           </View>
           <Text style={styles.counter}>
-            {currentIndex + (answerState !== "unanswered" ? 1 : 0)}/{totalQuestions}
+            {currentIndex + (answerState !== "unanswered" ? 1 : 0)}/
+            {totalQuestions}
           </Text>
         </View>
       </View>
