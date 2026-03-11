@@ -1,7 +1,7 @@
-import type { VocabQuestion } from "@/data/vocabData";
+import type { ClassicVocabEntry, VocabQuestion } from "@/data/vocabData";
 
 interface GenerateDailySetParams {
-  vocabPool: VocabQuestion[];
+  vocabPool: ClassicVocabEntry[];
   date: string;
   userKey: string;
   minQuestions?: number;
@@ -70,15 +70,23 @@ export function generateDailySet({
     if (distractors.length < 3) {
       const fallback = vocabPool
         .map((item) => item.meaning)
-        .filter((meaning) => meaning !== question.meaning && !distractors.includes(meaning));
+        .filter(
+          (meaning) =>
+            meaning !== question.meaning && !distractors.includes(meaning)
+        );
       for (const meaning of fallback) {
         distractors.push(meaning);
         if (distractors.length === 3) break;
       }
     }
 
-    const optionSet = shuffleWithSeed([question.meaning, ...distractors.slice(0, 3)], random);
-    const correctIndex = optionSet.findIndex((option) => option === question.meaning);
+    const optionSet = shuffleWithSeed(
+      [question.meaning, ...distractors.slice(0, 3)],
+      random
+    );
+    const correctIndex = optionSet.findIndex(
+      (option) => option === question.meaning
+    );
 
     return {
       ...question,
@@ -88,4 +96,3 @@ export function generateDailySet({
     };
   });
 }
-
