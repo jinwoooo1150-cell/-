@@ -288,7 +288,10 @@ export default function QuizScreen() {
   const isModernPoetry = quiz.categoryId === "modern-poetry";
   const isModernNovel = quiz.categoryId === "modern-novel";
   const isClassicPoetry = quiz.categoryId === "classic-poetry";
-  const isClassicNovel = quiz.categoryId === "classic-novel";
+  // [수정됨] 고전소설 카테고리 ID 통일 처리
+  const isClassicNovel =
+    quiz.categoryId === "classic-novel" ||
+    quiz.categoryId === "classical-novel";
   const isNovel = isModernNovel || isClassicNovel;
 
   // 지문 표시 로직: 현대어 모드면 modernText, 아니면 passage (전문)
