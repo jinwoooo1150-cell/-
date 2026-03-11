@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useStudy, IncorrectNote, NoteType } from "@/contexts/StudyContext";
@@ -120,7 +120,11 @@ const filterOptions: { key: FilterType; label: string; icon: string; color: stri
 export default function IncorrectsScreen() {
   const insets = useSafeAreaInsets();
   const { incorrectNotes, removeIncorrectNote } = useStudy();
-  const [filter, setFilter] = useState<FilterType>("all");
+  const params = useLocalSearchParams<{ type?: FilterType }>();
+  const initialFilter = params.type && ["all", "literature", "vocab", "exam"].includes(params.type)
+    ? params.type
+    : "all";
+  const [filter, setFilter] = useState<FilterType>(initialFilter);
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;

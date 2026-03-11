@@ -251,6 +251,15 @@ export default function VocabTestScreen() {
         <Text style={styles.questionCounter}>
           {Math.min(currentIndex + 1, totalQuestions)}/{totalQuestions}
         </Text>
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push({ pathname: "/study/incorrects", params: { type: "vocab" } });
+          }}
+          style={styles.incorrectButton}
+        >
+          <Ionicons name="document-text-outline" size={20} color={Colors.light.textMuted} />
+        </Pressable>
       </View>
 
       <ScrollView
@@ -368,6 +377,12 @@ const styles = StyleSheet.create({
     color: Colors.light.tint,
     minWidth: 36,
     textAlign: "right",
+  },
+  incorrectButton: {
+    width: 34,
+    height: 34,
+    alignItems: "center",
+    justifyContent: "center",
   },
   scrollView: {
     flex: 1,
