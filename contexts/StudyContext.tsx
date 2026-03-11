@@ -51,6 +51,7 @@ export interface VocabProgress {
   totalCount: number;
   completedIds: string[];
   currentDay: number;
+  lastGeneratedDate: string | null;
   completedDate: string | null;
   dailyQuestions: VocabQuestion[];
   userKey: string | null;
@@ -142,12 +143,22 @@ const defaultVocabProgress: VocabProgress = {
   totalCount: 0,
   completedIds: [],
   currentDay: 1,
+  lastGeneratedDate: null,
   completedDate: null,
   dailyQuestions: [],
   userKey: null,
 };
 
 const getDateKey = () => new Date().toISOString().slice(0, 10);
+
+function normalizeVocabProgress(raw: Partial<VocabProgress> | null | undefined): VocabProgress {
+  return {
+    ...defaultVocabProgress,
+    ...raw,
+    completedIds: Array.isArray(raw?.completedIds) ? raw.completedIds : [],
+    dailyQuestions: Array.isArray(raw?.dailyQuestions) ? raw.dailyQuestions : [],
+  };
+}
 
 export function StudyProvider({ children }: { children: ReactNode }) {
   const [dailyProgress, setDailyProgress] = useState(0);
@@ -168,12 +179,13 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       maxQuestions: 15,
     });
 
-    const isTodaySet = prev.completedDate === dateKey && prev.dailyQuestions.length > 0;
+    const isTodaySet = prev.lastGeneratedDate === dateKey && prev.dailyQuestions.length > 0;
 
     if (isTodaySet) {
       return {
         ...prev,
         totalCount: prev.dailyQuestions.length,
+        lastGeneratedDate: dateKey,
         userKey,
       };
     }
@@ -183,6 +195,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       learnedCount: 0,
       completedIds: [],
       totalCount: dailyQuestions.length,
+      lastGeneratedDate: dateKey,
       completedDate: null,
       dailyQuestions,
       userKey,
@@ -224,7 +237,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
         await AsyncStorage.setItem(VOCAB_USER_KEY, userKey);
       }
 
-      const parsedVocab = vocabData ? JSON.parse(vocabData) as VocabProgress : defaultVocabProgress;
+      const parsedVocab = normalizeVocabProgress(vocabData ? JSON.parse(vocabData) as VocabProgress : defaultVocabProgress);
       const nextVocab = buildDailyVocabProgress(parsedVocab, userKey, dateKey);
       setVocabProgress(nextVocab);
       await AsyncStorage.setItem(VOCAB_KEY, JSON.stringify(nextVocab));
