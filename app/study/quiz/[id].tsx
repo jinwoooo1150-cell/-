@@ -543,7 +543,9 @@ export default function QuizScreen() {
           <Ionicons name="close" size={28} color={Colors.light.text} />
         </Pressable>
         <View style={styles.headerProgressContainer}>
-          <ProgressBar progress={progress} height={8} color={Colors.light.tint} />
+          <View style={styles.progressBarWrapper}>
+            <ProgressBar progress={progress} height={8} color={Colors.light.tint} />
+          </View>
           <Text style={styles.counter}>
             {currentIndex + (answerState !== "unanswered" ? 1 : 0)}/{totalQuestions}
           </Text>
@@ -680,6 +682,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    minWidth: 0,
+  },
+  progressBarWrapper: {
+    flex: 1,
     minWidth: 0,
   },
   counter: {
