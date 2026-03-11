@@ -126,6 +126,7 @@ export default function VocabTestScreen() {
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
   const questions = classicPoetryVocab;
+  const questionIds = questions.map((question) => question.id);
   const totalQuestions = questions.length;
   const currentQuestion = questions[currentIndex];
   const progress = (currentIndex + (isAnswered ? 1 : 0)) / totalQuestions;
@@ -138,7 +139,7 @@ export default function VocabTestScreen() {
     const isCorrect = index === currentQuestion.correctIndex;
     if (isCorrect) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      updateVocabProgress(currentQuestion.id);
+      updateVocabProgress(currentQuestion.id, questionIds);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       addIncorrectNote({
@@ -155,7 +156,7 @@ export default function VocabTestScreen() {
         timestamp: Date.now(),
       });
     }
-  }, [isAnswered, currentQuestion, updateVocabProgress, addIncorrectNote]);
+  }, [isAnswered, currentQuestion, updateVocabProgress, addIncorrectNote, questionIds]);
 
   const handleNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -164,10 +165,10 @@ export default function VocabTestScreen() {
       setSelectedIndex(null);
       setIsAnswered(false);
     } else {
-      markVocabCompleted();
+      markVocabCompleted(questionIds);
       setIsFinished(true);
     }
-  }, [currentIndex, totalQuestions, markVocabCompleted]);
+  }, [currentIndex, totalQuestions, markVocabCompleted, questionIds]);
 
   if (isFinished) {
     return (
@@ -242,6 +243,9 @@ export default function VocabTestScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.wordCard}>
+          <Text style={styles.progressSummaryText}>
+            누적 학습 {vocabProgress.learnedCount}개 · 오늘 세트 {vocabProgress.dailyCorrectCount}/{vocabProgress.dailyQuestionCount || totalQuestions}
+          </Text>
           <Text style={styles.wordLabel}>다음 어휘의 뜻은?</Text>
           <Text style={styles.wordText}>{currentQuestion.word}</Text>
           <View style={styles.exampleBox}>
@@ -370,6 +374,12 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderWidth: 2,
     borderColor: Colors.light.tint,
+  },
+  progressSummaryText: {
+    fontFamily: "NotoSansKR_600SemiBold",
+    fontSize: 13,
+    color: Colors.light.textMuted,
+    marginBottom: 12,
   },
   wordLabel: {
     fontFamily: "NotoSansKR_500Medium",

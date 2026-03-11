@@ -46,10 +46,13 @@ export interface BookmarkItem {
 
 export interface VocabProgress {
   learnedCount: number;
-  totalCount: number;
-  completedIds: string[];
-  currentDay: number;
-  completedDate: string | null;
+  allLearnedIds: string[];
+  dailyQuestionCount: number;
+  dailyCorrectCount: number;
+  lastGeneratedDate: string | null;
+  lastCompletedDate: string | null;
+  lastSetQuestionIds: string[];
+  dailyCompletedIds: string[];
 }
 
 interface StudyContextValue {
@@ -71,9 +74,9 @@ interface StudyContextValue {
   removeBookmark: (questionId: string) => void;
   isBookmarked: (questionId: string) => boolean;
   addLearningTime: (seconds: number) => void;
-  updateVocabProgress: (learnedId: string) => void;
-  markVocabCompleted: () => void;
-  isVocabCompletedToday: () => boolean;
+  updateVocabProgress: (learnedId: string, questionIds?: string[]) => void;
+  markVocabCompleted: (questionIds?: string[]) => void;
+  isVocabCompletedToday: (questionIds?: string[]) => boolean;
   resetDailyLearningTime: () => void;
 }
 
@@ -84,7 +87,8 @@ const INCORRECTS_KEY = "suneung_incorrects";
 const BOOKMARKS_KEY = "suneung_bookmarks";
 const COMPLETED_KEY = "suneung_completed_works";
 const LEARNING_TIME_KEY = "suneung_learning_time";
-const VOCAB_KEY = "suneung_vocab_progress";
+const LEGACY_VOCAB_KEY = "suneung_vocab_progress";
+const VOCAB_KEY = "suneung_vocab_progress_v2";
 
 const TARGET_DATE = new Date(2026, 10, 12);
 
@@ -133,10 +137,71 @@ const defaultSubCategories: SubCategory[] = [
 
 const defaultVocabProgress: VocabProgress = {
   learnedCount: 0,
-  totalCount: 15,
-  completedIds: [],
-  currentDay: 1,
-  completedDate: null,
+  allLearnedIds: [],
+  dailyQuestionCount: 0,
+  dailyCorrectCount: 0,
+  lastGeneratedDate: null,
+  lastCompletedDate: null,
+  lastSetQuestionIds: [],
+  dailyCompletedIds: [],
+};
+
+const getTodayKey = () => new Date().toDateString();
+
+const ensureDailySet = (prev: VocabProgress, questionIds: string[] = []): VocabProgress => {
+  const today = getTodayKey();
+  const normalizedIds = [...new Set(questionIds)];
+  const hasSetChanged =
+    normalizedIds.length > 0
+    && normalizedIds.join("|") !== prev.lastSetQuestionIds.join("|");
+  const isNewDay = prev.lastGeneratedDate !== today;
+
+  if (!isNewDay && !hasSetChanged) {
+    if (normalizedIds.length > 0 && prev.dailyQuestionCount !== normalizedIds.length) {
+      return {
+        ...prev,
+        dailyQuestionCount: normalizedIds.length,
+      };
+    }
+    return prev;
+  }
+
+  return {
+    ...prev,
+    dailyQuestionCount: normalizedIds.length > 0 ? normalizedIds.length : prev.dailyQuestionCount,
+    dailyCorrectCount: 0,
+    dailyCompletedIds: [],
+    lastGeneratedDate: today,
+    lastSetQuestionIds: normalizedIds.length > 0 ? normalizedIds : prev.lastSetQuestionIds,
+    lastCompletedDate: isNewDay ? null : prev.lastCompletedDate,
+  };
+};
+
+const migrateVocabProgress = (raw: any): VocabProgress => {
+  if (!raw || typeof raw !== "object") return defaultVocabProgress;
+  if (Array.isArray(raw.allLearnedIds)) {
+    return {
+      ...defaultVocabProgress,
+      ...raw,
+      allLearnedIds: [...new Set(raw.allLearnedIds)],
+      lastSetQuestionIds: Array.isArray(raw.lastSetQuestionIds) ? raw.lastSetQuestionIds : [],
+      dailyCompletedIds: Array.isArray(raw.dailyCompletedIds) ? raw.dailyCompletedIds : [],
+      dailyQuestionCount: typeof raw.dailyQuestionCount === "number" ? raw.dailyQuestionCount : 0,
+      dailyCorrectCount: typeof raw.dailyCorrectCount === "number" ? raw.dailyCorrectCount : 0,
+    };
+  }
+
+  const legacyCompletedIds = Array.isArray(raw.completedIds) ? raw.completedIds : [];
+  return {
+    learnedCount: typeof raw.learnedCount === "number" ? raw.learnedCount : legacyCompletedIds.length,
+    allLearnedIds: legacyCompletedIds,
+    dailyQuestionCount: typeof raw.totalCount === "number" ? raw.totalCount : legacyCompletedIds.length,
+    dailyCorrectCount: legacyCompletedIds.length,
+    lastGeneratedDate: raw.completedDate ?? null,
+    lastCompletedDate: raw.completedDate ?? null,
+    lastSetQuestionIds: legacyCompletedIds,
+    dailyCompletedIds: legacyCompletedIds,
+  };
 };
 
 export function StudyProvider({ children }: { children: ReactNode }) {
@@ -156,13 +221,14 @@ export function StudyProvider({ children }: { children: ReactNode }) {
 
   const loadAllData = async () => {
     try {
-      const [studyData, incorrectsData, bookmarksData, completedData, timeData, vocabData] = await Promise.all([
+      const [studyData, incorrectsData, bookmarksData, completedData, timeData, vocabData, legacyVocabData] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEY),
         AsyncStorage.getItem(INCORRECTS_KEY),
         AsyncStorage.getItem(BOOKMARKS_KEY),
         AsyncStorage.getItem(COMPLETED_KEY),
         AsyncStorage.getItem(LEARNING_TIME_KEY),
         AsyncStorage.getItem(VOCAB_KEY),
+        AsyncStorage.getItem(LEGACY_VOCAB_KEY),
       ]);
 
       if (studyData) {
@@ -181,7 +247,15 @@ export function StudyProvider({ children }: { children: ReactNode }) {
           setLearningTime(parsed.seconds);
         }
       }
-      if (vocabData) setVocabProgress(JSON.parse(vocabData));
+      const parsedVocabData = vocabData ? JSON.parse(vocabData) : legacyVocabData ? JSON.parse(legacyVocabData) : null;
+      if (parsedVocabData) {
+        const migrated = migrateVocabProgress(parsedVocabData);
+        setVocabProgress(migrated);
+        await AsyncStorage.setItem(VOCAB_KEY, JSON.stringify(migrated));
+        if (legacyVocabData) {
+          await AsyncStorage.removeItem(LEGACY_VOCAB_KEY);
+        }
+      }
 
       setIsLoaded(true);
     } catch (e) {
@@ -301,32 +375,41 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.setItem(LEARNING_TIME_KEY, JSON.stringify({ date: today, seconds: 0 }));
   }, []);
 
-  const updateVocabProgress = useCallback(async (learnedId: string) => {
+  const updateVocabProgress = useCallback(async (learnedId: string, questionIds: string[] = []) => {
     setVocabProgress((prev) => {
-      if (prev.completedIds.includes(learnedId)) return prev;
+      const base = ensureDailySet(prev, questionIds);
+      if (base.dailyCompletedIds.includes(learnedId)) return base;
+      const hasLearned = base.allLearnedIds.includes(learnedId);
       const updated = {
-        ...prev,
-        learnedCount: prev.learnedCount + 1,
-        completedIds: [...prev.completedIds, learnedId],
+        ...base,
+        learnedCount: hasLearned ? base.learnedCount : base.learnedCount + 1,
+        allLearnedIds: hasLearned ? base.allLearnedIds : [...base.allLearnedIds, learnedId],
+        dailyCorrectCount: Math.min(base.dailyCorrectCount + 1, base.dailyQuestionCount),
+        dailyCompletedIds: [...base.dailyCompletedIds, learnedId],
       };
       AsyncStorage.setItem(VOCAB_KEY, JSON.stringify(updated));
       return updated;
     });
   }, []);
 
-  const markVocabCompleted = useCallback(async () => {
-    const today = new Date().toDateString();
+  const markVocabCompleted = useCallback(async (questionIds: string[] = []) => {
+    const today = getTodayKey();
     setVocabProgress((prev) => {
-      const updated = { ...prev, completedDate: today };
+      const base = ensureDailySet(prev, questionIds);
+      const updated = { ...base, lastCompletedDate: today };
       AsyncStorage.setItem(VOCAB_KEY, JSON.stringify(updated));
       return updated;
     });
   }, []);
 
-  const isVocabCompletedToday = useCallback(() => {
-    const today = new Date().toDateString();
-    return vocabProgress.completedDate === today;
-  }, [vocabProgress.completedDate]);
+  const isVocabCompletedToday = useCallback((questionIds: string[] = []) => {
+    const today = getTodayKey();
+    const normalizedIds = [...new Set(questionIds)];
+    const hasSameSet = normalizedIds.length === 0
+      ? true
+      : normalizedIds.join("|") === vocabProgress.lastSetQuestionIds.join("|");
+    return vocabProgress.lastCompletedDate === today && hasSameSet;
+  }, [vocabProgress.lastCompletedDate, vocabProgress.lastSetQuestionIds]);
 
   const value = useMemo(
     () => ({

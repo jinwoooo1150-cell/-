@@ -19,6 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useStudy } from "@/contexts/StudyContext";
 import { quizPassages } from "@/data/quizData";
+import { classicPoetryVocab } from "@/data/vocabData";
 import Colors from "@/constants/colors";
 
 interface LitCategoryItemProps {
@@ -136,7 +137,7 @@ function LitCategoryItem({
 
 export default function StudyScreen() {
   const insets = useSafeAreaInsets();
-  const { incorrectNotes, bookmarks, completedWorks } = useStudy();
+  const { incorrectNotes, bookmarks, completedWorks, vocabProgress } = useStudy();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
@@ -224,6 +225,16 @@ export default function StudyScreen() {
       >
         <Text style={styles.pageTitle}>학습</Text>
         <Text style={styles.pageSubtitle}>문학 갈래별 학습</Text>
+
+        <View style={styles.vocabSummaryCard}>
+          <Text style={styles.vocabSummaryTitle}>어휘 학습 현황</Text>
+          <Text style={styles.vocabSummaryText}>
+            전체 {classicPoetryVocab.length}개 중 누적 학습 {vocabProgress.learnedCount}개
+          </Text>
+          <Text style={styles.vocabSummarySubtext}>
+            오늘 세트 진행률 {vocabProgress.dailyCorrectCount}/{vocabProgress.dailyQuestionCount || classicPoetryVocab.length}
+          </Text>
+        </View>
 
         <View style={styles.actionCardsRow}>
           <Pressable
@@ -323,6 +334,31 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.light.textMuted,
     marginBottom: 20,
+  },
+  vocabSummaryCard: {
+    backgroundColor: Colors.light.card,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  vocabSummaryTitle: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 15,
+    color: Colors.light.text,
+    marginBottom: 8,
+  },
+  vocabSummaryText: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 13,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  vocabSummarySubtext: {
+    fontFamily: "NotoSansKR_400Regular",
+    fontSize: 13,
+    color: Colors.light.textMuted,
   },
   actionCardsRow: {
     flexDirection: "row",

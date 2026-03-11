@@ -20,6 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { CheetahMascot } from "@/components/CheetahMascot";
 import { useStudy } from "@/contexts/StudyContext";
+import { classicPoetryVocab } from "@/data/vocabData";
 import Colors from "@/constants/colors";
 
 export default function HomeScreen() {
@@ -32,10 +33,10 @@ export default function HomeScreen() {
     subCategories,
     vocabProgress,
     isVocabCompletedToday,
-    learningTime,
   } = useStudy();
   const dDay = getDDay();
-  const vocabDone = isVocabCompletedToday();
+  const questionIds = classicPoetryVocab.map((question) => question.id);
+  const vocabDone = isVocabCompletedToday(questionIds);
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
@@ -127,7 +128,10 @@ export default function HomeScreen() {
                   <View style={styles.vocabTextSection}>
                     <Text style={styles.vocabTitle}>오늘의 고전시가 어휘 테스트</Text>
                     <Text style={styles.vocabProgress}>
-                      {vocabProgress.learnedCount} / {vocabProgress.totalCount} 어휘 학습
+                      전체 {questionIds.length}개 중 누적 {vocabProgress.learnedCount}개 학습
+                    </Text>
+                    <Text style={styles.vocabProgressSub}>
+                      오늘 세트 진행률 {vocabProgress.dailyCorrectCount}/{vocabProgress.dailyQuestionCount || questionIds.length}
                     </Text>
                   </View>
                   {vocabDone ? (
@@ -354,6 +358,11 @@ const styles = StyleSheet.create({
     fontFamily: "NotoSansKR_400Regular",
     fontSize: 12,
     color: "rgba(255,255,255,0.7)",
+  },
+  vocabProgressSub: {
+    fontFamily: "NotoSansKR_400Regular",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.85)",
   },
   vocabCheckBadge: {
     width: 36,
