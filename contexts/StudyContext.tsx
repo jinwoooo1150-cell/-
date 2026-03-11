@@ -148,6 +148,11 @@ const defaultVocabProgress: VocabProgress = {
 
 const getTodayKey = () => new Date().toDateString();
 
+const toStringArray = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+};
+
 const ensureDailySet = (prev: VocabProgress, questionIds: string[] = []): VocabProgress => {
   const today = getTodayKey();
   const normalizedIds = [...new Set(questionIds)];
@@ -180,7 +185,7 @@ const ensureDailySet = (prev: VocabProgress, questionIds: string[] = []): VocabP
 const migrateVocabProgress = (raw: any): VocabProgress => {
   if (!raw || typeof raw !== "object") return defaultVocabProgress;
   if (Array.isArray(raw.allLearnedIds)) {
-    const normalizedAllLearnedIds = [...new Set(raw.allLearnedIds)];
+    const normalizedAllLearnedIds = [...new Set(toStringArray(raw.allLearnedIds))];
     const safeDailyQuestionCount = typeof raw.dailyQuestionCount === "number" ? Math.max(raw.dailyQuestionCount, 0) : 0;
     const safeDailyCorrectCount = typeof raw.dailyCorrectCount === "number" ? Math.max(raw.dailyCorrectCount, 0) : 0;
     return {
@@ -188,14 +193,14 @@ const migrateVocabProgress = (raw: any): VocabProgress => {
       ...raw,
       learnedCount: typeof raw.learnedCount === "number" ? Math.max(raw.learnedCount, normalizedAllLearnedIds.length) : normalizedAllLearnedIds.length,
       allLearnedIds: normalizedAllLearnedIds,
-      lastSetQuestionIds: Array.isArray(raw.lastSetQuestionIds) ? raw.lastSetQuestionIds : [],
-      dailyCompletedIds: Array.isArray(raw.dailyCompletedIds) ? raw.dailyCompletedIds : [],
+      lastSetQuestionIds: toStringArray(raw.lastSetQuestionIds),
+      dailyCompletedIds: toStringArray(raw.dailyCompletedIds),
       dailyQuestionCount: safeDailyQuestionCount,
       dailyCorrectCount: Math.min(safeDailyCorrectCount, safeDailyQuestionCount),
     };
   }
 
-  const legacyCompletedIds = Array.isArray(raw.completedIds) ? raw.completedIds : [];
+  const legacyCompletedIds = toStringArray(raw.completedIds);
   const normalizedLegacyLearnedIds = [...new Set(legacyCompletedIds)];
   return {
     learnedCount: typeof raw.learnedCount === "number" ? Math.max(raw.learnedCount, normalizedLegacyLearnedIds.length) : normalizedLegacyLearnedIds.length,
