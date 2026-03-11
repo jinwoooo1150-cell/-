@@ -23,8 +23,20 @@ import Animated, {
 import { ProgressBar } from "@/components/ProgressBar";
 import { CheetahMascot } from "@/components/CheetahMascot";
 import { useStudy } from "@/contexts/StudyContext";
-import { classicPoetryVocab } from "@/data/vocabData";
+import { apiRequest, getApiUrl } from "@/lib/query-client";
 import Colors from "@/constants/colors";
+
+type VocabQuestion = {
+  id: string;
+  word: string;
+  meaning: string;
+  example: string;
+  difficulty: number;
+  tags: string[];
+  explanation: string;
+  options: string[];
+  correctIndex: number;
+};
 
 function ChoiceButton({
   label,
@@ -115,20 +127,49 @@ function CompletionCheckmark() {
 
 export default function VocabTestScreen() {
   const insets = useSafeAreaInsets();
-  const { vocabProgress, updateVocabProgress, addIncorrectNote, markVocabCompleted } = useStudy();
+  const { updateVocabProgress, addIncorrectNote, markVocabCompleted } = useStudy();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+  const [questions, setQuestions] = useState<VocabQuestion[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
-  const questions = classicPoetryVocab;
   const totalQuestions = questions.length;
   const currentQuestion = questions[currentIndex];
-  const progress = (currentIndex + (isAnswered ? 1 : 0)) / totalQuestions;
+  const progress = totalQuestions > 0
+    ? (currentIndex + (isAnswered ? 1 : 0)) / totalQuestions
+    : 0;
+
+  useEffect(() => {
+    const loadDailyVocab = async () => {
+      try {
+        setIsLoading(true);
+        const date = new Date().toISOString().slice(0, 10);
+        const url = new URL(`/api/vocab/daily?date=${date}`, getApiUrl());
+        const res = await fetch(url.toString());
+
+        if (!res.ok) {
+          throw new Error("어휘 데이터를 불러오지 못했습니다.");
+        }
+
+        const data = await res.json();
+        setQuestions(data.items ?? []);
+        setLoadError(null);
+      } catch {
+        setLoadError("오늘의 어휘를 불러오지 못했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDailyVocab();
+  }, []);
 
   const handleSelectAnswer = useCallback((index: number) => {
     if (isAnswered) return;
@@ -154,6 +195,19 @@ export default function VocabTestScreen() {
         correctAnswer: currentQuestion.options[currentQuestion.correctIndex],
         timestamp: Date.now(),
       });
+
+      apiRequest("POST", "/api/vocab/wrong-note", {
+        userId: "anonymous",
+        vocabId: currentQuestion.id,
+        word: currentQuestion.word,
+        statement: `"${currentQuestion.word}"의 뜻은?`,
+        userAnswer: currentQuestion.options[index],
+        correctAnswer: currentQuestion.options[currentQuestion.correctIndex],
+        explanation: currentQuestion.explanation,
+        noteType: "vocab",
+      }).catch(() => {
+        // 서버 저장 실패 시에도 학습 플로우는 유지
+      });
     }
   }, [isAnswered, currentQuestion, updateVocabProgress, addIncorrectNote]);
 
@@ -168,6 +222,22 @@ export default function VocabTestScreen() {
       setIsFinished(true);
     }
   }, [currentIndex, totalQuestions, markVocabCompleted]);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centeredState]}>
+        <Text style={styles.loadingText}>오늘의 어휘를 불러오는 중...</Text>
+      </View>
+    );
+  }
+
+  if (loadError || !currentQuestion) {
+    return (
+      <View style={[styles.container, styles.centeredState]}>
+        <Text style={styles.loadingText}>{loadError ?? "학습할 어휘가 없습니다."}</Text>
+      </View>
+    );
+  }
 
   if (isFinished) {
     return (
@@ -490,6 +560,17 @@ const styles = StyleSheet.create({
     fontFamily: "NotoSansKR_700Bold",
     fontSize: 17,
     color: "#FFF",
+  },
+  centeredState: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  loadingText: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 16,
+    color: Colors.light.textMuted,
+    textAlign: "center",
   },
   finishContent: {
     flex: 1,

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,9 +14,22 @@ import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useStudy, IncorrectNote, NoteType } from "@/contexts/StudyContext";
+import { getApiUrl } from "@/lib/query-client";
 import Colors from "@/constants/colors";
 
 type FilterType = "all" | "literature" | "vocab" | "exam";
+
+type ApiWrongNote = {
+  id: string;
+  vocabId: string;
+  word: string;
+  statement: string;
+  userAnswer: string;
+  correctAnswer: string;
+  explanation: string;
+  noteType: string;
+  createdAt: string;
+};
 
 function getItemType(item: IncorrectNote): NoteType {
   if (item.noteType) return item.noteType;
@@ -121,14 +134,51 @@ export default function IncorrectsScreen() {
   const insets = useSafeAreaInsets();
   const { incorrectNotes, removeIncorrectNote } = useStudy();
   const [filter, setFilter] = useState<FilterType>("all");
+  const [apiVocabNotes, setApiVocabNotes] = useState<IncorrectNote[]>([]);
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
+  useEffect(() => {
+    const loadWrongNotes = async () => {
+      try {
+        const url = new URL("/api/vocab/wrong-notes?userId=anonymous", getApiUrl());
+        const res = await fetch(url.toString());
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const mapped: IncorrectNote[] = (data.items ?? []).map((item: ApiWrongNote) => ({
+          questionId: `vocab-${item.vocabId}-${item.id}`,
+          quizId: "vocab-classic-poetry",
+          quizTitle: "고전시가 어휘",
+          quizAuthor: item.word,
+          categoryId: "vocab",
+          statement: item.statement,
+          isTrue: false,
+          explanation: item.explanation,
+          userAnswer: item.userAnswer,
+          correctAnswer: item.correctAnswer,
+          noteType: "vocab",
+          timestamp: new Date(item.createdAt).getTime(),
+        }));
+        setApiVocabNotes(mapped);
+      } catch {
+        setApiVocabNotes([]);
+      }
+    };
+
+    loadWrongNotes();
+  }, []);
+
+  const allNotes = useMemo(() => {
+    const nonVocab = incorrectNotes.filter((n) => getItemType(n) !== "vocab");
+    return [...apiVocabNotes, ...nonVocab];
+  }, [incorrectNotes, apiVocabNotes]);
+
   const filteredNotes = useMemo(() => {
-    if (filter === "all") return incorrectNotes;
-    return incorrectNotes.filter((n) => getItemType(n) === filter);
-  }, [incorrectNotes, filter]);
+    if (filter === "all") return allNotes;
+    return allNotes.filter((n) => getItemType(n) === filter);
+  }, [allNotes, filter]);
 
   const handleDelete = (questionId: string) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -151,17 +201,17 @@ export default function IncorrectsScreen() {
         </Pressable>
         <Text style={styles.headerTitle}>나의 오답</Text>
         <View style={styles.countBadge}>
-          <Text style={styles.countText}>{incorrectNotes.length}</Text>
+          <Text style={styles.countText}>{allNotes.length}</Text>
         </View>
       </View>
 
-      {incorrectNotes.length > 0 && (
+      {allNotes.length > 0 && (
         <View style={styles.filterRow}>
           {filterOptions.map((opt) => {
             const isActive = filter === opt.key;
             const count = opt.key === "all"
-              ? incorrectNotes.length
-              : incorrectNotes.filter((n) => getItemType(n) === opt.key).length;
+              ? allNotes.length
+              : allNotes.filter((n) => getItemType(n) === opt.key).length;
             if (opt.key !== "all" && count === 0) return null;
             return (
               <Pressable
@@ -193,10 +243,10 @@ export default function IncorrectsScreen() {
         <View style={styles.emptyState}>
           <Ionicons name="checkmark-circle" size={48} color={Colors.light.success} />
           <Text style={styles.emptyTitle}>
-            {incorrectNotes.length === 0 ? "오답이 없습니다" : "해당 유형의 오답이 없습니다"}
+            {allNotes.length === 0 ? "오답이 없습니다" : "해당 유형의 오답이 없습니다"}
           </Text>
           <Text style={styles.emptySubtitle}>
-            {incorrectNotes.length === 0
+            {allNotes.length === 0
               ? "퀴즈를 풀면 틀린 문제가 여기에 저장됩니다"
               : "다른 필터를 선택해보세요"}
           </Text>
