@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface SubCategory {
@@ -27,6 +27,7 @@ export interface IncorrectNote {
   correctAnswer?: string;
   sourceTitle?: string;
   noteType?: NoteType;
+  reviewCorrectCount?: number;
   timestamp: number;
 }
 
@@ -67,6 +68,7 @@ interface StudyContextValue {
   addCompletedWork: (workId: string) => void;
   addIncorrectNote: (note: IncorrectNote) => void;
   removeIncorrectNote: (questionId: string) => void;
+  recordWrongReviewResult: (questionId: string, isCorrect: boolean) => void;
   addBookmark: (bookmark: BookmarkItem) => void;
   removeBookmark: (questionId: string) => void;
   isBookmarked: (questionId: string) => boolean;
@@ -85,6 +87,7 @@ const BOOKMARKS_KEY = "suneung_bookmarks";
 const COMPLETED_KEY = "suneung_completed_works";
 const LEARNING_TIME_KEY = "suneung_learning_time";
 const VOCAB_KEY = "suneung_vocab_progress";
+const WRONG_REVIEW_GRADUATION_THRESHOLD = 2;
 
 const TARGET_DATE = new Date(2026, 10, 12);
 
@@ -264,6 +267,36 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const recordWrongReviewResult = useCallback(async (questionId: string, isCorrect: boolean) => {
+    setIncorrectNotes((prev) => {
+      const target = prev.find((item) => item.questionId === questionId);
+      if (!target) return prev;
+
+      let updated: IncorrectNote[];
+      if (!isCorrect) {
+        updated = prev.map((item) =>
+          item.questionId === questionId
+            ? { ...item, reviewCorrectCount: 0 }
+            : item
+        );
+      } else {
+        const nextCount = (target.reviewCorrectCount ?? 0) + 1;
+        if (nextCount >= WRONG_REVIEW_GRADUATION_THRESHOLD) {
+          updated = prev.filter((item) => item.questionId !== questionId);
+        } else {
+          updated = prev.map((item) =>
+            item.questionId === questionId
+              ? { ...item, reviewCorrectCount: nextCount }
+              : item
+          );
+        }
+      }
+
+      AsyncStorage.setItem(INCORRECTS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   const addBookmark = useCallback(async (bookmark: BookmarkItem) => {
     setBookmarks((prev) => {
       const exists = prev.find((b) => b.questionId === bookmark.questionId);
@@ -344,6 +377,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       addCompletedWork,
       addIncorrectNote,
       removeIncorrectNote,
+      recordWrongReviewResult,
       addBookmark,
       removeBookmark,
       isBookmarked,
@@ -353,7 +387,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       isVocabCompletedToday,
       resetDailyLearningTime,
     }),
-    [dailyProgress, streak, subCategories, completedWorks, incorrectNotes, bookmarks, learningTime, vocabProgress, unlockCategory, addProgress, getDDay, addCompletedWork, addIncorrectNote, removeIncorrectNote, addBookmark, removeBookmark, isBookmarked, addLearningTime, updateVocabProgress, markVocabCompleted, isVocabCompletedToday, resetDailyLearningTime]
+    [dailyProgress, streak, subCategories, completedWorks, incorrectNotes, bookmarks, learningTime, vocabProgress, unlockCategory, addProgress, getDDay, addCompletedWork, addIncorrectNote, removeIncorrectNote, recordWrongReviewResult, addBookmark, removeBookmark, isBookmarked, addLearningTime, updateVocabProgress, markVocabCompleted, isVocabCompletedToday, resetDailyLearningTime]
   );
 
   return (

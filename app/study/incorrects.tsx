@@ -15,6 +15,7 @@ import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useStudy, IncorrectNote, NoteType } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
+import { buildWrongOnlyVocabQuestions } from "@/lib/vocabWrongOnly";
 
 type FilterType = "all" | "literature" | "vocab" | "exam";
 
@@ -130,6 +131,11 @@ export default function IncorrectsScreen() {
     return incorrectNotes.filter((n) => getItemType(n) === filter);
   }, [incorrectNotes, filter]);
 
+  const wrongOnlyQuestionCount = useMemo(
+    () => buildWrongOnlyVocabQuestions(incorrectNotes).length,
+    [incorrectNotes]
+  );
+
   const handleDelete = (questionId: string) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     removeIncorrectNote(questionId);
@@ -186,6 +192,24 @@ export default function IncorrectsScreen() {
               </Pressable>
             );
           })}
+        </View>
+      )}
+
+      {filter === "vocab" && wrongOnlyQuestionCount > 0 && (
+        <View style={styles.ctaWrap}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              router.push({ pathname: "/study/vocab-test", params: { mode: "wrong-only" } });
+            }}
+            style={({ pressed }) => [styles.retryButton, pressed && { opacity: 0.92 }]}
+          >
+            <Ionicons name="refresh-circle" size={20} color="#FFF" />
+            <Text style={styles.retryButtonText}>오답만 다시 풀기</Text>
+            <View style={styles.retryBadge}>
+              <Text style={styles.retryBadgeText}>{wrongOnlyQuestionCount}문제</Text>
+            </View>
+          </Pressable>
         </View>
       )}
 
@@ -288,6 +312,36 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 20,
     gap: 14,
+  },
+  ctaWrap: {
+    paddingHorizontal: 20,
+    paddingTop: 14,
+  },
+  retryButton: {
+    backgroundColor: "#00B4D8",
+    height: 50,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  retryButtonText: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 15,
+    color: "#FFF",
+    flex: 1,
+  },
+  retryBadge: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  retryBadgeText: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 11,
+    color: "#FFF",
   },
   card: {
     backgroundColor: Colors.light.card,
