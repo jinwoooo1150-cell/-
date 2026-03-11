@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { classicPoetryVocab, type VocabQuestion } from "@/data/vocabData";
+import { generateDailySet } from "@/lib/vocab/generateDailySet";
 
 interface SubCategory {
   id: string;
@@ -50,6 +52,8 @@ export interface VocabProgress {
   completedIds: string[];
   currentDay: number;
   completedDate: string | null;
+  dailyQuestions: VocabQuestion[];
+  userKey: string | null;
 }
 
 interface StudyContextValue {
@@ -61,6 +65,7 @@ interface StudyContextValue {
   bookmarks: BookmarkItem[];
   learningTime: number;
   vocabProgress: VocabProgress;
+  dailyQuestions: VocabQuestion[];
   unlockCategory: (id: string) => void;
   addProgress: (id: string, amount: number) => void;
   getDDay: () => number;
@@ -85,6 +90,7 @@ const BOOKMARKS_KEY = "suneung_bookmarks";
 const COMPLETED_KEY = "suneung_completed_works";
 const LEARNING_TIME_KEY = "suneung_learning_time";
 const VOCAB_KEY = "suneung_vocab_progress";
+const VOCAB_USER_KEY = "suneung_vocab_user_key";
 
 const TARGET_DATE = new Date(2026, 10, 12);
 
@@ -133,11 +139,15 @@ const defaultSubCategories: SubCategory[] = [
 
 const defaultVocabProgress: VocabProgress = {
   learnedCount: 0,
-  totalCount: 15,
+  totalCount: 0,
   completedIds: [],
   currentDay: 1,
   completedDate: null,
+  dailyQuestions: [],
+  userKey: null,
 };
+
+const getDateKey = () => new Date().toISOString().slice(0, 10);
 
 export function StudyProvider({ children }: { children: ReactNode }) {
   const [dailyProgress, setDailyProgress] = useState(0);
@@ -148,21 +158,47 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [learningTime, setLearningTime] = useState(0);
   const [vocabProgress, setVocabProgress] = useState<VocabProgress>(defaultVocabProgress);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    loadAllData();
+  const buildDailyVocabProgress = useCallback((prev: VocabProgress, userKey: string, dateKey: string) => {
+    const dailyQuestions = generateDailySet({
+      vocabPool: classicPoetryVocab,
+      date: dateKey,
+      userKey,
+      minQuestions: 10,
+      maxQuestions: 15,
+    });
+
+    const isTodaySet = prev.completedDate === dateKey && prev.dailyQuestions.length > 0;
+
+    if (isTodaySet) {
+      return {
+        ...prev,
+        totalCount: prev.dailyQuestions.length,
+        userKey,
+      };
+    }
+
+    return {
+      ...prev,
+      learnedCount: 0,
+      completedIds: [],
+      totalCount: dailyQuestions.length,
+      completedDate: null,
+      dailyQuestions,
+      userKey,
+    };
   }, []);
 
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     try {
-      const [studyData, incorrectsData, bookmarksData, completedData, timeData, vocabData] = await Promise.all([
+      const [studyData, incorrectsData, bookmarksData, completedData, timeData, vocabData, storedUserKey] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEY),
         AsyncStorage.getItem(INCORRECTS_KEY),
         AsyncStorage.getItem(BOOKMARKS_KEY),
         AsyncStorage.getItem(COMPLETED_KEY),
         AsyncStorage.getItem(LEARNING_TIME_KEY),
         AsyncStorage.getItem(VOCAB_KEY),
+        AsyncStorage.getItem(VOCAB_USER_KEY),
       ]);
 
       if (studyData) {
@@ -181,14 +217,26 @@ export function StudyProvider({ children }: { children: ReactNode }) {
           setLearningTime(parsed.seconds);
         }
       }
-      if (vocabData) setVocabProgress(JSON.parse(vocabData));
+      const dateKey = getDateKey();
+      let userKey = storedUserKey;
+      if (!userKey) {
+        userKey = `device-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+        await AsyncStorage.setItem(VOCAB_USER_KEY, userKey);
+      }
 
-      setIsLoaded(true);
-    } catch (e) {
+      const parsedVocab = vocabData ? JSON.parse(vocabData) as VocabProgress : defaultVocabProgress;
+      const nextVocab = buildDailyVocabProgress(parsedVocab, userKey, dateKey);
+      setVocabProgress(nextVocab);
+      await AsyncStorage.setItem(VOCAB_KEY, JSON.stringify(nextVocab));
+
+    } catch {
       console.log("Failed to load study data");
-      setIsLoaded(true);
     }
-  };
+  }, [buildDailyVocabProgress]);
+
+  useEffect(() => {
+    loadAllData();
+  }, [loadAllData]);
 
   const saveStudyData = useCallback(async (data: {
     dailyProgress: number;
@@ -197,7 +245,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   }) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (e) {
+    } catch {
       console.log("Failed to save study data");
     }
   }, []);
@@ -306,7 +354,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       if (prev.completedIds.includes(learnedId)) return prev;
       const updated = {
         ...prev,
-        learnedCount: prev.learnedCount + 1,
+        learnedCount: Math.min(prev.learnedCount + 1, prev.totalCount),
         completedIds: [...prev.completedIds, learnedId],
       };
       AsyncStorage.setItem(VOCAB_KEY, JSON.stringify(updated));
@@ -315,7 +363,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const markVocabCompleted = useCallback(async () => {
-    const today = new Date().toDateString();
+    const today = getDateKey();
     setVocabProgress((prev) => {
       const updated = { ...prev, completedDate: today };
       AsyncStorage.setItem(VOCAB_KEY, JSON.stringify(updated));
@@ -324,7 +372,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isVocabCompletedToday = useCallback(() => {
-    const today = new Date().toDateString();
+    const today = getDateKey();
     return vocabProgress.completedDate === today;
   }, [vocabProgress.completedDate]);
 
@@ -338,6 +386,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       bookmarks,
       learningTime,
       vocabProgress,
+      dailyQuestions: vocabProgress.dailyQuestions,
       unlockCategory,
       addProgress,
       getDDay,

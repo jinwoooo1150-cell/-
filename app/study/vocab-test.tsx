@@ -23,7 +23,6 @@ import Animated, {
 import { ProgressBar } from "@/components/ProgressBar";
 import { CheetahMascot } from "@/components/CheetahMascot";
 import { useStudy } from "@/contexts/StudyContext";
-import { classicPoetryVocab } from "@/data/vocabData";
 import Colors from "@/constants/colors";
 
 function ChoiceButton({
@@ -115,7 +114,7 @@ function CompletionCheckmark() {
 
 export default function VocabTestScreen() {
   const insets = useSafeAreaInsets();
-  const { vocabProgress, updateVocabProgress, addIncorrectNote, markVocabCompleted } = useStudy();
+  const { dailyQuestions, updateVocabProgress, addIncorrectNote, markVocabCompleted, isVocabCompletedToday } = useStudy();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -125,13 +124,18 @@ export default function VocabTestScreen() {
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
-  const questions = classicPoetryVocab;
-  const totalQuestions = questions.length;
-  const currentQuestion = questions[currentIndex];
-  const progress = (currentIndex + (isAnswered ? 1 : 0)) / totalQuestions;
+  const totalQuestions = dailyQuestions.length;
+  const currentQuestion = dailyQuestions[currentIndex];
+  const progress = totalQuestions === 0 ? 0 : (currentIndex + (isAnswered ? 1 : 0)) / totalQuestions;
+
+  useEffect(() => {
+    if (isVocabCompletedToday()) {
+      setIsFinished(true);
+    }
+  }, [isVocabCompletedToday]);
 
   const handleSelectAnswer = useCallback((index: number) => {
-    if (isAnswered) return;
+    if (isAnswered || !currentQuestion) return;
     setSelectedIndex(index);
     setIsAnswered(true);
 
@@ -158,6 +162,7 @@ export default function VocabTestScreen() {
   }, [isAnswered, currentQuestion, updateVocabProgress, addIncorrectNote]);
 
   const handleNext = useCallback(() => {
+    if (!currentQuestion) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (currentIndex < totalQuestions - 1) {
       setCurrentIndex((prev) => prev + 1);
@@ -167,7 +172,22 @@ export default function VocabTestScreen() {
       markVocabCompleted();
       setIsFinished(true);
     }
-  }, [currentIndex, totalQuestions, markVocabCompleted]);
+  }, [currentIndex, currentQuestion, totalQuestions, markVocabCompleted]);
+
+
+  if (!currentQuestion && !isFinished) {
+    return (
+      <View style={styles.container}>
+        <View style={[styles.finishContent, {
+          paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 40,
+          paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20,
+        }]}>
+          <Text style={styles.finishTitle}>오늘의 문제를 준비 중이에요</Text>
+          <Text style={styles.finishSubtext}>잠시 후 다시 시도해 주세요.</Text>
+        </View>
+      </View>
+    );
+  }
 
   if (isFinished) {
     return (
@@ -181,14 +201,14 @@ export default function VocabTestScreen() {
             <CheetahMascot size={70} />
           </View>
           <Text style={styles.finishTitle}>오늘의 어휘 학습 완료!</Text>
-          <Text style={styles.finishSubtext}>꾸준한 성장이 보입니다.</Text>
+          <Text style={styles.finishSubtext}>내일 새로운 세트가 자동으로 열려요.</Text>
 
           <View style={styles.finishCompletedCard}>
             <Ionicons name="sparkles" size={24} color={Colors.light.tint} />
             <Text style={styles.finishCompletedLabel}>고전시가 어휘 테스트</Text>
             <View style={styles.finishCompletedBadge}>
               <Ionicons name="checkmark" size={16} color="#FFF" />
-              <Text style={styles.finishCompletedBadgeText}>완료</Text>
+              <Text style={styles.finishCompletedBadgeText}>오늘 완료</Text>
             </View>
           </View>
 
