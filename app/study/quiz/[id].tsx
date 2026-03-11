@@ -280,8 +280,8 @@ export default function QuizScreen() {
 
   const totalQuestions = quiz.questions.length;
   const currentQuestion = quiz.questions[currentIndex];
-  const progress =
-    (currentIndex + (answerState !== "unanswered" ? 1 : 0)) / totalQuestions;
+  const solvedCount = currentIndex + (answerState !== "unanswered" ? 1 : 0);
+  const progress = solvedCount / totalQuestions;
   const currentBookmarked = isBookmarked(currentQuestion.id);
 
   // 갈래별 조건 확인
@@ -546,8 +546,8 @@ export default function QuizScreen() {
           <View style={styles.progressBarWrapper}>
             <ProgressBar progress={progress} height={8} color={Colors.light.tint} />
           </View>
-          <Text style={styles.counter} numberOfLines={1}>
-            {currentIndex + (answerState !== "unanswered" ? 1 : 0)} / {totalQuestions}
+          <Text style={styles.counter} numberOfLines={1} ellipsizeMode="clip" adjustsFontSizeToFit minimumFontScale={0.85}>
+            {solvedCount}/{totalQuestions}
           </Text>
         </View>
       </View>
@@ -691,8 +691,8 @@ const styles = StyleSheet.create({
   counter: {
     fontFamily: "NotoSansKR_700Bold",
     color: Colors.light.tint,
-    flexShrink: 0,
-    minWidth: 56,
+    flexShrink: 1,
+    maxWidth: 88,
     textAlign: "right",
     fontSize: 13,
   },
