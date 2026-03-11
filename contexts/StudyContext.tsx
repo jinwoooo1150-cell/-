@@ -168,11 +168,11 @@ const ensureDailySet = (prev: VocabProgress, questionIds: string[] = []): VocabP
 
   return {
     ...prev,
-    dailyQuestionCount: normalizedIds.length > 0 ? normalizedIds.length : prev.dailyQuestionCount,
+    dailyQuestionCount: normalizedIds.length,
     dailyCorrectCount: 0,
     dailyCompletedIds: [],
     lastGeneratedDate: today,
-    lastSetQuestionIds: normalizedIds.length > 0 ? normalizedIds : prev.lastSetQuestionIds,
+    lastSetQuestionIds: normalizedIds,
     lastCompletedDate: isNewDay ? null : prev.lastCompletedDate,
   };
 };
@@ -180,27 +180,32 @@ const ensureDailySet = (prev: VocabProgress, questionIds: string[] = []): VocabP
 const migrateVocabProgress = (raw: any): VocabProgress => {
   if (!raw || typeof raw !== "object") return defaultVocabProgress;
   if (Array.isArray(raw.allLearnedIds)) {
+    const normalizedAllLearnedIds = [...new Set(raw.allLearnedIds)];
+    const safeDailyQuestionCount = typeof raw.dailyQuestionCount === "number" ? Math.max(raw.dailyQuestionCount, 0) : 0;
+    const safeDailyCorrectCount = typeof raw.dailyCorrectCount === "number" ? Math.max(raw.dailyCorrectCount, 0) : 0;
     return {
       ...defaultVocabProgress,
       ...raw,
-      allLearnedIds: [...new Set(raw.allLearnedIds)],
+      learnedCount: typeof raw.learnedCount === "number" ? Math.max(raw.learnedCount, normalizedAllLearnedIds.length) : normalizedAllLearnedIds.length,
+      allLearnedIds: normalizedAllLearnedIds,
       lastSetQuestionIds: Array.isArray(raw.lastSetQuestionIds) ? raw.lastSetQuestionIds : [],
       dailyCompletedIds: Array.isArray(raw.dailyCompletedIds) ? raw.dailyCompletedIds : [],
-      dailyQuestionCount: typeof raw.dailyQuestionCount === "number" ? raw.dailyQuestionCount : 0,
-      dailyCorrectCount: typeof raw.dailyCorrectCount === "number" ? raw.dailyCorrectCount : 0,
+      dailyQuestionCount: safeDailyQuestionCount,
+      dailyCorrectCount: Math.min(safeDailyCorrectCount, safeDailyQuestionCount),
     };
   }
 
   const legacyCompletedIds = Array.isArray(raw.completedIds) ? raw.completedIds : [];
+  const normalizedLegacyLearnedIds = [...new Set(legacyCompletedIds)];
   return {
-    learnedCount: typeof raw.learnedCount === "number" ? raw.learnedCount : legacyCompletedIds.length,
-    allLearnedIds: legacyCompletedIds,
-    dailyQuestionCount: typeof raw.totalCount === "number" ? raw.totalCount : legacyCompletedIds.length,
-    dailyCorrectCount: legacyCompletedIds.length,
-    lastGeneratedDate: raw.completedDate ?? null,
+    learnedCount: typeof raw.learnedCount === "number" ? Math.max(raw.learnedCount, normalizedLegacyLearnedIds.length) : normalizedLegacyLearnedIds.length,
+    allLearnedIds: normalizedLegacyLearnedIds,
+    dailyQuestionCount: 0,
+    dailyCorrectCount: 0,
+    lastGeneratedDate: null,
     lastCompletedDate: raw.completedDate ?? null,
-    lastSetQuestionIds: legacyCompletedIds,
-    dailyCompletedIds: legacyCompletedIds,
+    lastSetQuestionIds: [],
+    dailyCompletedIds: [],
   };
 };
 
