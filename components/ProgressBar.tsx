@@ -26,13 +26,14 @@ export function ProgressBar({
   backgroundColor = Colors.light.border,
 }: ProgressBarProps) {
   const animatedWidth = useSharedValue(0);
+  const safeProgress = Math.max(0, Math.min(progress, 1));
 
   useEffect(() => {
-    animatedWidth.value = withTiming(Math.min(progress, 1), {
+    animatedWidth.value = withTiming(safeProgress, {
       duration: 800,
       easing: Easing.out(Easing.cubic),
     });
-  }, [progress]);
+  }, [safeProgress]);
 
   const fillStyle = useAnimatedStyle(() => ({
     width: `${animatedWidth.value * 100}%`,
@@ -43,7 +44,7 @@ export function ProgressBar({
       {showLabel && (
         <View style={styles.labelRow}>
           <Text style={styles.label}>{label}</Text>
-          <Text style={styles.percentage}>{Math.round(progress * 100)}%</Text>
+          <Text style={styles.percentage}>{Math.round(safeProgress * 100)}%</Text>
         </View>
       )}
       <View style={[styles.track, { height, backgroundColor, borderRadius: height / 2 }]}>
