@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0EAE5",
   },
   name: {
-    fontFamily: "NotoSansKR_700Bold",
+    fontFamily: "serif",
     fontSize: 16,
     color: Colors.light.text,
     textAlign: "center",
@@ -188,12 +188,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   lessonCount: {
-    fontFamily: "NotoSansKR_500Medium",
+    fontFamily: "serif",
     fontSize: 11,
     color: Colors.light.textMuted,
   },
   lockedLabel: {
-    fontFamily: "NotoSansKR_500Medium",
+    fontFamily: "serif",
     fontSize: 12,
     color: Colors.light.lockedText,
   },

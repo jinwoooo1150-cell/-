@@ -39,7 +39,7 @@ function ClassicTabLayout() {
         tabBarActiveTintColor: Colors.light.tint,
         tabBarInactiveTintColor: Colors.light.tabIconDefault,
         tabBarLabelStyle: {
-          fontFamily: "NotoSansKR_500Medium",
+          fontFamily: "serif",
           fontSize: 11,
         },
         tabBarStyle: {

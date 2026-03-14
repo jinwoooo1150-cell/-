@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Grays[800],
     lineHeight: 24,
-    fontFamily: "NotoSansKR_400Regular",
+    fontFamily: "serif",
   },
   passageParagraph: {
     marginBottom: 12,

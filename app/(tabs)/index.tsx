@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   appTitle: {
-    fontFamily: "NotoSansKR_900Black",
+    fontFamily: "serif",
     fontSize: 20,
     color: Colors.light.tint,
     letterSpacing: -0.5,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   streakText: {
-    fontFamily: "NotoSansKR_700Bold",
+    fontFamily: "serif",
     fontSize: 14,
     color: Colors.light.tint,
   },
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   xpText: {
-    fontFamily: "NotoSansKR_700Bold",
+    fontFamily: "serif",
     fontSize: 14,
     color: "#FFB347",
   },
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   ddayLabel: {
-    fontFamily: "NotoSansKR_500Medium",
+    fontFamily: "serif",
     fontSize: 13,
     color: "rgba(255,255,255,0.8)",
     letterSpacing: 0.5,
@@ -284,18 +284,18 @@ const styles = StyleSheet.create({
     alignItems: "baseline",
   },
   ddayPrefix: {
-    fontFamily: "NotoSansKR_900Black",
+    fontFamily: "serif",
     fontSize: 36,
     color: "#FFF",
   },
   ddayNumber: {
-    fontFamily: "NotoSansKR_900Black",
+    fontFamily: "serif",
     fontSize: 56,
     color: "#FFF",
     lineHeight: 64,
   },
   ddayDate: {
-    fontFamily: "NotoSansKR_400Regular",
+    fontFamily: "serif",
     fontSize: 12,
     color: "rgba(255,255,255,0.65)",
   },
@@ -346,12 +346,12 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   vocabTitle: {
-    fontFamily: "NotoSansKR_700Bold",
+    fontFamily: "serif",
     fontSize: 16,
     color: "#FFF",
   },
   vocabProgress: {
-    fontFamily: "NotoSansKR_400Regular",
+    fontFamily: "serif",
     fontSize: 12,
     color: "rgba(255,255,255,0.7)",
   },
@@ -407,12 +407,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.border,
   },
   progressValue: {
-    fontFamily: "NotoSansKR_900Black",
+    fontFamily: "serif",
     fontSize: 20,
     color: Colors.light.tint,
   },
   progressLabel: {
-    fontFamily: "NotoSansKR_400Regular",
+    fontFamily: "serif",
     fontSize: 11,
     color: Colors.light.textMuted,
   },
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   quickStartText: {
-    fontFamily: "NotoSansKR_700Bold",
+    fontFamily: "serif",
     fontSize: 17,
     color: "#FFF",
   },

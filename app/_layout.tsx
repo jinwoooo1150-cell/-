@@ -36,10 +36,10 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    NotoSansKR_400Regular,
-    NotoSansKR_500Medium,
-    NotoSansKR_700Bold,
-    NotoSansKR_900Black,
+    NotoSansKR_400Regular: NotoSansKR_400Regular,
+    NotoSansKR_500Medium: NotoSansKR_500Medium,
+    NotoSansKR_700Bold: NotoSansKR_700Bold,
+    NotoSansKR_900Black: NotoSansKR_900Black,
   });
   const [showSplash, setShowSplash] = useState(true);
 
