@@ -190,36 +190,21 @@ function CharacterMapModal({
             ))}
           </View>
 
-          <Text
-            style={[styles.modalTitle, { marginTop: 20, marginBottom: 10 }]}
-          >
-            관계
-          </Text>
-          <View style={{ gap: 8 }}>
+          <View style={styles.relationSectionHeader}>
+            <Ionicons name="git-network-outline" size={18} color="#4B5563" />
+            <Text style={styles.relationSectionTitle}>관계</Text>
+          </View>
+          <View style={styles.relationList}>
             {data.relations.map((r, i) => (
               <View key={i} style={styles.relRow}>
-                <Text style={{ fontWeight: "bold" }}>{r.from}</Text>
-                <View
-                  style={{
-                    flex: 1,
-                    alignItems: "center",
-                    paddingHorizontal: 4,
-                  }}
-                >
-                  <Text
-                    style={{ fontSize: 10, color: "#888", marginBottom: 2 }}
-                  >
-                    {r.label}
-                  </Text>
-                  <View
-                    style={{
-                      height: 1,
-                      backgroundColor: "#DDD",
-                      width: "100%",
-                    }}
-                  />
+                <Text style={styles.relCharacterName}>{r.from}</Text>
+                <View style={styles.relConnectorArea}>
+                  <View style={styles.relLabelChip}>
+                    <Text style={styles.relLabelText}>{r.label}</Text>
+                  </View>
+                  <View style={styles.relLine} />
                 </View>
-                <Text style={{ fontWeight: "bold" }}>{r.to}</Text>
+                <Text style={styles.relCharacterName}>{r.to}</Text>
               </View>
             ))}
           </View>
@@ -914,9 +899,16 @@ const styles = StyleSheet.create({
   },
   charCard: {
     width: "48%",
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 10,
+    shadowColor: "#111827",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
   charRoleBadge: {
     alignSelf: "flex-start",
@@ -926,12 +918,61 @@ const styles = StyleSheet.create({
   },
   charRoleText: { color: "#FFF", fontSize: 10, fontWeight: "bold" },
   charName: { fontWeight: "bold", fontSize: 16, marginBottom: 4 },
-  charDesc: { fontSize: 12, color: "#666" },
+  charDesc: { fontSize: 13, color: "#4B5563", lineHeight: 18 },
+  relationSectionHeader: {
+    marginTop: 20,
+    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  relationSectionTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#111827",
+    letterSpacing: -0.3,
+  },
+  relationList: { gap: 8 },
   relRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 10,
+    gap: 8,
+  },
+  relCharacterName: {
+    fontWeight: "700",
+    color: "#111827",
+    fontSize: 15,
+    minWidth: 60,
+    textAlign: "center",
+  },
+  relConnectorArea: {
+    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: 2,
+  },
+  relLabelChip: {
+    backgroundColor: "#EEF2FF",
+    borderColor: "#C7D2FE",
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    marginBottom: 4,
+  },
+  relLabelText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#4338CA",
+    lineHeight: 16,
+  },
+  relLine: {
+    height: 1,
+    backgroundColor: "#D1D5DB",
+    width: "100%",
   },
 });
