@@ -32,7 +32,6 @@ export default function HomeScreen() {
     subCategories,
     vocabProgress,
     isVocabCompletedToday,
-    learningTime,
   } = useStudy();
   const dDay = getDDay();
   const vocabDone = isVocabCompletedToday();
@@ -41,6 +40,7 @@ export default function HomeScreen() {
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
   const completedLessons = subCategories.reduce((sum, c) => sum + c.completedLessons, 0);
+  const todayProgress = Math.round(dailyProgress * 100);
 
   const vocabScale = useSharedValue(1);
   const vocabPressStyle = useAnimatedStyle(() => ({
@@ -65,19 +65,28 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.topBar}>
-          <View style={styles.streakBadge}>
-            <Ionicons name="flame" size={18} color={Colors.light.tint} />
-            <Text style={styles.streakText}>{streak}일</Text>
-          </View>
           <Text style={styles.appTitle}>Su-o-lingo</Text>
-          <View style={styles.xpBadge}>
-            <Ionicons name="star" size={16} color="#FFB347" />
-            <Text style={styles.xpText}>{completedLessons}</Text>
+          <View style={styles.headerBadgeRow}>
+            <View style={styles.streakBadge}>
+              <Ionicons name="flame" size={16} color={Colors.light.tint} />
+              <Text style={styles.streakText}>{streak}일</Text>
+            </View>
+            <View style={styles.xpBadge}>
+              <Ionicons name="star" size={14} color="#FFB347" />
+              <Text style={styles.xpText}>{completedLessons}</Text>
+            </View>
           </View>
         </View>
 
-        <View style={styles.mascotSection}>
-          <CheetahMascot size={80} mood="happy" />
+        <View style={styles.heroCard}>
+          <View style={styles.heroTextGroup}>
+            <Text style={styles.heroOverline}>오늘도 한 걸음</Text>
+            <Text style={styles.heroTitle}>수능 문학 감각, 매일 쌓아보세요</Text>
+            <Text style={styles.heroDescription}>짧고 밀도 있는 학습으로 꾸준한 실력을 만들어가요.</Text>
+          </View>
+          <View style={styles.mascotSection}>
+            <CheetahMascot size={74} mood="happy" />
+          </View>
         </View>
 
         <LinearGradient
@@ -115,7 +124,7 @@ export default function HomeScreen() {
           >
             <Animated.View style={vocabPressStyle}>
               <LinearGradient
-                colors={vocabDone ? ["#58CC02", "#46A302"] : ["#FF8C00", "#FFB347"]}
+                colors={vocabDone ? ["#58CC02", "#46A302"] : ["#FF9640", "#FFB347"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.vocabCard}
@@ -148,7 +157,7 @@ export default function HomeScreen() {
         <View style={styles.progressCard}>
           <View style={styles.progressRow}>
             <View style={styles.progressItem}>
-              <Text style={styles.progressValue}>{Math.round(dailyProgress * 100)}%</Text>
+              <Text style={styles.progressValue}>{todayProgress}%</Text>
               <Text style={styles.progressLabel}>오늘 진도</Text>
             </View>
             <View style={styles.progressDivider} />
@@ -161,6 +170,9 @@ export default function HomeScreen() {
               <Text style={styles.progressValue}>{streak}일</Text>
               <Text style={styles.progressLabel}>연속 학습</Text>
             </View>
+          </View>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${todayProgress}%` }]} />
           </View>
         </View>
 
@@ -208,31 +220,38 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 14,
   },
   appTitle: {
     fontFamily: "serif",
-    fontSize: 20,
+    fontSize: 22,
     color: Colors.light.tint,
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
+  },
+  headerBadgeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   streakBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
     backgroundColor: Colors.light.card,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
     elevation: 1,
   },
   streakText: {
     fontFamily: "serif",
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.light.tint,
   },
   xpBadge: {
@@ -240,23 +259,63 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
     backgroundColor: Colors.light.card,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
     elevation: 1,
   },
   xpText: {
     fontFamily: "serif",
-    fontSize: 14,
+    fontSize: 13,
     color: "#FFB347",
+  },
+  heroCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    marginBottom: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  heroTextGroup: {
+    flex: 1,
+    gap: 4,
+    paddingRight: 8,
+  },
+  heroOverline: {
+    fontFamily: "serif",
+    fontSize: 12,
+    color: Colors.light.textMuted,
+  },
+  heroTitle: {
+    fontFamily: "serif",
+    fontSize: 17,
+    lineHeight: 22,
+    color: Colors.light.text,
+  },
+  heroDescription: {
+    fontFamily: "serif",
+    fontSize: 12,
+    lineHeight: 17,
+    color: Colors.light.textSecondary,
   },
   mascotSection: {
     alignItems: "center",
-    marginVertical: 4,
+    justifyContent: "center",
   },
   ddayCard: {
     borderRadius: 24,
@@ -386,6 +445,8 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 18,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -415,6 +476,18 @@ const styles = StyleSheet.create({
     fontFamily: "serif",
     fontSize: 11,
     color: Colors.light.textMuted,
+  },
+  progressTrack: {
+    marginTop: 14,
+    height: 7,
+    borderRadius: 999,
+    backgroundColor: "#F3EFE8",
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: Colors.light.tint,
+    borderRadius: 999,
   },
   quickStartGradient: {
     flexDirection: "row",
