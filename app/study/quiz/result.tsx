@@ -258,12 +258,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   messageText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 28,
     color: Colors.light.text,
   },
   titleText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 16,
     color: Colors.light.textMuted,
   },
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   scorePercentage: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 52,
     color: "#FFF",
   },
@@ -303,12 +303,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.3)",
   },
   scoreValue: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 20,
     color: "#FFF",
   },
   scoreLabel: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: "rgba(255,255,255,0.8)",
   },
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.tint,
   },
   secondaryButtonText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 16,
     color: Colors.light.tint,
   },
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   primaryButtonText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 16,
     color: "#FFF",
   },

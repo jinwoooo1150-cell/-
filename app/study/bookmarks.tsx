@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 18,
     color: Colors.light.text,
     flex: 1,
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   countText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: "#FFF",
   },
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.card,
   },
   filterChipText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: Colors.light.text,
   },
@@ -294,13 +294,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 15,
     color: Colors.light.text,
     flex: 1,
   },
   cardAuthor: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: Colors.light.textMuted,
   },
@@ -315,22 +315,22 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   sourceTagText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 11,
     color: "#8B5CF6",
   },
   sourceTagSep: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 10,
     color: "#C4B5FD",
   },
   sourceTagWork: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 11,
     color: "#7C3AED",
   },
   statementText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 14,
     lineHeight: 22,
     color: Colors.light.text,
@@ -349,12 +349,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   answerTagLabel: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: Colors.light.textMuted,
   },
   answerTagValue: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 14,
   },
   explanationBox: {
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   explanationText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     lineHeight: 20,
     color: Colors.light.textSecondary,
@@ -380,12 +380,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   emptyTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 18,
     color: Colors.light.text,
   },
   emptySubtitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 14,
     color: Colors.light.textMuted,
     textAlign: "center",

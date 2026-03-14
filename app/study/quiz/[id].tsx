@@ -412,9 +412,11 @@ export default function QuizScreen() {
         )}
       </View>
       <View style={styles.divider} />
-      <Text style={styles.passageText} textBreakStrategy="simple">
-        {passageToDisplay}
-      </Text>
+      <View style={styles.passageTextBox}>
+        <Text style={styles.passageText} textBreakStrategy="simple">
+          {passageToDisplay}
+        </Text>
+      </View>
     </View>
   );
 
@@ -679,15 +681,15 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   counter: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     color: Colors.light.tint,
     flexShrink: 0,
     textAlign: "right",
   },
   scrollContent: { padding: 20, paddingBottom: 120 },
   infoSection: { alignItems: "center", marginBottom: 16 },
-  title: { fontFamily: "serif", fontSize: 22 },
-  author: { fontFamily: "serif", color: "#666" },
+  title: { fontFamily: "NotoSansKR_500Medium", fontSize: 22 },
+  author: { fontFamily: "NotoSansKR_500Medium", color: "#666" },
 
   tabRow: {
     flexDirection: "row",
@@ -708,7 +710,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.border,
   },
   tabButtonText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: Colors.light.text,
   },
@@ -745,11 +747,18 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: "#EEE", marginBottom: 12 },
 
   passageText: {
-    fontSize: 15,
-    lineHeight: 24,
-    fontFamily: "serif",
+    fontSize: 10.91,
+    lineHeight: 20,
+    fontFamily: "신명 중명조",
     width: "100%",
     flexShrink: 1,
+  },
+  passageTextBox: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    backgroundColor: "#FAFAFA",
+    padding: 12,
   },
 
   relatedExamButton: {

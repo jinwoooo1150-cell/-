@@ -313,13 +313,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   pageTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 28,
     color: Colors.light.text,
     marginBottom: 4,
   },
   pageSubtitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 15,
     color: Colors.light.textMuted,
     marginBottom: 20,
@@ -350,23 +350,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   actionTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 14,
     color: Colors.light.text,
   },
   actionCount: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: Colors.light.textMuted,
   },
   sectionTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 20,
     color: Colors.light.text,
     marginBottom: 2,
   },
   sectionSubtitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: Colors.light.textMuted,
     marginBottom: 16,
@@ -399,12 +399,12 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   litTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 16,
     color: Colors.light.text,
   },
   litSubtitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 11,
     color: Colors.light.textMuted,
   },
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   litCount: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: Colors.light.tint,
   },

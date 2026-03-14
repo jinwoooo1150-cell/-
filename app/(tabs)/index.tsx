@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   appTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 22,
     color: Colors.light.tint,
     letterSpacing: -0.3,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   streakText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: Colors.light.tint,
   },
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   xpText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: "#FFB347",
   },
@@ -297,18 +297,18 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   heroOverline: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: Colors.light.textMuted,
   },
   heroTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 17,
     lineHeight: 22,
     color: Colors.light.text,
   },
   heroDescription: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     lineHeight: 17,
     color: Colors.light.textSecondary,
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   ddayLabel: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: "rgba(255,255,255,0.8)",
     letterSpacing: 0.5,
@@ -343,18 +343,18 @@ const styles = StyleSheet.create({
     alignItems: "baseline",
   },
   ddayPrefix: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 36,
     color: "#FFF",
   },
   ddayNumber: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 56,
     color: "#FFF",
     lineHeight: 64,
   },
   ddayDate: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: "rgba(255,255,255,0.65)",
   },
@@ -405,12 +405,12 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   vocabTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 16,
     color: "#FFF",
   },
   vocabProgress: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: "rgba(255,255,255,0.7)",
   },
@@ -468,12 +468,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.border,
   },
   progressValue: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 20,
     color: Colors.light.tint,
   },
   progressLabel: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 11,
     color: Colors.light.textMuted,
   },
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   quickStartText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 17,
     color: "#FFF",
   },

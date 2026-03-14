@@ -329,10 +329,10 @@ const styles = StyleSheet.create({
   activeTabText: { color: PRIMARY_COLOR },
   passageContent: { padding: 16 },
   passageText: {
-    fontSize: 14,
+    fontSize: 10.91,
     color: Grays[800],
-    lineHeight: 24,
-    fontFamily: "serif",
+    lineHeight: 20,
+    fontFamily: "신명 중명조",
   },
   passageParagraph: {
     marginBottom: 12,
