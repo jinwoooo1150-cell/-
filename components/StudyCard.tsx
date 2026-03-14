@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontFamily: "NotoSansKR_700Bold",
+    fontFamily: "serif",
     fontSize: 18,
     color: "#FFF",
     textAlign: "center",
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   subtitle: {
-    fontFamily: "NotoSansKR_400Regular",
+    fontFamily: "serif",
     fontSize: 13,
     color: "rgba(255,255,255,0.8)",
     textAlign: "center",

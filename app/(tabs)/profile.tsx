@@ -117,12 +117,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   userName: {
-    fontFamily: "NotoSansKR_900Black",
+    fontFamily: "serif",
     fontSize: 24,
     color: Colors.light.text,
   },
   userLevel: {
-    fontFamily: "NotoSansKR_500Medium",
+    fontFamily: "serif",
     fontSize: 14,
     color: Colors.light.tint,
     backgroundColor: Colors.light.cream,
@@ -150,12 +150,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   statValue: {
-    fontFamily: "NotoSansKR_900Black",
+    fontFamily: "serif",
     fontSize: 18,
     color: Colors.light.text,
   },
   statLabel: {
-    fontFamily: "NotoSansKR_400Regular",
+    fontFamily: "serif",
     fontSize: 11,
     color: Colors.light.textMuted,
     textAlign: "center",
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   sectionTitle: {
-    fontFamily: "NotoSansKR_700Bold",
+    fontFamily: "serif",
     fontSize: 18,
     color: Colors.light.text,
   },
@@ -195,12 +195,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   menuTitle: {
-    fontFamily: "NotoSansKR_500Medium",
+    fontFamily: "serif",
     fontSize: 15,
     color: Colors.light.text,
   },
   menuValue: {
-    fontFamily: "NotoSansKR_400Regular",
+    fontFamily: "serif",
     fontSize: 13,
     color: Colors.light.textMuted,
   },

@@ -679,15 +679,15 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   counter: {
-    fontFamily: "NotoSansKR_700Bold",
+    fontFamily: "serif",
     color: Colors.light.tint,
     flexShrink: 0,
     textAlign: "right",
   },
   scrollContent: { padding: 20, paddingBottom: 120 },
   infoSection: { alignItems: "center", marginBottom: 16 },
-  title: { fontFamily: "NotoSansKR_900Black", fontSize: 22 },
-  author: { fontFamily: "NotoSansKR_400Regular", color: "#666" },
+  title: { fontFamily: "serif", fontSize: 22 },
+  author: { fontFamily: "serif", color: "#666" },
 
   tabRow: {
     flexDirection: "row",
@@ -708,7 +708,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.border,
   },
   tabButtonText: {
-    fontFamily: "NotoSansKR_500Medium",
+    fontFamily: "serif",
     fontSize: 12,
     color: Colors.light.text,
   },
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
   passageText: {
     fontSize: 15,
     lineHeight: 24,
-    fontFamily: "NotoSansKR_400Regular",
+    fontFamily: "serif",
     width: "100%",
     flexShrink: 1,
   },
