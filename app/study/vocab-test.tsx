@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   questionCounter: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 14,
     color: Colors.light.tint,
     minWidth: 36,
@@ -407,12 +407,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.tint,
   },
   wordLabel: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 14,
     color: Colors.light.textMuted,
   },
   wordText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 32,
     color: Colors.light.tint,
   },
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   exampleText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: Colors.light.textSecondary,
     flex: 1,
@@ -444,11 +444,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   choiceIndex: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 16,
   },
   choiceLabel: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 15,
     flex: 1,
   },
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   feedbackLabel: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 20,
   },
   explanationCard: {
@@ -486,12 +486,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   explanationTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: Colors.light.tint,
   },
   explanationText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     lineHeight: 22,
     color: Colors.light.textSecondary,
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   nextButtonText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 17,
     color: "#FFF",
   },
@@ -540,13 +540,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   finishTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 24,
     color: Colors.light.text,
     textAlign: "center",
   },
   finishSubtext: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 16,
     color: Colors.light.textMuted,
     marginBottom: 20,
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.success,
   },
   finishCompletedLabel: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 15,
     color: Colors.light.text,
     flex: 1,
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   finishCompletedBadgeText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: "#FFF",
   },
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   finishHomeBtnText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 17,
     color: "#FFF",
   },

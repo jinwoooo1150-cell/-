@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 18,
     color: Colors.light.text,
   },
@@ -322,13 +322,13 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   sectionTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 22,
     color: Colors.light.text,
     marginBottom: 2,
   },
   sectionSubtitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: Colors.light.textMuted,
     marginBottom: 20,
@@ -361,12 +361,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   categoryTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 17,
     color: Colors.light.text,
   },
   categorySubtitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: Colors.light.textMuted,
   },
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   categoryCount: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: Colors.light.tint,
   },
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   lockText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 11,
     color: Colors.light.lockedText,
   },

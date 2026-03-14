@@ -53,7 +53,7 @@ function SpeechBubble({ text, size }: { text: string; size: number }) {
       minWidth: 100 * s,
     }, animStyle]}>
       <Text style={{
-        fontFamily: "serif",
+        fontFamily: "NotoSansKR_500Medium",
         fontSize: 10 * s,
         color: Colors.light.text,
         textAlign: "center",

@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 18,
     color: Colors.light.text,
   },
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   headerCountText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: "#FFF",
   },
@@ -288,12 +288,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 17,
     color: Colors.light.text,
   },
   cardMeta: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: Colors.light.textMuted,
   },
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   questionCountText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 12,
     color: Colors.light.textMuted,
   },
@@ -333,12 +333,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   emptyTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 18,
     color: Colors.light.text,
   },
   emptySubtitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 14,
     color: Colors.light.textMuted,
     textAlign: "center",

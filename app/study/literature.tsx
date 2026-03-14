@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerTitle: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 18,
     color: Colors.light.text,
   },
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   badgeDotText: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 9,
     color: "#FFF",
   },

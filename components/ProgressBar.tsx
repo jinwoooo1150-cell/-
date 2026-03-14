@@ -72,12 +72,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   label: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: Colors.light.textSecondary,
   },
   percentage: {
-    fontFamily: "serif",
+    fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
     color: Colors.light.tint,
   },

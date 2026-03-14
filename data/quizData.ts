@@ -97,16 +97,107 @@ export const grandUnitConfig = {
   },
 };
 
+const BROKEN_TEXT_REGEX = /[\uFFFD]|�|���+|ꥼ|찀|su�|i��/g;
+
+function sanitizeText(value?: string): string | undefined {
+  if (!value) return value;
+
+  return value
+    .replace(BROKEN_TEXT_REGEX, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function sanitizeQuiz(quiz: QuizPassage): QuizPassage {
+  return {
+    ...quiz,
+    title: sanitizeText(quiz.title) || quiz.title,
+    author: sanitizeText(quiz.author) || quiz.author,
+    source: sanitizeText(quiz.source) || quiz.source,
+    passage: sanitizeText(quiz.passage) || quiz.passage,
+    originalText: sanitizeText(quiz.originalText),
+    modernText: sanitizeText(quiz.modernText),
+    commentary: sanitizeText(quiz.commentary),
+    narrativeSections: quiz.narrativeSections?.map((section) => ({
+      ...section,
+      title: sanitizeText(section.title) || section.title,
+      summary: sanitizeText(section.summary) || section.summary,
+    })),
+    characterMap: quiz.characterMap
+      ? {
+          ...quiz.characterMap,
+          characters: quiz.characterMap.characters.map((character) => ({
+            ...character,
+            name: sanitizeText(character.name) || character.name,
+            role: sanitizeText(character.role) || character.role,
+            description:
+              sanitizeText(character.description) || character.description,
+          })),
+          relations: quiz.characterMap.relations.map((relation) => ({
+            ...relation,
+            from: sanitizeText(relation.from) || relation.from,
+            to: sanitizeText(relation.to) || relation.to,
+            label: sanitizeText(relation.label) || relation.label,
+          })),
+        }
+      : undefined,
+    questions: quiz.questions.map((question) => ({
+      ...question,
+      statement: sanitizeText(question.statement) || question.statement,
+      explanation: sanitizeText(question.explanation) || question.explanation,
+    })),
+    relatedExams: quiz.relatedExams?.map((relatedExam) => ({
+      ...relatedExam,
+      sourceTitle: sanitizeText(relatedExam.sourceTitle) || relatedExam.sourceTitle,
+      statement: sanitizeText(relatedExam.statement) || relatedExam.statement,
+      explanation: sanitizeText(relatedExam.explanation) || relatedExam.explanation,
+      relatedPassage: sanitizeText(relatedExam.relatedPassage),
+      relatedModernText: sanitizeText(relatedExam.relatedModernText),
+      relatedCommentary: sanitizeText(relatedExam.relatedCommentary),
+      relatedNarrativeSections: relatedExam.relatedNarrativeSections?.map((section) => ({
+        ...section,
+        title: sanitizeText(section.title) || section.title,
+        summary: sanitizeText(section.summary) || section.summary,
+      })),
+      relatedCharacterMap: relatedExam.relatedCharacterMap
+        ? {
+            ...relatedExam.relatedCharacterMap,
+            characters: relatedExam.relatedCharacterMap.characters.map((character) => ({
+              ...character,
+              name: sanitizeText(character.name) || character.name,
+              role: sanitizeText(character.role) || character.role,
+              description:
+                sanitizeText(character.description) || character.description,
+            })),
+            relations: relatedExam.relatedCharacterMap.relations.map((relation) => ({
+              ...relation,
+              from: sanitizeText(relation.from) || relation.from,
+              to: sanitizeText(relation.to) || relation.to,
+              label: sanitizeText(relation.label) || relation.label,
+            })),
+          }
+        : undefined,
+    })),
+  };
+}
+
 // ⚠️ 함수를 파일 상단에 정의하여 'is not a function' 오류 방지
 export function getQuizzesByGrandUnit(grandUnit: GrandUnit): QuizPassage[] {
-  return quizPassages.filter((q) => q.grandUnit === grandUnit);
+  return quizPassages
+    .filter((q) => q.grandUnit === grandUnit)
+    .map((quiz) => sanitizeQuiz(quiz));
 }
 
 export function getQuizzesByCategory(categoryId: string): QuizPassage[] {
-  return quizPassages.filter((q) => q.categoryId === categoryId);
+  return quizPassages
+    .filter((q) => q.categoryId === categoryId)
+    .map((quiz) => sanitizeQuiz(quiz));
 }
 export function getQuizById(id: string): QuizPassage | undefined {
-  return quizPassages.find((q) => q.id === id);
+  const quiz = quizPassages.find((q) => q.id === id);
+  if (!quiz) return undefined;
+  return sanitizeQuiz(quiz);
 }
 
 // 데이터 배열 시작
