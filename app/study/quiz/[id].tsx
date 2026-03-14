@@ -772,15 +772,15 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: "#DFDFDF", marginBottom: 12 },
 
   passageText: {
-    fontSize: 17,
-    lineHeight: 33,
+    fontSize: 10.91,
+    lineHeight: 21,
     color: "#2A2A2A",
     fontFamily:
-      Platform.OS === "ios"
-        ? "Times New Roman"
-        : Platform.OS === "android"
-          ? "serif"
-          : "Georgia, 'Times New Roman', serif",
+      Platform.OS === "web"
+        ? "'신명 중명조', 'Shin Myungjo', 'ShinMyungjo', serif"
+        : Platform.OS === "ios"
+          ? "AppleMyungjo"
+          : "serif",
     letterSpacing: 0.2,
     width: "100%",
     flexShrink: 1,
@@ -828,9 +828,15 @@ const styles = StyleSheet.create({
   qBadgeText: { color: "#FFF", fontWeight: "bold" },
 
   qText: {
-    fontSize: 17,
-    fontWeight: "500",
+    fontSize: 10.91,
+    fontWeight: "400",
     lineHeight: 26,
+    fontFamily:
+      Platform.OS === "web"
+        ? "'신명 중명조', 'Shin Myungjo', 'ShinMyungjo', serif"
+        : Platform.OS === "ios"
+          ? "AppleMyungjo"
+          : "serif",
     width: "100%",
     flexShrink: 1,
     flexWrap: "wrap",
