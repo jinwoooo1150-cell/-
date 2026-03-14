@@ -386,9 +386,14 @@ export default function QuizScreen() {
   const renderPassageArea = () => (
     <View style={styles.passageCard}>
       <View style={styles.passageHeaderRow}>
-        <Text style={styles.passageLabel}>
-          {isModernPoetry ? "작품 전문" : "지문 (전문)"}
-        </Text>
+        <View style={styles.passageTitleGroup}>
+          <View style={styles.passageBullet}>
+            <Ionicons name="star" size={11} color="#B68A28" />
+          </View>
+          <Text style={styles.passageLabel}>
+            {isModernPoetry ? "작품 전문" : "다음 글을 읽고 물음에 답하시오."}
+          </Text>
+        </View>
         {/* 현대어 해설 토글 */}
         {hasModernText && (
           <View style={styles.toggleContainer}>
@@ -728,12 +733,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 12,
+    gap: 10,
+  },
+  passageTitleGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+    minWidth: 0,
+  },
+  passageBullet: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#FCE9A6",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E8C86E",
   },
   passageLabel: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#888",
+    fontSize: 16,
+    color: "#262626",
+    fontFamily: "NotoSansKR_700Bold",
+    flexShrink: 1,
   },
   toggleContainer: {
     flexDirection: "row",
@@ -743,22 +767,31 @@ const styles = StyleSheet.create({
   toggleLabel: {
     fontSize: 12,
     color: "#888",
+    fontFamily: "NotoSansKR_500Medium",
   },
-  divider: { height: 1, backgroundColor: "#EEE", marginBottom: 12 },
+  divider: { height: 1, backgroundColor: "#DFDFDF", marginBottom: 12 },
 
   passageText: {
-    fontSize: 10.91,
-    lineHeight: 20,
-    fontFamily: "신명 중명조",
+    fontSize: 17,
+    lineHeight: 33,
+    color: "#2A2A2A",
+    fontFamily:
+      Platform.OS === "ios"
+        ? "Times New Roman"
+        : Platform.OS === "android"
+          ? "serif"
+          : "Georgia, 'Times New Roman', serif",
+    letterSpacing: 0.2,
     width: "100%",
     flexShrink: 1,
   },
   passageTextBox: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 10,
-    backgroundColor: "#FAFAFA",
-    padding: 12,
+    borderColor: "#D2D2D2",
+    borderRadius: 0,
+    backgroundColor: "#FCFCFA",
+    paddingHorizontal: 14,
+    paddingVertical: 16,
   },
 
   relatedExamButton: {
