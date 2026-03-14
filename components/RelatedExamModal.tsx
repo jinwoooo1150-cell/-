@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Modal,
   View,
@@ -35,6 +35,23 @@ interface RelatedExamModalProps {
 // 탭 타입 정의
 type TabType = "passage" | "modern" | "commentary";
 
+const TAB_LABELS: Record<TabType, string> = {
+  passage: "원문",
+  modern: "현대어",
+  commentary: "해설",
+};
+
+const getSafeText = (value?: string) => {
+  if (!value) return "";
+
+  return value
+    .replace(/\uFFFD+/g, " ")
+    .replace(/�+/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+};
+
 export function RelatedExamModal({
   visible,
   onClose,
@@ -56,10 +73,29 @@ export function RelatedExamModal({
     }
   }, [visible]);
 
-  if (!questions || questions.length === 0) return null;
-
-  const currentQuestion = questions[currentIndex];
+  const currentQuestion = questions[currentIndex] ?? questions[0];
   const isLastQuestion = currentIndex === questions.length - 1;
+
+  const availableTabs = useMemo(() => {
+    if (!currentQuestion) return [];
+
+    return (["passage", "modern", "commentary"] as TabType[]).filter(
+      (tab) => {
+        if (tab === "passage") return Boolean(currentQuestion.relatedPassage);
+        if (tab === "modern") return Boolean(currentQuestion.relatedModernText);
+        return Boolean(currentQuestion.relatedCommentary);
+      },
+    );
+  }, [currentQuestion]);
+
+  useEffect(() => {
+    if (!availableTabs.length) return;
+    if (!availableTabs.includes(activeTab)) {
+      setActiveTab(availableTabs[0]);
+    }
+  }, [activeTab, availableTabs]);
+
+  if (!currentQuestion) return null;
 
   // 탭 변경 핸들러
   const handleTabChange = (tab: TabType) => {
@@ -88,18 +124,23 @@ export function RelatedExamModal({
   const getTabContent = () => {
     switch (activeTab) {
       case "modern":
-        return (
-          currentQuestion.relatedModernText ||
-          "현대어 풀이가 제공되지 않습니다."
-        );
+        return getSafeText(currentQuestion.relatedModernText);
       case "commentary":
-        return (
-          currentQuestion.relatedCommentary || "작품 해설이 제공되지 않습니다."
-        );
+        return getSafeText(currentQuestion.relatedCommentary);
       default:
-        return currentQuestion.relatedPassage || "지문이 없습니다.";
+        return getSafeText(currentQuestion.relatedPassage);
     }
   };
+
+  const tabContent =
+    getTabContent() ||
+    (activeTab === "modern"
+      ? "현대어 풀이가 제공되지 않습니다."
+      : activeTab === "commentary"
+        ? "작품 해설이 제공되지 않습니다."
+        : "지문이 없습니다.");
+
+  const contentParagraphs = tabContent.split("\n").filter(Boolean);
 
   return (
     <Modal
@@ -130,68 +171,43 @@ export function RelatedExamModal({
             contentContainerStyle={styles.contentContainer}
           >
             {/* [수정] 탭 버튼 영역 */}
-            {(currentQuestion.relatedPassage ||
-              currentQuestion.relatedModernText ||
-              currentQuestion.relatedCommentary) && (
+            {availableTabs.length > 0 && (
               <View style={styles.passageContainer}>
                 <View style={styles.tabBar}>
-                  <Pressable
-                    onPress={() => handleTabChange("passage")}
-                    style={[
-                      styles.tabItem,
-                      activeTab === "passage" && styles.activeTabItem,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.tabText,
-                        activeTab === "passage" && styles.activeTabText,
-                      ]}
-                    >
-                      원문
-                    </Text>
-                  </Pressable>
-                  {currentQuestion.relatedModernText && (
+                  {availableTabs.map((tab) => (
                     <Pressable
-                      onPress={() => handleTabChange("modern")}
+                      key={tab}
+                      onPress={() => handleTabChange(tab)}
                       style={[
                         styles.tabItem,
-                        activeTab === "modern" && styles.activeTabItem,
+                        activeTab === tab && styles.activeTabItem,
                       ]}
                     >
                       <Text
                         style={[
                           styles.tabText,
-                          activeTab === "modern" && styles.activeTabText,
+                          activeTab === tab && styles.activeTabText,
                         ]}
                       >
-                        현대어
+                        {TAB_LABELS[tab]}
                       </Text>
                     </Pressable>
-                  )}
-                  {currentQuestion.relatedCommentary && (
-                    <Pressable
-                      onPress={() => handleTabChange("commentary")}
-                      style={[
-                        styles.tabItem,
-                        activeTab === "commentary" && styles.activeTabItem,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.tabText,
-                          activeTab === "commentary" && styles.activeTabText,
-                        ]}
-                      >
-                        해설
-                      </Text>
-                    </Pressable>
-                  )}
+                  ))}
                 </View>
 
-                <View style={styles.passageContent}>
-                  <Text style={styles.passageText}>{getTabContent()}</Text>
-                </View>
+                <ScrollView style={styles.passageContent} nestedScrollEnabled>
+                  {contentParagraphs.map((paragraph, paragraphIndex) => (
+                    <Text
+                      key={`${activeTab}-${paragraphIndex}`}
+                      style={[
+                        styles.passageText,
+                        paragraphIndex < contentParagraphs.length - 1 && styles.passageParagraph,
+                      ]}
+                    >
+                      {paragraph}
+                    </Text>
+                  ))}
+                </ScrollView>
               </View>
             )}
 
@@ -315,8 +331,11 @@ const styles = StyleSheet.create({
   passageText: {
     fontSize: 14,
     color: Grays[800],
-    lineHeight: 22,
+    lineHeight: 24,
     fontFamily: "NotoSansKR_400Regular",
+  },
+  passageParagraph: {
+    marginBottom: 12,
   },
 
   questionBox: { marginBottom: 20 },
