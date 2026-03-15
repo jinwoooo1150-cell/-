@@ -35,17 +35,38 @@ type AnswerState = "unanswered" | "correct" | "incorrect";
 const phaseOrder = [
   "exposition",
   "rising",
-  "climax",
   "falling",
+  "climax",
   "resolution",
 ] as const;
 const phaseLabels: Record<(typeof phaseOrder)[number], string> = {
   exposition: "발단",
   rising: "전개",
+  falling: "위기",
   climax: "절정",
-  falling: "하강",
   resolution: "결말",
 };
+
+const phaseAliases: Record<string, (typeof phaseOrder)[number]> = {
+  exposition: "exposition",
+  "발단": "exposition",
+  도입: "exposition",
+  rising: "rising",
+  전개: "rising",
+  "전개 1": "rising",
+  "전개 2": "rising",
+  falling: "falling",
+  위기: "falling",
+  climax: "climax",
+  절정: "climax",
+  "절정/결말": "climax",
+  resolution: "resolution",
+  결말: "resolution",
+};
+
+function normalizePhase(phase: NarrativeSection["phase"]) {
+  return phaseAliases[phase] ?? null;
+}
 
 // --- Modals ---
 
@@ -118,7 +139,7 @@ function FullPlotModal({
         </View>
         <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
           {phaseOrder.map((phase) => {
-            const section = sections.find((s) => s.phase === phase);
+            const section = sections.find((s) => normalizePhase(s.phase) === phase);
             if (!section) return null;
             return (
               <View key={phase} style={styles.plotSectionItem}>
@@ -278,6 +299,8 @@ export default function QuizScreen() {
     quiz.categoryId === "classic-novel" ||
     quiz.categoryId === "classical-novel";
   const isNovel = isModernNovel || isClassicNovel;
+  const hasCharacterMap = !!quiz.characterMap;
+  const hasNarrativeSections = !!quiz.narrativeSections?.length;
 
   // 지문 표시 로직: 현대어 모드면 modernText, 아니면 passage (전문)
   const passageToDisplay =
@@ -289,7 +312,7 @@ export default function QuizScreen() {
     return (
       <View style={styles.tabRow}>
         {/* 소설류: 인물 관계도 */}
-        {isNovel && quiz.characterMap && (
+        {(isNovel || hasCharacterMap) && quiz.characterMap && (
           <Pressable
             onPress={() => setShowCharacterMap(true)}
             style={styles.tabButton}
@@ -304,7 +327,7 @@ export default function QuizScreen() {
         )}
 
         {/* 소설류: 전체 줄거리 */}
-        {isNovel && quiz.narrativeSections && (
+        {(isNovel || hasNarrativeSections) && hasNarrativeSections && (
           <Pressable
             onPress={() => setShowFullPlot(true)}
             style={styles.tabButton}
