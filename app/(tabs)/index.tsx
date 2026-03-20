@@ -75,8 +75,8 @@ export default function HomeScreen() {
 
         <View style={styles.heroCard}>
           <View style={styles.heroTextGroup}>
-            <Text style={styles.heroOverline}>오늘도 한 걸음</Text>
-            <Text style={styles.heroTitle}>수오 공부법으로 오수를 면하자</Text>
+            <Text style={styles.heroOverline}>교훈</Text>
+            <Text style={styles.heroTitle}>수오 공부법으로{"\n"}오수를 면하자</Text>
           </View>
           <View style={styles.mascotSection}>
             <CheetahMascot size={120} mood="happy" />
@@ -261,18 +261,18 @@ const styles = StyleSheet.create({
   },
   heroTextGroup: {
     flex: 1,
-    gap: 4,
+    gap: 6,
     paddingRight: 8,
   },
   heroOverline: {
     fontFamily: "NotoSansKR_500Medium",
-    fontSize: 12,
-    color: Colors.light.textMuted,
+    fontSize: 18,
+    color: Colors.light.text,
   },
   heroTitle: {
     fontFamily: "NotoSansKR_500Medium",
     fontSize: 17,
-    lineHeight: 22,
+    lineHeight: 24,
     color: Colors.light.text,
   },
   heroDescription: {
