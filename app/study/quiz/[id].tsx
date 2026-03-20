@@ -1,6 +1,6 @@
 // app/study/quiz/[id].tsx
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -168,6 +168,14 @@ function CharacterMapModal({
 }) {
   const insets = useSafeAreaInsets();
 
+  const compactRelations = useMemo(() =>
+    data.relations.map((relation) => ({
+      ...relation,
+      shortLabel:
+        relation.label.length > 18 ? `${relation.label.slice(0, 18).trim()}…` : relation.label,
+    })),
+  [data.relations]);
+
   const getRoleBg = (role: string) => {
     if (role.includes("주인공")) return Colors.light.tint;
     if (role.includes("적대자")) return "#EF4444";
@@ -216,16 +224,29 @@ function CharacterMapModal({
             <Text style={styles.relationSectionTitle}>관계</Text>
           </View>
           <View style={styles.relationList}>
-            {data.relations.map((r, i) => (
-              <View key={i} style={styles.relRow}>
-                <Text style={styles.relCharacterName}>{r.from}</Text>
-                <View style={styles.relConnectorArea}>
-                  <View style={styles.relLabelChip}>
-                    <Text style={styles.relLabelText}>{r.label}</Text>
-                  </View>
-                  <View style={styles.relLine} />
+            {compactRelations.map((r, i) => (
+              <View key={i} style={styles.relCard}>
+                <View style={styles.relNode}>
+                  <Text style={styles.relCharacterName} numberOfLines={1}>
+                    {r.from}
+                  </Text>
                 </View>
-                <Text style={styles.relCharacterName}>{r.to}</Text>
+
+                <View style={styles.relConnectorArea}>
+                  <View style={styles.relLine} />
+                  <View style={styles.relArrowHead} />
+                  <View style={styles.relLabelChip}>
+                    <Text style={styles.relLabelText} numberOfLines={1}>
+                      {r.shortLabel}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.relNode}>
+                  <Text style={styles.relCharacterName} numberOfLines={1}>
+                    {r.to}
+                  </Text>
+                </View>
               </View>
             ))}
           </View>
@@ -1044,47 +1065,73 @@ const styles = StyleSheet.create({
     color: "#111827",
     letterSpacing: -0.3,
   },
-  relationList: { gap: 8 },
-  relRow: {
+  relationList: { gap: 10 },
+  relCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    gap: 10,
+    backgroundColor: "#F9FAFB",
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    padding: 10,
-    borderRadius: 10,
-    gap: 8,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+  },
+  relNode: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   relCharacterName: {
-    fontFamily: "NotoSansKR_700Bold",
-    color: "#111827",
-    fontSize: 15,
-    minWidth: 60,
     textAlign: "center",
+    fontSize: 13,
+    color: Colors.light.text,
+    fontFamily: "NotoSansKR_700Bold",
   },
   relConnectorArea: {
-    flex: 1,
+    width: 96,
     alignItems: "center",
-    paddingHorizontal: 2,
+    justifyContent: "center",
+    position: "relative",
   },
   relLabelChip: {
-    backgroundColor: "#EEF2FF",
-    borderColor: "#C7D2FE",
+    backgroundColor: "#FFF7ED",
     borderWidth: 1,
+    borderColor: "#FED7AA",
     borderRadius: 999,
-    paddingVertical: 3,
-    paddingHorizontal: 10,
-    marginBottom: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    maxWidth: 88,
+    zIndex: 1,
   },
   relLabelText: {
-    fontSize: 12,
-    fontFamily: "NotoSansKR_700Bold",
-    color: "#4338CA",
-    lineHeight: 16,
+    fontSize: 10,
+    color: "#C2410C",
+    fontFamily: "NotoSansKR_500Medium",
   },
   relLine: {
-    height: 1,
-    backgroundColor: "#D1D5DB",
-    width: "100%",
+    position: "absolute",
+    left: 4,
+    right: 14,
+    height: 2,
+    backgroundColor: "#CBD5E1",
+    borderRadius: 999,
+  },
+  relArrowHead: {
+    position: "absolute",
+    right: 4,
+    width: 0,
+    height: 0,
+    borderTopWidth: 6,
+    borderBottomWidth: 6,
+    borderLeftWidth: 8,
+    borderTopColor: "transparent",
+    borderBottomColor: "transparent",
+    borderLeftColor: "#CBD5E1",
   },
 });
