@@ -21,11 +21,11 @@ import Animated, {
 import { CheetahMascot } from "@/components/CheetahMascot";
 import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
+import { getQuizzesByGrandUnit } from "@/data/quizData";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const {
-    dailyProgress,
     getDDay,
     completedWorks,
     subCategories,
@@ -39,7 +39,8 @@ export default function HomeScreen() {
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
   const completedLessons = subCategories.reduce((sum, c) => sum + c.completedLessons, 0);
-  const todayProgress = Math.round(dailyProgress * 100);
+  const totalWorks = getQuizzesByGrandUnit("literature").length;
+  const learningProgress = totalWorks === 0 ? 0 : Math.round((completedWorks.length / totalWorks) * 100);
 
   const vocabScale = useSharedValue(1);
   const vocabPressStyle = useAnimatedStyle(() => ({
@@ -149,19 +150,19 @@ export default function HomeScreen() {
         </Animated.View>
 
         <View style={styles.progressCard}>
-          <View style={styles.progressRow}>
-            <View style={styles.progressItem}>
-              <Text style={styles.progressValue}>{todayProgress}%</Text>
-              <Text style={styles.progressLabel}>오늘 진도</Text>
+          <View style={styles.progressRowSingle}>
+            <View style={styles.progressItemWide}>
+              <Text style={styles.progressValue}>{learningProgress}%</Text>
+              <Text style={styles.progressLabel}>진행률</Text>
             </View>
-            <View style={styles.progressDivider} />
-            <View style={styles.progressItem}>
-              <Text style={styles.progressValue}>{completedWorks.length}</Text>
-              <Text style={styles.progressLabel}>완료 작품</Text>
+            <View style={styles.progressCountBadge}>
+              <Text style={styles.progressCountText}>
+                {completedWorks.length} / {totalWorks} 작품 완료
+              </Text>
             </View>
           </View>
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${todayProgress}%` }]} />
+            <View style={[styles.progressFill, { width: `${learningProgress}%` }]} />
           </View>
         </View>
 
@@ -421,19 +422,28 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  progressRow: {
+  progressRowSingle: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
   },
-  progressItem: {
+  progressItemWide: {
     flex: 1,
-    alignItems: "center",
     gap: 4,
   },
-  progressDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: Colors.light.border,
+  progressCountBadge: {
+    backgroundColor: "#FFF7ED",
+    borderWidth: 1,
+    borderColor: "#FED7AA",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  progressCountText: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 12,
+    color: "#C2410C",
   },
   progressValue: {
     fontFamily: "NotoSansKR_500Medium",

@@ -7,7 +7,6 @@ import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SubCategoryCard } from "@/components/SubCategoryCard";
 import { useStudy } from "@/contexts/StudyContext";
-import { getQuizzesByCategory } from "@/data/quizData";
 import Colors from "@/constants/colors";
 
 const categoryQuizMap: Record<string, string> = {
