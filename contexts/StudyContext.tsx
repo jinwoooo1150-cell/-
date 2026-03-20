@@ -59,7 +59,6 @@ export interface VocabProgress {
 
 interface StudyContextValue {
   dailyProgress: number;
-  streak: number;
   subCategories: SubCategory[];
   completedWorks: string[];
   incorrectNotes: IncorrectNote[];
@@ -162,7 +161,6 @@ function normalizeVocabProgress(raw: Partial<VocabProgress> | null | undefined):
 
 export function StudyProvider({ children }: { children: ReactNode }) {
   const [dailyProgress, setDailyProgress] = useState(0);
-  const [streak, setStreak] = useState(0);
   const [subCategories, setSubCategories] = useState<SubCategory[]>(defaultSubCategories);
   const [completedWorks, setCompletedWorks] = useState<string[]>([]);
   const [incorrectNotes, setIncorrectNotes] = useState<IncorrectNote[]>([]);
@@ -217,7 +215,6 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       if (studyData) {
         const data = JSON.parse(studyData);
         if (data.dailyProgress !== undefined) setDailyProgress(data.dailyProgress);
-        if (data.streak !== undefined) setStreak(data.streak);
         if (data.subCategories) setSubCategories(data.subCategories);
       }
       if (incorrectsData) setIncorrectNotes(JSON.parse(incorrectsData));
@@ -253,7 +250,6 @@ export function StudyProvider({ children }: { children: ReactNode }) {
 
   const saveStudyData = useCallback(async (data: {
     dailyProgress: number;
-    streak: number;
     subCategories: SubCategory[];
   }) => {
     try {
@@ -268,10 +264,10 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       const updated = prev.map((cat) =>
         cat.id === id ? { ...cat, unlocked: true } : cat
       );
-      saveStudyData({ dailyProgress, streak, subCategories: updated });
+      saveStudyData({ dailyProgress, subCategories: updated });
       return updated;
     });
-  }, [dailyProgress, streak, saveStudyData]);
+  }, [dailyProgress, saveStudyData]);
 
   const addProgress = useCallback((id: string, amount: number) => {
     setSubCategories((prev) => {
@@ -286,10 +282,10 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       });
       const newDaily = Math.min(dailyProgress + amount * 0.5, 1);
       setDailyProgress(newDaily);
-      saveStudyData({ dailyProgress: newDaily, streak, subCategories: updated });
+      saveStudyData({ dailyProgress: newDaily, subCategories: updated });
       return updated;
     });
-  }, [dailyProgress, streak, saveStudyData]);
+  }, [dailyProgress, saveStudyData]);
 
   const getDDay = useCallback(() => {
     const now = new Date();
@@ -392,7 +388,6 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       dailyProgress,
-      streak,
       subCategories,
       completedWorks,
       incorrectNotes,
@@ -415,7 +410,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       isVocabCompletedToday,
       resetDailyLearningTime,
     }),
-    [dailyProgress, streak, subCategories, completedWorks, incorrectNotes, bookmarks, learningTime, vocabProgress, unlockCategory, addProgress, getDDay, addCompletedWork, addIncorrectNote, removeIncorrectNote, addBookmark, removeBookmark, isBookmarked, addLearningTime, updateVocabProgress, markVocabCompleted, isVocabCompletedToday, resetDailyLearningTime]
+    [dailyProgress, subCategories, completedWorks, incorrectNotes, bookmarks, learningTime, vocabProgress, unlockCategory, addProgress, getDDay, addCompletedWork, addIncorrectNote, removeIncorrectNote, addBookmark, removeBookmark, isBookmarked, addLearningTime, updateVocabProgress, markVocabCompleted, isVocabCompletedToday, resetDailyLearningTime]
   );
 
   return (

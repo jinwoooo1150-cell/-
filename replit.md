@@ -1,8 +1,8 @@
-# Suolingo
+# Suo
 
 ## Overview
 
-Suolingo is a mobile-first Korean language study app built with Expo/React Native, designed to help students prepare for the Korean CSAT (수능/Suneung) exam. The app focuses on Korean literature study with quiz-based learning featuring O/X (true/false) questions on literary passages (poetry and novels). It has a Duolingo-inspired UI with an orange color scheme, animated cheetah mascot, progress tracking, streak system, and XP rewards.
+Suo is a mobile-first Korean language study app built with Expo/React Native, designed to help students prepare for the Korean CSAT (수능/Suneung) exam. The app focuses on Korean literature study with quiz-based learning featuring O/X (true/false) questions on literary passages (poetry and novels). It has a Duolingo-inspired UI with an orange color scheme, animated cheetah mascot, progress tracking, and XP rewards.
 
 The project uses a full-stack architecture: an Expo React Native frontend (supporting iOS, Android, and web) with an Express.js backend server, PostgreSQL database via Drizzle ORM, and file-based routing through expo-router.
 

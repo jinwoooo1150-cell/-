@@ -42,7 +42,7 @@ function ProfileMenuItem({ icon, title, value, showChevron = true }: ProfileMenu
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { streak, subCategories } = useStudy();
+  const { subCategories } = useStudy();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
@@ -72,11 +72,6 @@ export default function ProfileScreen() {
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <Ionicons name="flame" size={26} color={Colors.light.tint} />
-            <Text style={styles.statValue}>{streak}일</Text>
-            <Text style={styles.statLabel}>연속 학습</Text>
-          </View>
-          <View style={styles.statCard}>
             <Ionicons name="checkmark-done" size={26} color={Colors.light.success} />
             <Text style={styles.statValue}>{completedLessons}/{totalLessons}</Text>
             <Text style={styles.statLabel}>완료 레슨</Text>
@@ -90,7 +85,7 @@ export default function ProfileScreen() {
             <View style={styles.menuDivider} />
             <ProfileMenuItem icon="moon-outline" title="다크 모드" value="자동" />
             <View style={styles.menuDivider} />
-            <ProfileMenuItem icon="help-circle-outline" title="Su-o-lingo 사용법" />
+            <ProfileMenuItem icon="help-circle-outline" title="Suo 사용법" />
             <View style={styles.menuDivider} />
             <ProfileMenuItem icon="information-circle-outline" title="앱 정보" value="v1.0.0" />
           </View>

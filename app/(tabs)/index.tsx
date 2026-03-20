@@ -26,7 +26,6 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const {
     dailyProgress,
-    streak,
     getDDay,
     completedWorks,
     subCategories,
@@ -65,12 +64,8 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.topBar}>
-          <Text style={styles.appTitle}>Su-o-lingo</Text>
+          <Text style={styles.appTitle}>Suo</Text>
           <View style={styles.headerBadgeRow}>
-            <View style={styles.streakBadge}>
-              <Ionicons name="flame" size={16} color={Colors.light.tint} />
-              <Text style={styles.streakText}>{streak}일</Text>
-            </View>
             <View style={styles.xpBadge}>
               <Ionicons name="star" size={14} color="#FFB347" />
               <Text style={styles.xpText}>{completedLessons}</Text>
@@ -165,11 +160,6 @@ export default function HomeScreen() {
               <Text style={styles.progressValue}>{completedWorks.length}</Text>
               <Text style={styles.progressLabel}>완료 작품</Text>
             </View>
-            <View style={styles.progressDivider} />
-            <View style={styles.progressItem}>
-              <Text style={styles.progressValue}>{streak}일</Text>
-              <Text style={styles.progressLabel}>연속 학습</Text>
-            </View>
           </View>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width: `${todayProgress}%` }]} />
@@ -232,27 +222,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-  },
-  streakBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: Colors.light.card,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  streakText: {
-    fontFamily: "NotoSansKR_500Medium",
-    fontSize: 13,
-    color: Colors.light.tint,
   },
   xpBadge: {
     flexDirection: "row",
