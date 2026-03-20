@@ -80,9 +80,7 @@ export default function HomeScreen() {
             <Text style={styles.heroDescription}>짧고 밀도 있는 학습으로 꾸준한 실력을 만들어가요.</Text>
           </View>
           <View style={styles.mascotSection}>
-            <View style={styles.mascotFaceClip}>
-              <CheetahMascot size={130} mood="happy" />
-            </View>
+            <CheetahMascot size={120} mood="happy" />
           </View>
         </View>
 
@@ -287,11 +285,6 @@ const styles = StyleSheet.create({
   mascotSection: {
     alignItems: "center",
     justifyContent: "center",
-  },
-  mascotFaceClip: {
-    width: 130,
-    height: 78,
-    overflow: "hidden",
   },
   ddayCard: {
     borderRadius: 24,
