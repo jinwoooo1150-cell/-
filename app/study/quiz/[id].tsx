@@ -16,9 +16,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import * as Haptics from "expo-haptics";
-import Animated, { FadeInDown, SlideInRight } from "react-native-reanimated";
+import Animated, { FadeInDown, SlideInRight, ZoomIn } from "react-native-reanimated";
 import { ProgressBar } from "@/components/ProgressBar";
-import { CheetahMascot } from "@/components/CheetahMascot";
 import {
   getQuizById,
   CharacterMapData,
@@ -497,19 +496,33 @@ export default function QuizScreen() {
 
       {answerState !== "unanswered" && (
         <Animated.View entering={FadeInDown} style={styles.feedbackSection}>
-          <CheetahMascot
-            size={60}
-            mood={answerState === "correct" ? "happy" : "sad"}
-          />
+          <Animated.View
+            entering={ZoomIn.springify().damping(10).stiffness(200)}
+            style={[
+              styles.oxResultBadge,
+              answerState === "correct"
+                ? styles.oxResultCorrect
+                : styles.oxResultIncorrect,
+            ]}
+          >
+            <Text style={[
+              styles.oxResultText,
+              answerState === "correct"
+                ? styles.oxResultTextCorrect
+                : styles.oxResultTextIncorrect,
+            ]}>
+              {answerState === "correct" ? "O" : "X"}
+            </Text>
+          </Animated.View>
           <View style={styles.explanationBox}>
             <Text
               style={{
-                fontWeight: "bold",
-                color: Colors.light.tint,
+                fontFamily: "NotoSansKR_700Bold",
+                color: answerState === "correct" ? "#00A86B" : "#FF4B4B",
                 marginBottom: 4,
               }}
             >
-              해설
+              {answerState === "correct" ? "정답" : "오답"} · 해설
             </Text>
             <Text style={styles.explanationText} textBreakStrategy="simple">
               {currentQuestion.explanation}
@@ -865,7 +878,34 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
 
-  feedbackSection: { alignItems: "center", gap: 10 },
+  feedbackSection: { alignItems: "center", gap: 14 },
+  oxResultBadge: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  oxResultCorrect: {
+    borderColor: "#00A86B",
+    backgroundColor: "#E6F4EF",
+  },
+  oxResultIncorrect: {
+    borderColor: "#FF4B4B",
+    backgroundColor: "#FFF0F0",
+  },
+  oxResultText: {
+    fontSize: 40,
+    fontFamily: "NotoSansKR_900Black",
+    lineHeight: 48,
+  },
+  oxResultTextCorrect: {
+    color: "#00A86B",
+  },
+  oxResultTextIncorrect: {
+    color: "#FF4B4B",
+  },
   explanationBox: {
     backgroundColor: "#FFF",
     padding: 16,
