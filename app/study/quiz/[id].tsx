@@ -27,6 +27,7 @@ import {
 import { RelatedExamModal } from "@/components/RelatedExamModal";
 import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
+import { renderMarkedPassage } from "@/lib/passageMarkers";
 
 // --- Types & Constants ---
 
@@ -442,7 +443,12 @@ export default function QuizScreen() {
       <View style={styles.divider} />
       <View style={styles.passageTextBox}>
         <Text style={styles.passageText} textBreakStrategy="simple">
-          {passageToDisplay}
+          {renderMarkedPassage(
+            passageToDisplay,
+            currentQuestion.statement,
+            styles.passageText,
+            styles.highlightedPassageText,
+          )}
         </Text>
       </View>
     </View>
@@ -807,6 +813,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     width: "100%",
     flexShrink: 1,
+  },
+  highlightedPassageText: {
+    textDecorationLine: "underline",
+    textDecorationColor: "#B68A28",
+    backgroundColor: "#FFF7E0",
   },
   passageTextBox: {
     borderWidth: 1,

@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/colors";
 import { RelatedExamQuestion } from "@/data/quizData";
+import { renderMarkedPassage } from "@/lib/passageMarkers";
 
 const PRIMARY_COLOR = Colors.light?.tint || "#2f95dc";
 const Grays = {
@@ -140,8 +141,6 @@ export function RelatedExamModal({
         ? "작품 해설이 제공되지 않습니다."
         : "지문이 없습니다.");
 
-  const contentParagraphs = tabContent.split("\n").filter(Boolean);
-
   return (
     <Modal
       visible={visible}
@@ -196,17 +195,16 @@ export function RelatedExamModal({
                 </View>
 
                 <ScrollView style={styles.passageContent} nestedScrollEnabled>
-                  {contentParagraphs.map((paragraph, paragraphIndex) => (
-                    <Text
-                      key={`${activeTab}-${paragraphIndex}`}
-                      style={[
-                        styles.passageText,
-                        paragraphIndex < contentParagraphs.length - 1 && styles.passageParagraph,
-                      ]}
-                    >
-                      {paragraph}
-                    </Text>
-                  ))}
+                  <Text style={styles.passageText}>
+                    {activeTab === "passage"
+                      ? renderMarkedPassage(
+                          tabContent,
+                          currentQuestion.statement,
+                          styles.passageText,
+                          styles.highlightedPassageText,
+                        )
+                      : tabContent}
+                  </Text>
                 </ScrollView>
               </View>
             )}
@@ -334,10 +332,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontFamily: "신명 중명조",
   },
-  passageParagraph: {
-    marginBottom: 12,
+  highlightedPassageText: {
+    textDecorationLine: "underline",
+    textDecorationColor: "#B68A28",
+    backgroundColor: "#FFF7E0",
   },
-
   questionBox: { marginBottom: 20 },
   statement: {
     fontSize: 18,
