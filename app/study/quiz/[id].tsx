@@ -804,12 +804,7 @@ const styles = StyleSheet.create({
     fontSize: 10.91,
     lineHeight: 21,
     color: "#2A2A2A",
-    fontFamily:
-      Platform.OS === "web"
-        ? "'신명 중명조', 'Shin Myungjo', 'ShinMyungjo', serif"
-        : Platform.OS === "ios"
-          ? "AppleMyungjo"
-          : "serif",
+    fontFamily: "NotoSansKR_400Regular",
     letterSpacing: 0.2,
     width: "100%",
     flexShrink: 1,
@@ -837,7 +832,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 20,
   },
-  relatedExamText: { color: "#8B5CF6", fontWeight: "bold", marginRight: 4 },
+  relatedExamText: { color: "#8B5CF6", fontFamily: "NotoSansKR_700Bold", marginRight: 4 },
 
   questionCard: {
     backgroundColor: "#FFF5E6",
@@ -859,18 +854,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
-  qBadgeText: { color: "#FFF", fontWeight: "bold" },
+  qBadgeText: { color: "#FFF", fontFamily: "NotoSansKR_700Bold" },
 
   qText: {
     fontSize: 10.91,
-    fontWeight: "400",
     lineHeight: 26,
-    fontFamily:
-      Platform.OS === "web"
-        ? "'신명 중명조', 'Shin Myungjo', 'ShinMyungjo', serif"
-        : Platform.OS === "ios"
-          ? "AppleMyungjo"
-          : "serif",
+    fontFamily: "NotoSansKR_400Regular",
     width: "100%",
     flexShrink: 1,
     flexWrap: "wrap",
@@ -887,6 +876,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     color: "#333",
+    fontFamily: "NotoSansKR_400Regular",
     width: "100%",
     flexShrink: 1,
   },
@@ -907,7 +897,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  oxText: { fontSize: 24, fontWeight: "900", color: "#FFF" },
+  oxText: { fontSize: 24, fontFamily: "NotoSansKR_900Black", color: "#FFF" },
   nextBtn: {
     backgroundColor: Colors.light.tint,
     height: 56,
@@ -915,7 +905,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  nextBtnText: { fontSize: 18, fontWeight: "bold", color: "#FFF" },
+  nextBtnText: { fontSize: 18, fontFamily: "NotoSansKR_700Bold", color: "#FFF" },
 
   // Split Layout Styles
   splitLayoutContainer: {
@@ -953,8 +943,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#EEE",
   },
-  modalTitle: { fontSize: 18, fontWeight: "bold" },
-  modalContentText: { fontSize: 16, lineHeight: 26 },
+  modalTitle: { fontSize: 18, fontFamily: "NotoSansKR_700Bold" },
+  modalContentText: { fontSize: 16, lineHeight: 26, fontFamily: "NotoSansKR_400Regular" },
   plotSectionItem: {
     marginBottom: 20,
     borderLeftWidth: 3,
@@ -968,9 +958,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginBottom: 4,
   },
-  plotPhaseText: { color: "#FFF", fontSize: 11, fontWeight: "bold" },
-  plotTitle: { fontSize: 15, fontWeight: "bold", marginBottom: 2 },
-  plotSummary: { color: "#555", fontSize: 13 },
+  plotPhaseText: { color: "#FFF", fontSize: 11, fontFamily: "NotoSansKR_700Bold" },
+  plotTitle: { fontSize: 15, fontFamily: "NotoSansKR_700Bold", marginBottom: 2 },
+  plotSummary: { color: "#555", fontSize: 13, fontFamily: "NotoSansKR_400Regular" },
 
   // Character Map Styles
   charGrid: {
@@ -998,9 +988,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginBottom: 4,
   },
-  charRoleText: { color: "#FFF", fontSize: 10, fontWeight: "bold" },
-  charName: { fontWeight: "bold", fontSize: 16, marginBottom: 4 },
-  charDesc: { fontSize: 13, color: "#4B5563", lineHeight: 18 },
+  charRoleText: { color: "#FFF", fontSize: 10, fontFamily: "NotoSansKR_700Bold" },
+  charName: { fontFamily: "NotoSansKR_700Bold", fontSize: 16, marginBottom: 4 },
+  charDesc: { fontSize: 13, color: "#4B5563", lineHeight: 18, fontFamily: "NotoSansKR_400Regular" },
   relationSectionHeader: {
     marginTop: 20,
     marginBottom: 10,
@@ -1010,7 +1000,7 @@ const styles = StyleSheet.create({
   },
   relationSectionTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontFamily: "NotoSansKR_900Black",
     color: "#111827",
     letterSpacing: -0.3,
   },
@@ -1026,7 +1016,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   relCharacterName: {
-    fontWeight: "700",
+    fontFamily: "NotoSansKR_700Bold",
     color: "#111827",
     fontSize: 15,
     minWidth: 60,
@@ -1048,7 +1038,7 @@ const styles = StyleSheet.create({
   },
   relLabelText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontFamily: "NotoSansKR_700Bold",
     color: "#4338CA",
     lineHeight: 16,
   },

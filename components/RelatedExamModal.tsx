@@ -301,8 +301,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
   },
-  badgeText: { color: PRIMARY_COLOR, fontSize: 12, fontWeight: "700" },
-  source: { flex: 1, fontSize: 14, color: Grays[500], fontWeight: "500" },
+  badgeText: { color: PRIMARY_COLOR, fontSize: 12, fontFamily: "NotoSansKR_700Bold" },
+  source: { flex: 1, fontSize: 14, color: Grays[500], fontFamily: "NotoSansKR_500Medium" },
   content: { flex: 1 },
   contentContainer: { padding: 24 },
 
@@ -323,14 +323,14 @@ const styles = StyleSheet.create({
   },
   tabItem: { flex: 1, paddingVertical: 12, alignItems: "center" },
   activeTabItem: { borderBottomWidth: 2, borderBottomColor: PRIMARY_COLOR },
-  tabText: { fontSize: 13, color: Grays[500], fontWeight: "600" },
+  tabText: { fontSize: 13, color: Grays[500], fontFamily: "NotoSansKR_500Medium" },
   activeTabText: { color: PRIMARY_COLOR },
   passageContent: { padding: 16 },
   passageText: {
     fontSize: 10.91,
     color: Grays[800],
     lineHeight: 20,
-    fontFamily: "신명 중명조",
+    fontFamily: "NotoSansKR_400Regular",
   },
   highlightedPassageText: {
     textDecorationLine: "underline",
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   questionBox: { marginBottom: 20 },
   statement: {
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: "NotoSansKR_500Medium",
     color: Grays[900],
     lineHeight: 28,
   },
@@ -359,10 +359,10 @@ const styles = StyleSheet.create({
   },
   correctTag: { backgroundColor: "#E6F4F1" },
   incorrectTag: { backgroundColor: "#FFF0EB" },
-  resultText: { fontSize: 14, fontWeight: "700" },
+  resultText: { fontSize: 14, fontFamily: "NotoSansKR_700Bold" },
   correctText: { color: "#00A86B" },
   incorrectText: { color: "#FF4B4B" },
-  explanation: { fontSize: 15, color: Grays[700], lineHeight: 24 },
+  explanation: { fontSize: 15, color: Grays[700], lineHeight: 24, fontFamily: "NotoSansKR_400Regular" },
   footer: {
     padding: 20,
     borderTopWidth: 1,
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  oxButtonText: { color: "#FFF", fontSize: 20, fontWeight: "800" },
+  oxButtonText: { color: "#FFF", fontSize: 20, fontFamily: "NotoSansKR_900Black" },
   nextButton: {
     backgroundColor: PRIMARY_COLOR,
     height: 50,
@@ -387,5 +387,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  nextButtonText: { color: "#FFF", fontSize: 16, fontWeight: "700" },
+  nextButtonText: { color: "#FFF", fontSize: 16, fontFamily: "NotoSansKR_700Bold" },
 });

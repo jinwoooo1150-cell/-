@@ -8396,7 +8396,7 @@ export const quizPassages: QuizPassage[] = [
     ],
   },
   {
-    id: "modern-novel-6",
+    id: "modern-novel-6b",
     grandUnit: "literature",
     categoryId: "modern-novel",
     title: "불신 시대",
@@ -11444,7 +11444,7 @@ export const quizPassages: QuizPassage[] = [
     ],
   },
   {
-    id: "modern-novel-nuni-omyeon",
+    id: "modern-novel-nuni-omyeon-2",
     grandUnit: "literature",
     categoryId: "modern-novel",
     title: "눈이 오면",
