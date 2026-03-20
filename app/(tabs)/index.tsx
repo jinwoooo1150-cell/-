@@ -76,7 +76,7 @@ export default function HomeScreen() {
         <View style={styles.heroCard}>
           <View style={styles.heroTextGroup}>
             <Text style={styles.heroOverline}>오늘도 한 걸음</Text>
-            <Text style={styles.heroTitle}>수능 문학 감각, 매일 쌓아보세요</Text>
+            <Text style={styles.heroTitle}>수오 공부법으로 오수를 면하자</Text>
             <Text style={styles.heroDescription}>짧고 밀도 있는 학습으로 꾸준한 실력을 만들어가요.</Text>
           </View>
           <View style={styles.mascotSection}>
