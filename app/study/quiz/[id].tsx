@@ -11,6 +11,7 @@ import {
   Modal,
   Switch,
   useWindowDimensions,
+  LayoutChangeEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -282,6 +283,9 @@ export default function QuizScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerState, setAnswerState] = useState<AnswerState>("unanswered");
   const [results, setResults] = useState<boolean[]>([]);
+  const [feedbackSectionY, setFeedbackSectionY] = useState(0);
+
+  const mobileScrollRef = useRef<ScrollView>(null);
 
   // 현대어 풀이 토글 상태
   const [showModern, setShowModern] = useState(false);
@@ -300,6 +304,17 @@ export default function QuizScreen() {
       if (elapsed > 0) addLearningTime(elapsed);
     };
   }, []);
+
+  useEffect(() => {
+    if (isLargeScreen || answerState === "unanswered") return;
+
+    const scrollTarget = Math.max(feedbackSectionY - 24, 0);
+    const frame = requestAnimationFrame(() => {
+      mobileScrollRef.current?.scrollTo({ y: scrollTarget, animated: true });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [answerState, feedbackSectionY, isLargeScreen]);
 
   if (!quiz)
     return (
@@ -415,6 +430,7 @@ export default function QuizScreen() {
     if (currentIndex < totalQuestions - 1) {
       setCurrentIndex((prev) => prev + 1);
       setAnswerState("unanswered");
+      setFeedbackSectionY(0);
     } else {
       addCompletedWork(quiz.id);
       router.replace({
@@ -477,6 +493,10 @@ export default function QuizScreen() {
     </View>
   );
 
+  const handleFeedbackLayout = (event: LayoutChangeEvent) => {
+    setFeedbackSectionY(event.nativeEvent.layout.y);
+  };
+
   // [UI 모듈] 문제 영역
   const renderQuestionArea = () => (
     <>
@@ -521,7 +541,7 @@ export default function QuizScreen() {
       </Animated.View>
 
       {answerState !== "unanswered" && (
-        <Animated.View entering={FadeInDown} style={styles.feedbackSection}>
+        <Animated.View entering={FadeInDown} style={styles.feedbackSection} onLayout={handleFeedbackLayout}>
           <Animated.View
             entering={ZoomIn.springify().damping(10).stiffness(200)}
             style={[
@@ -664,6 +684,7 @@ export default function QuizScreen() {
         // [모바일] 단일 스크롤 레이아웃
         <>
           <ScrollView
+            ref={mobileScrollRef}
             contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 180 }]}
             showsVerticalScrollIndicator={false}
           >
