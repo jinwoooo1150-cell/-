@@ -9,11 +9,11 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Colors from "@/constants/colors";
+import { useStudy } from "@/contexts/StudyContext";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { RelatedExamQuestion } from "@/data/quizData";
 import { renderMarkedPassage } from "@/lib/passageMarkers";
 
-const PRIMARY_COLOR = Colors.light?.tint || "#2f95dc";
 const Grays = {
   50: "#F9FAFB",
   100: "#F3F4F6",
@@ -57,7 +57,11 @@ export function RelatedExamModal({
   visible,
   onClose,
   questions,
+  quizId,
+  parentQuizData,
 }: RelatedExamModalProps) {
+  const theme = useAppTheme();
+  const { addBookmark, removeBookmark, isBookmarked } = useStudy();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSolved, setIsSolved] = useState(false);
   const [isUserCorrect, setIsUserCorrect] = useState(false);
@@ -75,6 +79,7 @@ export function RelatedExamModal({
   }, [visible]);
 
   const currentQuestion = questions[currentIndex] ?? questions[0];
+  const currentBookmarked = currentQuestion ? isBookmarked(currentQuestion.id) : false;
   const isLastQuestion = currentIndex === questions.length - 1;
 
   const availableTabs = useMemo(() => {
@@ -148,31 +153,58 @@ export function RelatedExamModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={styles.container}>
+      <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
+        <View style={[styles.container, { backgroundColor: theme.card }]}>
           {/* Header */}
           <View style={styles.header}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
+            <View style={[styles.badge, { backgroundColor: theme.tint + "22" }]}>
+              <Text style={[styles.badgeText, { color: theme.tint }]}>
                 기출 연동 {currentIndex + 1}/{questions.length}
               </Text>
             </View>
-            <Text style={styles.source} numberOfLines={1}>
+            <Text style={[styles.source, { color: theme.text }]} numberOfLines={1}>
               {currentQuestion.sourceTitle}
             </Text>
-            <TouchableOpacity onPress={onClose} hitSlop={10}>
-              <Ionicons name="close" size={24} color={Grays[500]} />
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                onPress={() => {
+                  if (currentBookmarked) {
+                    removeBookmark(currentQuestion.id);
+                    return;
+                  }
+
+                  addBookmark({
+                    questionId: currentQuestion.id,
+                    quizId: quizId ?? parentQuizData?.id ?? "related-exam",
+                    quizTitle: parentQuizData?.title ?? "연관 기출",
+                    quizAuthor: parentQuizData?.author ?? "기출 문제",
+                    categoryId: parentQuizData?.categoryId ?? "related-exam",
+                    statement: currentQuestion.statement,
+                    isTrue: currentQuestion.isTrue,
+                    explanation: currentQuestion.explanation,
+                    sourceTitle: currentQuestion.sourceTitle,
+                    noteType: "exam",
+                    timestamp: Date.now(),
+                  });
+                }}
+                hitSlop={10}
+              >
+                <Ionicons name={currentBookmarked ? "bookmark" : "bookmark-outline"} size={22} color={theme.tint} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onClose} hitSlop={10}>
+                <Ionicons name="close" size={24} color={theme.textMuted} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <ScrollView
-            style={styles.content}
+            style={[styles.content, { backgroundColor: theme.card }]}
             contentContainerStyle={styles.contentContainer}
           >
             {/* [수정] 탭 버튼 영역 */}
             {availableTabs.length > 0 && (
-              <View style={styles.passageContainer}>
-                <View style={styles.tabBar}>
+              <View style={[styles.passageContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                <View style={[styles.tabBar, { backgroundColor: theme.background }]}>
                   {availableTabs.map((tab) => (
                     <Pressable
                       key={tab}
@@ -180,12 +212,15 @@ export function RelatedExamModal({
                       style={[
                         styles.tabItem,
                         activeTab === tab && styles.activeTabItem,
+                        activeTab === tab && { backgroundColor: theme.card, borderColor: theme.tint },
                       ]}
                     >
                       <Text
                         style={[
                           styles.tabText,
+                          { color: theme.textMuted },
                           activeTab === tab && styles.activeTabText,
+                          activeTab === tab && { color: theme.tint },
                         ]}
                       >
                         {TAB_LABELS[tab]}
@@ -195,7 +230,7 @@ export function RelatedExamModal({
                 </View>
 
                 <ScrollView style={styles.passageContent} nestedScrollEnabled>
-                  <Text style={styles.passageText}>
+                  <Text style={[styles.passageText, { color: theme.textSecondary }]}>
                     {activeTab === "passage"
                       ? renderMarkedPassage(
                           tabContent,
@@ -210,13 +245,13 @@ export function RelatedExamModal({
             )}
 
             {/* 문제 질문 */}
-            <View style={styles.questionBox}>
-              <Text style={styles.statement}>{currentQuestion.statement}</Text>
+            <View style={[styles.questionBox, { backgroundColor: theme.background, borderColor: theme.border }]}>
+              <Text style={[styles.statement, { color: theme.text }]}>{currentQuestion.statement}</Text>
             </View>
 
             {/* 정답 및 해설 */}
             {isSolved && (
-              <View style={styles.answerSection}>
+              <View style={[styles.answerSection, { backgroundColor: theme.background }]}>
                 <View
                   style={[
                     styles.resultTag,
@@ -233,7 +268,7 @@ export function RelatedExamModal({
                     {currentQuestion.isTrue ? "O" : "X"})
                   </Text>
                 </View>
-                <Text style={styles.explanation}>
+                <Text style={[styles.explanation, { color: theme.textSecondary }]}>
                   {currentQuestion.explanation}
                 </Text>
               </View>
@@ -241,11 +276,11 @@ export function RelatedExamModal({
           </ScrollView>
 
           {/* Footer */}
-          <View style={styles.footer}>
+          <View style={[styles.footer, { borderTopColor: theme.border, backgroundColor: theme.card }]}>
             {!isSolved ? (
               <View style={styles.oxButtonContainer}>
                 <Pressable
-                  style={[styles.oxButton, { backgroundColor: PRIMARY_COLOR }]}
+                  style={[styles.oxButton, { backgroundColor: theme.tint }]}
                   onPress={() => handleAnswer("O")}
                 >
                   <Text style={styles.oxButtonText}>O</Text>
@@ -296,7 +331,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   badge: {
-    backgroundColor: PRIMARY_COLOR + "15",
+    backgroundColor: theme.tint + "15",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -379,7 +414,7 @@ const styles = StyleSheet.create({
   },
   oxButtonText: { color: "#FFF", fontSize: 20, fontFamily: "NotoSansKR_900Black" },
   nextButton: {
-    backgroundColor: PRIMARY_COLOR,
+    backgroundColor: theme.tint,
     height: 50,
     borderRadius: 12,
     flexDirection: "row",

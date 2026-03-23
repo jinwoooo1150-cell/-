@@ -15,6 +15,7 @@ interface SubCategory {
 }
 
 export type NoteType = "literature" | "vocab" | "exam";
+export type ThemeMode = "system" | "light" | "dark";
 
 export interface IncorrectNote {
   questionId: string;
@@ -66,6 +67,7 @@ interface StudyContextValue {
   learningTime: number;
   vocabProgress: VocabProgress;
   dailyQuestions: VocabQuestion[];
+  themeMode: ThemeMode;
   unlockCategory: (id: string) => void;
   addProgress: (id: string, amount: number) => void;
   getDDay: () => number;
@@ -80,6 +82,7 @@ interface StudyContextValue {
   markVocabCompleted: () => void;
   isVocabCompletedToday: () => boolean;
   resetDailyLearningTime: () => void;
+  setThemeMode: (mode: ThemeMode) => void;
 }
 
 const StudyContext = createContext<StudyContextValue | null>(null);
@@ -91,6 +94,7 @@ const COMPLETED_KEY = "suneung_completed_works";
 const LEARNING_TIME_KEY = "suneung_learning_time";
 const VOCAB_KEY = "suneung_vocab_progress";
 const VOCAB_USER_KEY = "suneung_vocab_user_key";
+const THEME_MODE_KEY = "suneung_theme_mode";
 
 const TARGET_DATE = new Date(2026, 10, 12);
 
@@ -167,6 +171,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [learningTime, setLearningTime] = useState(0);
   const [vocabProgress, setVocabProgress] = useState<VocabProgress>(defaultVocabProgress);
+  const [themeMode, setThemeModeState] = useState<ThemeMode>("system");
 
   const buildDailyVocabProgress = useCallback((prev: VocabProgress, userKey: string, dateKey: string) => {
     const dailyQuestions = generateDailySet({
@@ -202,7 +207,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
 
   const loadAllData = useCallback(async () => {
     try {
-      const [studyData, incorrectsData, bookmarksData, completedData, timeData, vocabData, storedUserKey] = await Promise.all([
+      const [studyData, incorrectsData, bookmarksData, completedData, timeData, vocabData, storedUserKey, storedThemeMode] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEY),
         AsyncStorage.getItem(INCORRECTS_KEY),
         AsyncStorage.getItem(BOOKMARKS_KEY),
@@ -210,6 +215,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
         AsyncStorage.getItem(LEARNING_TIME_KEY),
         AsyncStorage.getItem(VOCAB_KEY),
         AsyncStorage.getItem(VOCAB_USER_KEY),
+        AsyncStorage.getItem(THEME_MODE_KEY),
       ]);
 
       if (studyData) {
@@ -232,6 +238,10 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       if (!userKey) {
         userKey = `device-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
         await AsyncStorage.setItem(VOCAB_USER_KEY, userKey);
+      }
+
+      if (storedThemeMode === "system" || storedThemeMode === "light" || storedThemeMode === "dark") {
+        setThemeModeState(storedThemeMode);
       }
 
       const parsedVocab = normalizeVocabProgress(vocabData ? JSON.parse(vocabData) as VocabProgress : defaultVocabProgress);
@@ -385,6 +395,11 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     return vocabProgress.completedDate === today;
   }, [vocabProgress.completedDate]);
 
+  const setThemeMode = useCallback(async (mode: ThemeMode) => {
+    setThemeModeState(mode);
+    await AsyncStorage.setItem(THEME_MODE_KEY, mode);
+  }, []);
+
   const value = useMemo(
     () => ({
       dailyProgress,
@@ -395,6 +410,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       learningTime,
       vocabProgress,
       dailyQuestions: vocabProgress.dailyQuestions,
+      themeMode,
       unlockCategory,
       addProgress,
       getDDay,
@@ -409,8 +425,9 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       markVocabCompleted,
       isVocabCompletedToday,
       resetDailyLearningTime,
+      setThemeMode,
     }),
-    [dailyProgress, subCategories, completedWorks, incorrectNotes, bookmarks, learningTime, vocabProgress, unlockCategory, addProgress, getDDay, addCompletedWork, addIncorrectNote, removeIncorrectNote, addBookmark, removeBookmark, isBookmarked, addLearningTime, updateVocabProgress, markVocabCompleted, isVocabCompletedToday, resetDailyLearningTime]
+    [dailyProgress, subCategories, completedWorks, incorrectNotes, bookmarks, learningTime, vocabProgress, themeMode, unlockCategory, addProgress, getDDay, addCompletedWork, addIncorrectNote, removeIncorrectNote, addBookmark, removeBookmark, isBookmarked, addLearningTime, updateVocabProgress, markVocabCompleted, isVocabCompletedToday, resetDailyLearningTime, setThemeMode]
   );
 
   return (
