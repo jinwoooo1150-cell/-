@@ -15,6 +15,7 @@ import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useStudy, BookmarkItem, NoteType } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 type FilterType = "all" | "literature" | "exam";
 
@@ -24,11 +25,12 @@ function getBookmarkType(item: BookmarkItem): NoteType {
 }
 
 function BookmarkCard({ item, index, onDelete }: { item: BookmarkItem; index: number; onDelete: (id: string) => void }) {
+  const theme = useAppTheme();
   const itemType = getBookmarkType(item);
   const isExam = itemType === "exam";
   const correctAnswer = item.isTrue ? "O" : "X";
-  const borderColor = isExam ? "#8B5CF6" : Colors.light.tint;
-  const bookmarkIconColor = isExam ? "#8B5CF6" : Colors.light.tint;
+  const borderColor = isExam ? "#8B5CF6" : theme.tint;
+  const bookmarkIconColor = isExam ? "#8B5CF6" : theme.tint;
 
   const handleDelete = () => {
     if (Platform.OS === "web") {
@@ -52,7 +54,7 @@ function BookmarkCard({ item, index, onDelete }: { item: BookmarkItem; index: nu
   return (
     <Animated.View
       entering={Platform.OS !== "web" ? FadeInDown.delay(index * 80).springify() : undefined}
-      style={[styles.card, { borderLeftColor: borderColor }]}
+      style={[styles.card, { borderLeftColor: borderColor, backgroundColor: theme.card, borderColor: theme.border }]}
     >
       <View style={styles.cardHeader}>
         <View style={styles.cardTitleRow}>
@@ -80,11 +82,11 @@ function BookmarkCard({ item, index, onDelete }: { item: BookmarkItem; index: nu
       <View style={styles.answerRow}>
         <View style={styles.answerTag}>
           <Text style={styles.answerTagLabel}>정답:</Text>
-          <Text style={[styles.answerTagValue, { color: Colors.light.success }]}>{correctAnswer}</Text>
+          <Text style={[styles.answerTagValue, { color: theme.success }]}>{correctAnswer}</Text>
         </View>
       </View>
       <View style={styles.explanationBox}>
-        <Ionicons name="bulb" size={14} color={Colors.light.tint} />
+        <Ionicons name="bulb" size={14} color={theme.tint} />
         <Text style={styles.explanationText}>{item.explanation}</Text>
       </View>
     </Animated.View>
@@ -98,6 +100,7 @@ const filterOptions: { key: FilterType; label: string; icon: string; color: stri
 ];
 
 export default function BookmarksScreen() {
+  const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { bookmarks, removeBookmark } = useStudy();
   const [filter, setFilter] = useState<FilterType>("all");
@@ -116,7 +119,7 @@ export default function BookmarksScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={[styles.header, {
         paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 12,
       }]}>
@@ -127,7 +130,7 @@ export default function BookmarksScreen() {
           }}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color={Colors.light.text} />
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
         </Pressable>
         <Text style={styles.headerTitle}>북마크</Text>
         <View style={styles.countBadge}>
@@ -171,7 +174,7 @@ export default function BookmarksScreen() {
 
       {filteredBookmarks.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="bookmark-outline" size={48} color={Colors.light.textMuted} />
+          <Ionicons name="bookmark-outline" size={48} color={theme.textMuted} />
           <Text style={styles.emptyTitle}>
             {bookmarks.length === 0 ? "북마크가 없습니다" : "해당 유형의 북마크가 없습니다"}
           </Text>

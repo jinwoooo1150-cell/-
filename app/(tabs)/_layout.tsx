@@ -2,10 +2,10 @@ import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
 import { NativeTabs, Icon, Label } from "expo-router/unstable-native-tabs";
 import { BlurView } from "expo-blur";
-import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import Colors from "@/constants/colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 function NativeTabLayout() {
   return (
@@ -27,8 +27,8 @@ function NativeTabLayout() {
 }
 
 function ClassicTabLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const theme = useAppTheme();
+  const isDark = theme.background === "#121212";
   const isWeb = Platform.OS === "web";
   const isIOS = Platform.OS === "ios";
 
@@ -36,8 +36,8 @@ function ClassicTabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.light.tint,
-        tabBarInactiveTintColor: Colors.light.tabIconDefault,
+        tabBarActiveTintColor: theme.tint,
+        tabBarInactiveTintColor: theme.tabIconDefault,
         tabBarLabelStyle: {
           fontFamily: "NotoSansKR_500Medium",
           fontSize: 11,
@@ -46,7 +46,7 @@ function ClassicTabLayout() {
           position: "absolute",
           backgroundColor: isIOS ? "transparent" : isDark ? "#000" : "#fff",
           borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: isDark ? "#333" : Colors.light.border,
+          borderTopColor: theme.border,
           elevation: 0,
           ...(isWeb ? { height: 84 } : {}),
         },
