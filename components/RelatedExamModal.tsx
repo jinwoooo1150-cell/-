@@ -157,14 +157,16 @@ export function RelatedExamModal({
         <View style={[styles.container, { backgroundColor: theme.card }]}>
           {/* Header */}
           <View style={styles.header}>
-            <View style={[styles.badge, { backgroundColor: theme.tint + "22" }]}>
-              <Text style={[styles.badgeText, { color: theme.tint }]}>
-                기출 연동 {currentIndex + 1}/{questions.length}
+            <View style={styles.headerMeta}>
+              <View style={[styles.badge, { backgroundColor: theme.tint + "22" }]}>
+                <Text style={[styles.badgeText, { color: theme.tint }]}>
+                  기출 연동 {currentIndex + 1}/{questions.length}
+                </Text>
+              </View>
+              <Text style={[styles.source, { color: theme.text }]}>
+                {currentQuestion.sourceTitle}
               </Text>
             </View>
-            <Text style={[styles.source, { color: theme.text }]} numberOfLines={1}>
-              {currentQuestion.sourceTitle}
-            </Text>
             <View style={styles.headerActions}>
               <TouchableOpacity
                 onPress={() => {
@@ -323,10 +325,15 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: Grays[200],
+    gap: 12,
+  },
+  headerMeta: {
+    flex: 1,
+    minWidth: 0,
     gap: 8,
   },
   badge: {
@@ -335,8 +342,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   badgeText: { fontSize: 12, fontFamily: "NotoSansKR_700Bold" },
-  source: { flex: 1, fontSize: 14, color: Grays[500], fontFamily: "NotoSansKR_500Medium" },
-  headerActions: { flexDirection: "row", alignItems: "center", gap: 12 },
+  source: {
+    fontSize: 14,
+    color: Grays[500],
+    fontFamily: "NotoSansKR_500Medium",
+    lineHeight: 20,
+    flexShrink: 1,
+  },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 12, paddingTop: 2 },
   content: { flex: 1 },
   contentContainer: { padding: 24 },
 
