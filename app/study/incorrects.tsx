@@ -15,6 +15,7 @@ import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useStudy, IncorrectNote, NoteType } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 type FilterType = "all" | "literature" | "vocab" | "exam";
 
@@ -24,7 +25,7 @@ function getItemType(item: IncorrectNote): NoteType {
   return "literature";
 }
 
-function IncorrectCard({ item, index, onDelete }: { item: IncorrectNote; index: number; onDelete: (id: string) => void }) {
+function IncorrectCard({ item, index, onDelete, theme }: { item: IncorrectNote; index: number; onDelete: (id: string) => void; theme: ReturnType<typeof useAppTheme> }) {
   const itemType = getItemType(item);
   const isVocab = itemType === "vocab";
   const isExam = itemType === "exam";
@@ -56,15 +57,15 @@ function IncorrectCard({ item, index, onDelete }: { item: IncorrectNote; index: 
   return (
     <Animated.View
       entering={Platform.OS !== "web" ? FadeInDown.delay(index * 80).springify() : undefined}
-      style={[styles.card, { borderLeftColor: borderColor }]}
+      style={[styles.card, { borderLeftColor: borderColor, backgroundColor: theme.card }]}
     >
       <View style={styles.cardHeader}>
         <View style={styles.cardTitleRow}>
           <View style={[styles.incorrectBadge, { backgroundColor: badgeColor }]}>
             <Ionicons name={badgeIcon as any} size={12} color="#FFF" />
           </View>
-          <Text style={styles.cardTitle} numberOfLines={1}>{item.quizTitle}</Text>
-          {!isExam && <Text style={styles.cardAuthor}>{item.quizAuthor}</Text>}
+          <Text style={[styles.cardTitle, { color: theme.text }]} numberOfLines={1}>{item.quizTitle}</Text>
+          {!isExam && <Text style={[styles.cardAuthor, { color: theme.textMuted }]}>{item.quizAuthor}</Text>}
         </View>
         <Pressable onPress={handleDelete} hitSlop={8} style={styles.deleteButton}>
           <Ionicons name="trash-outline" size={20} color="#EF4444" />
@@ -78,33 +79,33 @@ function IncorrectCard({ item, index, onDelete }: { item: IncorrectNote; index: 
           <Text style={styles.sourceTagWork}>{item.quizAuthor}</Text>
         </View>
       )}
-      <Text style={styles.statementText}>{item.statement}</Text>
+      <Text style={[styles.statementText, { color: theme.text }]}>{item.statement}</Text>
       {isVocab ? (
         <View style={styles.vocabAnswerColumn}>
-          <View style={styles.vocabAnswerRow}>
-            <Text style={styles.answerTagLabel}>내 답:</Text>
+          <View style={[styles.vocabAnswerRow, { backgroundColor: theme.background }]}>
+            <Text style={[styles.answerTagLabel, { color: theme.textMuted }]}>내 답:</Text>
             <Text style={[styles.vocabAnswerText, { color: "#EF4444" }]}>{item.userAnswer}</Text>
           </View>
-          <View style={styles.vocabAnswerRow}>
-            <Text style={styles.answerTagLabel}>정답:</Text>
-            <Text style={[styles.vocabAnswerText, { color: Colors.light.success }]}>{correctAnswer}</Text>
+          <View style={[styles.vocabAnswerRow, { backgroundColor: theme.background }]}>
+            <Text style={[styles.answerTagLabel, { color: theme.textMuted }]}>정답:</Text>
+            <Text style={[styles.vocabAnswerText, { color: theme.success }]}>{correctAnswer}</Text>
           </View>
         </View>
       ) : (
         <View style={styles.answerRow}>
-          <View style={styles.answerTag}>
-            <Text style={styles.answerTagLabel}>내 답:</Text>
+          <View style={[styles.answerTag, { backgroundColor: theme.background }]}>
+            <Text style={[styles.answerTagLabel, { color: theme.textMuted }]}>내 답:</Text>
             <Text style={[styles.answerTagValue, { color: "#EF4444" }]}>{item.userAnswer}</Text>
           </View>
-          <View style={styles.answerTag}>
-            <Text style={styles.answerTagLabel}>정답:</Text>
-            <Text style={[styles.answerTagValue, { color: Colors.light.success }]}>{correctAnswer}</Text>
+          <View style={[styles.answerTag, { backgroundColor: theme.background }]}>
+            <Text style={[styles.answerTagLabel, { color: theme.textMuted }]}>정답:</Text>
+            <Text style={[styles.answerTagValue, { color: theme.success }]}>{correctAnswer}</Text>
           </View>
         </View>
       )}
-      <View style={styles.explanationBox}>
-        <Ionicons name="bulb" size={14} color={Colors.light.tint} />
-        <Text style={styles.explanationText}>{item.explanation}</Text>
+      <View style={[styles.explanationBox, { backgroundColor: theme.cream }]}>
+        <Ionicons name="bulb" size={14} color={theme.tint} />
+        <Text style={[styles.explanationText, { color: theme.textSecondary }]}>{item.explanation}</Text>
       </View>
     </Animated.View>
   );
@@ -119,6 +120,7 @@ const filterOptions: { key: FilterType; label: string; icon: string; color: stri
 
 export default function IncorrectsScreen() {
   const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
   const { incorrectNotes, removeIncorrectNote } = useStudy();
   const params = useLocalSearchParams<{ type?: FilterType }>();
   const initialFilter = params.type && ["all", "literature", "vocab", "exam"].includes(params.type)
@@ -140,9 +142,11 @@ export default function IncorrectsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={[styles.header, {
         paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 12,
+        backgroundColor: theme.card,
+        borderBottomColor: theme.border,
       }]}>
         <Pressable
           onPress={() => {
@@ -151,16 +155,16 @@ export default function IncorrectsScreen() {
           }}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color={Colors.light.text} />
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>나의 오답</Text>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>나의 오답</Text>
         <View style={styles.countBadge}>
           <Text style={styles.countText}>{incorrectNotes.length}</Text>
         </View>
       </View>
 
       {incorrectNotes.length > 0 && (
-        <View style={styles.filterRow}>
+        <View style={[styles.filterRow, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
           {filterOptions.map((opt) => {
             const isActive = filter === opt.key;
             const count = opt.key === "all"
@@ -175,7 +179,7 @@ export default function IncorrectsScreen() {
                   setFilter(opt.key);
                 }}
                 style={[
-                  styles.filterChip,
+                  styles.filterChip, { borderColor: theme.border, backgroundColor: theme.card },
                   isActive && { backgroundColor: opt.color, borderColor: opt.color },
                 ]}
               >
@@ -184,7 +188,7 @@ export default function IncorrectsScreen() {
                   size={14}
                   color={isActive ? "#FFF" : opt.color}
                 />
-                <Text style={[styles.filterChipText, isActive && { color: "#FFF" }]}>
+                <Text style={[styles.filterChipText, { color: theme.text }, isActive && { color: "#FFF" }]}>
                   {opt.label} {count}
                 </Text>
               </Pressable>
@@ -195,11 +199,11 @@ export default function IncorrectsScreen() {
 
       {filteredNotes.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="checkmark-circle" size={48} color={Colors.light.success} />
-          <Text style={styles.emptyTitle}>
+          <Ionicons name="checkmark-circle" size={48} color={theme.success} />
+          <Text style={[styles.emptyTitle, { color: theme.text }]}>
             {incorrectNotes.length === 0 ? "오답이 없습니다" : "해당 유형의 오답이 없습니다"}
           </Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptySubtitle, { color: theme.textMuted }]}>
             {incorrectNotes.length === 0
               ? "퀴즈를 풀면 틀린 문제가 여기에 저장됩니다"
               : "다른 필터를 선택해보세요"}
@@ -210,7 +214,7 @@ export default function IncorrectsScreen() {
           data={filteredNotes}
           keyExtractor={(item) => item.questionId}
           renderItem={({ item, index }) => (
-            <IncorrectCard item={item} index={index} onDelete={handleDelete} />
+            <IncorrectCard item={item} index={index} onDelete={handleDelete} theme={theme} />
           )}
           contentContainerStyle={[
             styles.listContent,

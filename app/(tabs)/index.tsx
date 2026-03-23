@@ -21,10 +21,12 @@ import Animated, {
 import { CheetahMascot } from "@/components/CheetahMascot";
 import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { getQuizzesByGrandUnit } from "@/data/quizData";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
   const {
     getDDay,
     completedWorks,
@@ -52,7 +54,7 @@ export default function HomeScreen() {
   }));
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
@@ -64,14 +66,14 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.topBar}>
-          <Text style={styles.appTitle}>Suo</Text>
+          <Text style={[styles.appTitle, { color: theme.tint }]}>Suo</Text>
           <View style={styles.headerBadgeRow}>
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 router.push("/study/bookmarks" as any);
               }}
-              style={({ pressed }) => [styles.xpBadge, pressed && { opacity: 0.85 }]}
+              style={({ pressed }) => [styles.xpBadge, { backgroundColor: theme.card, borderColor: theme.border }, pressed && { opacity: 0.85 }]}
             >
               <Ionicons name="bookmark" size={14} color="#3B82F6" />
               <Text style={[styles.xpText, styles.bookmarkText]}>북마크</Text>
@@ -82,10 +84,10 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={styles.heroCard}>
+        <View style={[styles.heroCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.heroTextGroup}>
-            <Text style={styles.heroOverline}>교훈</Text>
-            <Text style={styles.heroTitle}>수오 공부법으로{"\n"}오수를 면하자</Text>
+            <Text style={[styles.heroOverline, { color: theme.tint }]}>교훈</Text>
+            <Text style={[styles.heroTitle, { color: theme.text }]}>수오 공부법으로{"\n"}오수를 면하자</Text>
           </View>
           <View style={styles.mascotSection}>
             <CheetahMascot size={120} mood="happy" />
@@ -157,11 +159,11 @@ export default function HomeScreen() {
           </Pressable>
         </Animated.View>
 
-        <View style={styles.progressCard}>
+        <View style={[styles.progressCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.progressRowSingle}>
             <View style={styles.progressItemWide}>
-              <Text style={styles.progressValue}>{learningProgress}%</Text>
-              <Text style={styles.progressLabel}>진행률</Text>
+              <Text style={[styles.progressValue, { color: theme.text }]}>{learningProgress}%</Text>
+              <Text style={[styles.progressLabel, { color: theme.textMuted }]}>진행률</Text>
             </View>
             <View style={styles.progressCountBadge}>
               <Text style={styles.progressCountText}>
@@ -169,7 +171,7 @@ export default function HomeScreen() {
               </Text>
             </View>
           </View>
-          <View style={styles.progressTrack}>
+          <View style={[styles.progressTrack, { backgroundColor: theme.border }]}>
             <View style={[styles.progressFill, { width: `${learningProgress}%` }]} />
           </View>
         </View>
