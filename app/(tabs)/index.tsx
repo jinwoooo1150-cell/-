@@ -28,9 +28,9 @@ export default function HomeScreen() {
   const {
     getDDay,
     completedWorks,
-    subCategories,
     vocabProgress,
     isVocabCompletedToday,
+    bookmarks,
   } = useStudy();
   const dDay = getDDay();
   const vocabDone = isVocabCompletedToday();
@@ -38,7 +38,6 @@ export default function HomeScreen() {
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
-  const completedLessons = subCategories.reduce((sum, c) => sum + c.completedLessons, 0);
   const totalWorks = getQuizzesByGrandUnit("literature").length;
   const learningProgress = totalWorks === 0 ? 0 : Math.round((completedWorks.length / totalWorks) * 100);
 
@@ -67,10 +66,19 @@ export default function HomeScreen() {
         <View style={styles.topBar}>
           <Text style={styles.appTitle}>Suo</Text>
           <View style={styles.headerBadgeRow}>
-            <View style={styles.xpBadge}>
-              <Ionicons name="star" size={14} color="#FFB347" />
-              <Text style={styles.xpText}>{completedLessons}</Text>
-            </View>
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/study/bookmarks" as any);
+              }}
+              style={({ pressed }) => [styles.xpBadge, pressed && { opacity: 0.85 }]}
+            >
+              <Ionicons name="bookmark" size={14} color="#3B82F6" />
+              <Text style={[styles.xpText, styles.bookmarkText]}>북마크</Text>
+              <View style={styles.bookmarkCountBadge}>
+                <Text style={styles.bookmarkCountText}>{bookmarks.length}</Text>
+              </View>
+            </Pressable>
           </View>
         </View>
 
@@ -242,7 +250,23 @@ const styles = StyleSheet.create({
   xpText: {
     fontFamily: "NotoSansKR_500Medium",
     fontSize: 13,
-    color: "#FFB347",
+    color: Colors.light.text,
+  },
+  bookmarkText: {
+    color: "#2563EB",
+  },
+  bookmarkCountBadge: {
+    minWidth: 20,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    backgroundColor: "#DBEAFE",
+    alignItems: "center",
+  },
+  bookmarkCountText: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 11,
+    color: "#1D4ED8",
   },
   heroCard: {
     backgroundColor: "#FFF",

@@ -152,7 +152,10 @@ function sanitizeQuiz(quiz: QuizPassage): QuizPassage {
       sourceTitle: sanitizeText(relatedExam.sourceTitle) || relatedExam.sourceTitle,
       statement: sanitizeText(relatedExam.statement) || relatedExam.statement,
       explanation: sanitizeText(relatedExam.explanation) || relatedExam.explanation,
-      relatedPassage: sanitizeText(relatedExam.relatedPassage),
+      relatedPassage:
+        sanitizeText(relatedExam.relatedPassage) ||
+        sanitizeText(quiz.originalText) ||
+        sanitizeText(quiz.passage),
       relatedModernText: sanitizeText(relatedExam.relatedModernText),
       relatedCommentary: sanitizeText(relatedExam.relatedCommentary),
       relatedNarrativeSections: relatedExam.relatedNarrativeSections?.map((section) => ({

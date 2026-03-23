@@ -10,7 +10,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { CheetahMascot } from "@/components/CheetahMascot";
-import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
 
 interface ProfileMenuItemProps {
@@ -42,13 +41,8 @@ function ProfileMenuItem({ icon, title, value, showChevron = true }: ProfileMenu
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { subCategories } = useStudy();
-
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
-
-  const completedLessons = subCategories.reduce((sum, c) => sum + c.completedLessons, 0);
-  const totalLessons = subCategories.reduce((sum, c) => sum + c.totalLessons, 0);
 
   return (
     <View style={styles.container}>
@@ -66,15 +60,12 @@ export default function ProfileScreen() {
           <View style={styles.avatarContainer}>
             <CheetahMascot size={70} />
           </View>
-          <Text style={styles.userName}>수험생</Text>
-          <Text style={styles.userLevel}>Level 5</Text>
-        </View>
-
-        <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <Ionicons name="checkmark-done" size={26} color={Colors.light.success} />
-            <Text style={styles.statValue}>{completedLessons}/{totalLessons}</Text>
-            <Text style={styles.statLabel}>완료 레슨</Text>
+          <View style={styles.motivationCard}>
+            <Text style={styles.motivationEyebrow}>오늘의 한마디</Text>
+            <Text style={styles.motivationTitle}>꾸준함이 결국 실력을 만듭니다.</Text>
+            <Text style={styles.motivationBody}>
+              하루 10분이라도 좋으니, 오늘의 공부를 끝까지 이어 가 보세요.
+            </Text>
           </View>
         </View>
 
@@ -106,54 +97,42 @@ const styles = StyleSheet.create({
   profileHeader: {
     alignItems: "center",
     marginBottom: 24,
-    gap: 6,
+    gap: 14,
   },
   avatarContainer: {
     marginBottom: 8,
   },
-  userName: {
-    fontFamily: "NotoSansKR_500Medium",
-    fontSize: 24,
-    color: Colors.light.text,
-  },
-  userLevel: {
-    fontFamily: "NotoSansKR_500Medium",
-    fontSize: 14,
-    color: Colors.light.tint,
-    backgroundColor: Colors.light.cream,
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  statsGrid: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 28,
-  },
-  statCard: {
-    flex: 1,
+  motivationCard: {
+    width: "100%",
     backgroundColor: Colors.light.card,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-    gap: 6,
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
   },
-  statValue: {
+  motivationEyebrow: {
     fontFamily: "NotoSansKR_500Medium",
-    fontSize: 18,
+    fontSize: 12,
+    color: Colors.light.tint,
+  },
+  motivationTitle: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 22,
+    lineHeight: 30,
     color: Colors.light.text,
   },
-  statLabel: {
+  motivationBody: {
     fontFamily: "NotoSansKR_500Medium",
-    fontSize: 11,
+    fontSize: 14,
+    lineHeight: 21,
     color: Colors.light.textMuted,
-    textAlign: "center",
   },
   menuSection: {
     gap: 14,
