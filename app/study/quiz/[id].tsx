@@ -263,6 +263,7 @@ function CharacterMapModal({
 export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
 
   // 화면 크기 감지 (태블릿 가로모드 대응)
   const { width } = useWindowDimensions();
