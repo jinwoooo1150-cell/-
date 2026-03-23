@@ -26,6 +26,7 @@ import {
 import { RelatedExamModal } from "@/components/RelatedExamModal";
 import { useStudy } from "@/contexts/StudyContext";
 import Colors from "@/constants/colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { renderMarkedPassage } from "@/lib/passageMarkers";
 
 // --- Types & Constants ---
@@ -83,6 +84,7 @@ function SimpleTextModal({
   content: string;
 }) {
   const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
   return (
     <Modal
       visible={visible}
@@ -98,7 +100,7 @@ function SimpleTextModal({
         <View style={styles.modalHeader}>
           <Text style={styles.modalTitle}>{title}</Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={28} color={Colors.light.text} />
+            <Ionicons name="close" size={28} color={theme.text} />
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={{ padding: 20 }}>
@@ -300,7 +302,7 @@ export default function QuizScreen() {
 
   if (!quiz)
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <Text>Quiz not found</Text>
       </View>
     );
@@ -341,7 +343,7 @@ export default function QuizScreen() {
             <Ionicons
               name="people-outline"
               size={16}
-              color={Colors.light.tint}
+              color={theme.tint}
             />
             <Text style={styles.tabButtonText}>인물 관계도</Text>
           </Pressable>
@@ -356,7 +358,7 @@ export default function QuizScreen() {
             <Ionicons
               name="git-network-outline"
               size={16}
-              color={Colors.light.tint}
+              color={theme.tint}
             />
             <Text style={styles.tabButtonText}>전체 줄거리</Text>
           </Pressable>
@@ -371,7 +373,7 @@ export default function QuizScreen() {
             <Ionicons
               name="document-text-outline"
               size={16}
-              color={Colors.light.tint}
+              color={theme.tint}
             />
             <Text style={styles.tabButtonText}>작품 해설</Text>
           </Pressable>
@@ -488,29 +490,31 @@ export default function QuizScreen() {
           </View>
           <Pressable
             onPress={() => {
-              isBookmarked(currentQuestion.id)
-                ? removeBookmark(currentQuestion.id)
-                : addBookmark({
-                    questionId: currentQuestion.id,
-                    quizId: quiz.id,
-                    quizTitle: quiz.title,
-                    quizAuthor: quiz.author,
-                    categoryId: quiz.categoryId,
-                    statement: currentQuestion.statement,
-                    isTrue: currentQuestion.isTrue,
-                    explanation: currentQuestion.explanation,
-                    timestamp: Date.now(),
-                  });
+              if (isBookmarked(currentQuestion.id)) {
+                removeBookmark(currentQuestion.id);
+              } else {
+                addBookmark({
+                  questionId: currentQuestion.id,
+                  quizId: quiz.id,
+                  quizTitle: quiz.title,
+                  quizAuthor: quiz.author,
+                  categoryId: quiz.categoryId,
+                  statement: currentQuestion.statement,
+                  isTrue: currentQuestion.isTrue,
+                  explanation: currentQuestion.explanation,
+                  timestamp: Date.now(),
+                });
+              }
             }}
           >
             <Ionicons
               name={currentBookmarked ? "bookmark" : "bookmark-outline"}
               size={22}
-              color={Colors.light.tint}
+              color={theme.tint}
             />
           </Pressable>
         </View>
-        <Text style={styles.qText} textBreakStrategy="simple">
+        <Text style={[styles.qText, { color: theme.text }]} textBreakStrategy="simple">
           {currentQuestion.statement}
         </Text>
       </Animated.View>
@@ -535,7 +539,7 @@ export default function QuizScreen() {
               {answerState === "correct" ? "O" : "X"}
             </Text>
           </Animated.View>
-          <View style={styles.explanationBox}>
+          <View style={[styles.explanationBox, { backgroundColor: theme.cream }]}>
             <Text
               style={{
                 fontFamily: "NotoSansKR_700Bold",
@@ -545,7 +549,7 @@ export default function QuizScreen() {
             >
               {answerState === "correct" ? "정답" : "오답"} · 해설
             </Text>
-            <Text style={styles.explanationText} textBreakStrategy="simple">
+            <Text style={[styles.explanationText, { color: theme.textSecondary }]} textBreakStrategy="simple">
               {currentQuestion.explanation}
             </Text>
           </View>
@@ -583,7 +587,7 @@ export default function QuizScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
       <View
         style={[
@@ -591,21 +595,23 @@ export default function QuizScreen() {
           {
             paddingTop:
               Platform.OS === "android" ? insets.top + 10 : insets.top,
+            borderColor: theme.border,
+            backgroundColor: theme.card,
           },
         ]}
       >
         <Pressable onPress={() => router.back()} style={styles.closeButton}>
-          <Ionicons name="close" size={28} color={Colors.light.text} />
+          <Ionicons name="close" size={28} color={theme.text} />
         </Pressable>
         <View style={styles.headerProgressContainer}>
           <View style={styles.progressBarWrapper}>
             <ProgressBar
               progress={progress}
               height={8}
-              color={Colors.light.tint}
+              color={theme.tint}
             />
           </View>
-          <Text style={styles.counter}>
+          <Text style={[styles.counter, { color: theme.tint }]}>
             {currentIndex + (answerState !== "unanswered" ? 1 : 0)}/
             {totalQuestions}
           </Text>
@@ -657,7 +663,7 @@ export default function QuizScreen() {
         // [모바일] 단일 스크롤 레이아웃
         <>
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 180 }]}
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.infoSection}>

@@ -20,6 +20,7 @@ import Animated, {
 import { useStudy } from "@/contexts/StudyContext";
 import { quizPassages } from "@/data/quizData";
 import Colors from "@/constants/colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 interface LitCategoryItemProps {
   title: string;
@@ -136,6 +137,7 @@ function LitCategoryItem({
 
 export default function StudyScreen() {
   const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
   const { incorrectNotes, bookmarks, completedWorks } = useStudy();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
@@ -210,7 +212,7 @@ export default function StudyScreen() {
   ];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
@@ -222,8 +224,8 @@ export default function StudyScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.pageTitle}>학습</Text>
-        <Text style={styles.pageSubtitle}>문학 갈래별 학습</Text>
+        <Text style={[styles.pageTitle, { color: theme.text }]}>학습</Text>
+        <Text style={[styles.pageSubtitle, { color: theme.textMuted }]}>문학 갈래별 학습</Text>
 
         <View style={styles.actionCardsRow}>
           <Pressable
@@ -232,7 +234,7 @@ export default function StudyScreen() {
               router.push("/study/incorrects" as any);
             }}
             style={({ pressed }) => [
-              styles.actionCard,
+              styles.actionCard, { backgroundColor: theme.card, borderColor: theme.border },
               pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
             ]}
           >
@@ -245,8 +247,8 @@ export default function StudyScreen() {
                 color={Colors.light.tint}
               />
             </View>
-            <Text style={styles.actionTitle}>나의 오답</Text>
-            <Text style={styles.actionCount}>{incorrectNotes.length}개</Text>
+            <Text style={[styles.actionTitle, { color: theme.text }]}>나의 오답</Text>
+            <Text style={[styles.actionCount, { color: theme.textMuted }]}>{incorrectNotes.length}개</Text>
           </Pressable>
           <Pressable
             onPress={() => {
@@ -254,7 +256,7 @@ export default function StudyScreen() {
               router.push("/study/bookmarks" as any);
             }}
             style={({ pressed }) => [
-              styles.actionCard,
+              styles.actionCard, { backgroundColor: theme.card, borderColor: theme.border },
               pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
             ]}
           >
@@ -263,8 +265,8 @@ export default function StudyScreen() {
             >
               <Ionicons name="bookmark" size={22} color="#3B82F6" />
             </View>
-            <Text style={styles.actionTitle}>북마크</Text>
-            <Text style={styles.actionCount}>{bookmarks.length}개</Text>
+            <Text style={[styles.actionTitle, { color: theme.text }]}>북마크</Text>
+            <Text style={[styles.actionCount, { color: theme.textMuted }]}>{bookmarks.length}개</Text>
           </Pressable>
         </View>
 
