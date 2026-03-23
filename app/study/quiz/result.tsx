@@ -74,7 +74,6 @@ export default function QuizResultScreen() {
   const totalCount = parseInt(total || "0", 10);
   const resultsArr: boolean[] = resultsStr ? JSON.parse(resultsStr) : [];
   const correctCount = resultsArr.filter(Boolean).length;
-  const percentage = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
 
   const mascotBounce = useSharedValue(0);
 
@@ -82,7 +81,7 @@ export default function QuizResultScreen() {
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
   useEffect(() => {
-    if (percentage >= 60) {
+    if (correctCount === totalCount && totalCount > 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     mascotBounce.value = withSequence(
@@ -96,10 +95,10 @@ export default function QuizResultScreen() {
   }));
 
   const getMessage = () => {
-    if (percentage === 100) return "완벽해요!";
-    if (percentage >= 80) return "훌륭해요!";
-    if (percentage >= 60) return "잘했어요!";
-    if (percentage >= 40) return "조금만 더!";
+    if (totalCount === 0) return "수고했어요!";
+    if (correctCount === totalCount) return "완벽해요!";
+    if (correctCount >= Math.ceil(totalCount * 0.7)) return "훌륭해요!";
+    if (correctCount >= Math.ceil(totalCount * 0.4)) return "잘했어요!";
     return "다시 도전해요!";
   };
 
@@ -107,7 +106,7 @@ export default function QuizResultScreen() {
 
   return (
     <View style={styles.container}>
-      {percentage >= 60 &&
+      {correctCount === totalCount && totalCount > 0 &&
         Array.from({ length: 12 }).map((_, i) => (
           <ConfettiDot
             key={i}
@@ -147,26 +146,15 @@ export default function QuizResultScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.scoreCard}
           >
-            <Text style={styles.scorePercentage}>{percentage}%</Text>
-            <View style={styles.scoreDetails}>
-              <View style={styles.scoreRow}>
-                <View style={styles.scoreItem}>
-                  <Ionicons name="checkmark-circle" size={22} color={Colors.light.success} />
-                  <Text style={styles.scoreValue}>{correctCount}</Text>
-                  <Text style={styles.scoreLabel}>정답</Text>
-                </View>
-                <View style={styles.scoreDivider} />
-                <View style={styles.scoreItem}>
-                  <Ionicons name="close-circle" size={22} color="#FF6B6B" />
-                  <Text style={styles.scoreValue}>{totalCount - correctCount}</Text>
-                  <Text style={styles.scoreLabel}>오답</Text>
-                </View>
-                <View style={styles.scoreDivider} />
-                <View style={styles.scoreItem}>
-                  <Ionicons name="layers" size={22} color="rgba(255,255,255,0.8)" />
-                  <Text style={styles.scoreValue}>{totalCount}</Text>
-                  <Text style={styles.scoreLabel}>전체</Text>
-                </View>
+            <View style={styles.scoreSummaryRow}>
+              <View style={styles.scoreSummaryIcon}>
+                <Ionicons name="book-outline" size={24} color="#FFF" />
+              </View>
+              <View style={styles.scoreSummaryTextGroup}>
+                <Text style={styles.scoreSummaryTitle}>문제를 모두 풀었어요</Text>
+                <Text style={styles.scoreSummaryDescription}>
+                  총 {totalCount}문제를 끝까지 완료했습니다.
+                </Text>
               </View>
             </View>
           </LinearGradient>
