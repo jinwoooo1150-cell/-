@@ -219,7 +219,6 @@ export function RelatedExamModal({
                         style={[
                           styles.tabText,
                           { color: theme.textMuted },
-                          activeTab === tab && styles.activeTabText,
                           activeTab === tab && { color: theme.tint },
                         ]}
                       >
@@ -293,7 +292,7 @@ export function RelatedExamModal({
                 </Pressable>
               </View>
             ) : (
-              <Pressable style={styles.nextButton} onPress={handleNext}>
+              <Pressable style={[styles.nextButton, { backgroundColor: theme.tint }]} onPress={handleNext}>
                 <Text style={styles.nextButtonText}>
                   {isLastQuestion ? "닫기" : "다음 문제"}
                 </Text>
@@ -331,13 +330,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   badge: {
-    backgroundColor: theme.tint + "15",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
-  badgeText: { color: PRIMARY_COLOR, fontSize: 12, fontFamily: "NotoSansKR_700Bold" },
+  badgeText: { fontSize: 12, fontFamily: "NotoSansKR_700Bold" },
   source: { flex: 1, fontSize: 14, color: Grays[500], fontFamily: "NotoSansKR_500Medium" },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 12 },
   content: { flex: 1 },
   contentContainer: { padding: 24 },
 
@@ -357,9 +356,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   tabItem: { flex: 1, paddingVertical: 12, alignItems: "center" },
-  activeTabItem: { borderBottomWidth: 2, borderBottomColor: PRIMARY_COLOR },
+  activeTabItem: { borderBottomWidth: 2 },
   tabText: { fontSize: 13, color: Grays[500], fontFamily: "NotoSansKR_500Medium" },
-  activeTabText: { color: PRIMARY_COLOR },
   passageContent: { padding: 16 },
   passageText: {
     fontSize: 10.91,
@@ -414,7 +412,6 @@ const styles = StyleSheet.create({
   },
   oxButtonText: { color: "#FFF", fontSize: 20, fontFamily: "NotoSansKR_900Black" },
   nextButton: {
-    backgroundColor: theme.tint,
     height: 50,
     borderRadius: 12,
     flexDirection: "row",
