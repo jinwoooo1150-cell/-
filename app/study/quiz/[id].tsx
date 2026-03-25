@@ -86,6 +86,32 @@ function SimpleTextModal({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
+  const formattedParagraphs = useMemo(() => {
+    const normalized = content.replace(/\r\n/g, "\n").trim();
+    if (!normalized) return [];
+
+    const explicitParagraphs = normalized
+      .split(/\n{2,}|\n/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+
+    if (explicitParagraphs.length > 1) {
+      return explicitParagraphs;
+    }
+
+    const sentences = normalized.match(/[^.!?\n]+[.!?]?/g)?.map((line) => line.trim()).filter(Boolean) ?? [];
+
+    if (sentences.length <= 2) {
+      return [normalized];
+    }
+
+    const autoParagraphs: string[] = [];
+    for (let i = 0; i < sentences.length; i += 2) {
+      autoParagraphs.push(sentences.slice(i, i + 2).join(" "));
+    }
+    return autoParagraphs;
+  }, [content]);
+
   return (
     <Modal
       visible={visible}
@@ -104,8 +130,20 @@ function SimpleTextModal({
             <Ionicons name="close" size={28} color={theme.text} />
           </Pressable>
         </View>
-        <ScrollView contentContainerStyle={{ padding: 20 }}>
-          <Text style={styles.modalContentText}>{content}</Text>
+        <ScrollView contentContainerStyle={styles.modalScrollContent}>
+          <View style={styles.modalContentCard}>
+            {formattedParagraphs.map((paragraph, index) => (
+              <Text
+                key={`${paragraph.slice(0, 16)}-${index}`}
+                style={[
+                  styles.modalContentText,
+                  index < formattedParagraphs.length - 1 && styles.modalContentParagraph,
+                ]}
+              >
+                {paragraph}
+              </Text>
+            ))}
+          </View>
         </ScrollView>
       </View>
     </Modal>
@@ -1026,7 +1064,27 @@ const styles = StyleSheet.create({
     borderColor: "#EEE",
   },
   modalTitle: { fontSize: 18, fontFamily: "NotoSansKR_700Bold" },
-  modalContentText: { fontSize: 16, lineHeight: 26, fontFamily: "NotoSansKR_400Regular" },
+  modalScrollContent: {
+    padding: 20,
+    paddingBottom: 28,
+  },
+  modalContentCard: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+  },
+  modalContentText: {
+    fontSize: 16,
+    lineHeight: 30,
+    color: "#1E293B",
+    fontFamily: "NotoSansKR_400Regular",
+  },
+  modalContentParagraph: {
+    marginBottom: 14,
+  },
   plotSectionItem: {
     marginBottom: 20,
     borderLeftWidth: 3,
