@@ -40,7 +40,7 @@ export default function VocabDaysScreen() {
     router.push({
       pathname: "/study/vocab-test",
       params: { day: String(day) },
-    } as any);
+    });
   };
 
   const days = Array.from({ length: totalDays }, (_, i) => i + 1);

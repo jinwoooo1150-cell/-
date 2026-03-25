@@ -330,7 +330,7 @@ export default function VocabTestScreen() {
             router.push({
               pathname: "/study/incorrects",
               params: { type: "vocab" },
-            } as any);
+            });
           }}
           style={styles.incorrectButton}
         >

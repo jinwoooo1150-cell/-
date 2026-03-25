@@ -141,7 +141,7 @@ export default function HomeScreen() {
             }}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              router.push("/study/vocab-days" as any);
+              router.push("/study/vocab-days");
             }}
           >
             <Animated.View style={vocabPressStyle}>
