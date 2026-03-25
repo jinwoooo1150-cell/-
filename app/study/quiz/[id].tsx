@@ -431,7 +431,10 @@ export default function QuizScreen() {
       setFeedbackSectionY(0);
     } else {
       addCompletedWork(quiz.id);
-      router.replace("/study/works");
+      router.replace({
+        pathname: "/study/works",
+        params: { categoryId: quiz.categoryId },
+      });
     }
   };
 
