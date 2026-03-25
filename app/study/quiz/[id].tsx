@@ -523,7 +523,7 @@ export default function QuizScreen() {
             <Text
               style={[
                 styles.toggleLabel,
-                showModern && { color: Colors.light.tint, fontWeight: "bold" },
+                showModern && { color: Colors.light.tint, fontFamily: "NotoSansKR_700Bold" },
               ]}
             >
               현대어 해설
