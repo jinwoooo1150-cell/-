@@ -187,8 +187,7 @@ export default function QuizResultScreen() {
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.back();
-              router.back();
+              router.replace("/study/literature");
             }}
             style={({ pressed }) => [
               styles.secondaryButton,
