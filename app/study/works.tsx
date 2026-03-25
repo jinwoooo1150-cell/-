@@ -193,8 +193,20 @@ export default function WorksScreen() {
             size={48}
             color={Colors.light.textMuted}
           />
-          <Text style={styles.emptyTitle}>준비 중입니다</Text>
-          <Text style={styles.emptySubtitle}>곧 새로운 지문이 추가됩니다</Text>
+          <Text style={styles.emptyTitle}>학습 완료!</Text>
+          <Text style={styles.emptySubtitle}>모든 작품 학습을 마쳤습니다.</Text>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/study/literature");
+            }}
+            style={({ pressed }) => [
+              styles.emptyActionButton,
+              pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+            ]}
+          >
+            <Text style={styles.emptyActionButtonText}>목록으로</Text>
+          </Pressable>
         </View>
       ) : (
         <FlatList
@@ -342,5 +354,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.textMuted,
     textAlign: "center",
+  },
+  emptyActionButton: {
+    marginTop: 14,
+    minWidth: 124,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+    borderRadius: 12,
+    backgroundColor: Colors.light.tint,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyActionButtonText: {
+    fontFamily: "NotoSansKR_500Medium",
+    fontSize: 15,
+    color: "#FFF",
   },
 });
