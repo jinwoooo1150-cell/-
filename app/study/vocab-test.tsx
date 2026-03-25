@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import Animated, {
   useSharedValue,
@@ -23,6 +23,8 @@ import Animated, {
 import { ProgressBar } from "@/components/ProgressBar";
 import { CheetahMascot } from "@/components/CheetahMascot";
 import { useStudy } from "@/contexts/StudyContext";
+import { classicPoetryVocab } from "@/data/vocabData";
+import { generateDaySet } from "@/lib/vocab/generateDaySet";
 import Colors from "@/constants/colors";
 
 function ChoiceButton({
@@ -40,25 +42,28 @@ function ChoiceButton({
 }) {
   const scale = useSharedValue(1);
 
-  const bgColor = state === "correct"
-    ? Colors.light.success
-    : state === "incorrect"
-      ? "#EF4444"
+  const bgColor =
+    state === "correct"
+      ? Colors.light.success
+      : state === "incorrect"
+        ? "#EF4444"
+        : state === "dimmed"
+          ? "#E8E0DA"
+          : Colors.light.card;
+
+  const textColor =
+    state === "correct" || state === "incorrect"
+      ? "#FFF"
       : state === "dimmed"
-        ? "#E8E0DA"
-        : Colors.light.card;
+        ? Colors.light.textMuted
+        : Colors.light.text;
 
-  const textColor = state === "correct" || state === "incorrect"
-    ? "#FFF"
-    : state === "dimmed"
-      ? Colors.light.textMuted
-      : Colors.light.text;
-
-  const borderColor = state === "correct"
-    ? Colors.light.success
-    : state === "incorrect"
-      ? "#EF4444"
-      : Colors.light.border;
+  const borderColor =
+    state === "correct"
+      ? Colors.light.success
+      : state === "incorrect"
+        ? "#EF4444"
+        : Colors.light.border;
 
   const handlePressIn = () => {
     if (disabled) return;
@@ -82,8 +87,16 @@ function ChoiceButton({
       onPress={onPress}
       disabled={disabled}
     >
-      <Animated.View style={[styles.choiceButton, { backgroundColor: bgColor, borderColor }, buttonStyle]}>
-        <Text style={[styles.choiceIndex, { color: textColor }]}>{labels[index]}</Text>
+      <Animated.View
+        style={[
+          styles.choiceButton,
+          { backgroundColor: bgColor, borderColor },
+          buttonStyle,
+        ]}
+      >
+        <Text style={[styles.choiceIndex, { color: textColor }]}>
+          {labels[index]}
+        </Text>
         <Text style={[styles.choiceLabel, { color: textColor }]}>{label}</Text>
       </Animated.View>
     </Pressable>
@@ -114,52 +127,68 @@ function CompletionCheckmark() {
 
 export default function VocabTestScreen() {
   const insets = useSafeAreaInsets();
-  const { dailyQuestions, updateVocabProgress, addIncorrectNote, markVocabCompleted, isVocabCompletedToday } = useStudy();
+  const { day: dayParam } = useLocalSearchParams<{ day?: string }>();
+  const { markDayCompleted, isVocabDayCompleted, addIncorrectNote } = useStudy();
+
+  const day = dayParam ? parseInt(dayParam, 10) : 1;
+
+  const questions = useMemo(
+    () => generateDaySet(day, classicPoetryVocab),
+    [day]
+  );
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
 
-  const totalQuestions = dailyQuestions.length;
-  const currentQuestion = dailyQuestions[currentIndex];
-  const progress = totalQuestions === 0 ? 0 : (currentIndex + (isAnswered ? 1 : 0)) / totalQuestions;
+  const totalQuestions = questions.length;
+  const currentQuestion = questions[currentIndex];
+  const progress =
+    totalQuestions === 0
+      ? 0
+      : (currentIndex + (isAnswered ? 1 : 0)) / totalQuestions;
 
   useEffect(() => {
-    if (isVocabCompletedToday()) {
+    if (isVocabDayCompleted(day)) {
       setIsFinished(true);
     }
-  }, [isVocabCompletedToday]);
+  }, [day, isVocabDayCompleted]);
 
-  const handleSelectAnswer = useCallback((index: number) => {
-    if (isAnswered || !currentQuestion) return;
-    setSelectedIndex(index);
-    setIsAnswered(true);
+  const handleSelectAnswer = useCallback(
+    (index: number) => {
+      if (isAnswered || !currentQuestion) return;
+      setSelectedIndex(index);
+      setIsAnswered(true);
 
-    const isCorrect = index === currentQuestion.correctIndex;
-    if (isCorrect) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      updateVocabProgress(currentQuestion.id);
-    } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      addIncorrectNote({
-        questionId: `vocab-${currentQuestion.id}`,
-        quizId: "vocab-classic-poetry",
-        quizTitle: "고전시가 어휘",
-        quizAuthor: currentQuestion.word,
-        categoryId: "vocab",
-        statement: `"${currentQuestion.word}"의 뜻은?`,
-        isTrue: false,
-        explanation: currentQuestion.explanation,
-        userAnswer: currentQuestion.options[index],
-        correctAnswer: currentQuestion.options[currentQuestion.correctIndex],
-        timestamp: Date.now(),
-      });
-    }
-  }, [isAnswered, currentQuestion, updateVocabProgress, addIncorrectNote]);
+      const isCorrect = index === currentQuestion.correctIndex;
+      if (isCorrect) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setCorrectCount((prev) => prev + 1);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        addIncorrectNote({
+          questionId: `vocab-${currentQuestion.id}`,
+          quizId: `vocab-classic-poetry-day${day}`,
+          quizTitle: `고전시가 어휘 ${day}일차`,
+          quizAuthor: currentQuestion.word,
+          categoryId: "vocab",
+          statement: `"${currentQuestion.word}"의 뜻은?`,
+          isTrue: false,
+          explanation: currentQuestion.explanation,
+          userAnswer: currentQuestion.options[index],
+          correctAnswer:
+            currentQuestion.options[currentQuestion.correctIndex],
+          timestamp: Date.now(),
+        });
+      }
+    },
+    [isAnswered, currentQuestion, day, addIncorrectNote]
+  );
 
   const handleNext = useCallback(() => {
     if (!currentQuestion) return;
@@ -169,46 +198,77 @@ export default function VocabTestScreen() {
       setSelectedIndex(null);
       setIsAnswered(false);
     } else {
-      markVocabCompleted();
+      markDayCompleted(day);
       setIsFinished(true);
     }
-  }, [currentIndex, currentQuestion, totalQuestions, markVocabCompleted]);
-
+  }, [currentIndex, currentQuestion, totalQuestions, markDayCompleted, day]);
 
   if (!currentQuestion && !isFinished) {
     return (
       <View style={styles.container}>
-        <View style={[styles.finishContent, {
-          paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 40,
-          paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20,
-        }]}>
-          <Text style={styles.finishTitle}>오늘의 문제를 준비 중이에요</Text>
-          <Text style={styles.finishSubtext}>잠시 후 다시 시도해 주세요.</Text>
+        <View
+          style={[
+            styles.finishContent,
+            {
+              paddingTop:
+                (Platform.OS === "web" ? webTopInset : insets.top) + 40,
+              paddingBottom:
+                (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20,
+            },
+          ]}
+        >
+          <Ionicons name="warning-outline" size={48} color={Colors.light.tint} />
+          <Text style={styles.finishTitle}>{day}일차 문제가 없어요</Text>
+          <Text style={styles.finishSubtext}>다른 날짜를 선택해 주세요.</Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [
+              styles.finishHomeBtn,
+              pressed && { opacity: 0.9 },
+            ]}
+          >
+            <Ionicons name="arrow-back" size={20} color="#FFF" />
+            <Text style={styles.finishHomeBtnText}>돌아가기</Text>
+          </Pressable>
         </View>
       </View>
     );
   }
 
   if (isFinished) {
+    const finalCorrect = isVocabDayCompleted(day)
+      ? totalQuestions
+      : correctCount;
     return (
       <View style={styles.container}>
-        <View style={[styles.finishContent, {
-          paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 40,
-          paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20,
-        }]}>
+        <View
+          style={[
+            styles.finishContent,
+            {
+              paddingTop:
+                (Platform.OS === "web" ? webTopInset : insets.top) + 40,
+              paddingBottom:
+                (Platform.OS === "web" ? webBottomInset : insets.bottom) + 20,
+            },
+          ]}
+        >
           <CompletionCheckmark />
           <View style={styles.finishMascotRow}>
             <CheetahMascot size={70} />
           </View>
-          <Text style={styles.finishTitle}>오늘의 어휘 학습 완료!</Text>
-          <Text style={styles.finishSubtext}>내일 새로운 세트가 자동으로 열려요.</Text>
+          <Text style={styles.finishTitle}>{day}일차 완료!</Text>
+          <Text style={styles.finishSubtext}>
+            {totalQuestions}문제 중 {Math.min(finalCorrect, totalQuestions)}문제 정답
+          </Text>
 
           <View style={styles.finishCompletedCard}>
             <Ionicons name="sparkles" size={24} color={Colors.light.tint} />
-            <Text style={styles.finishCompletedLabel}>고전시가 어휘 테스트</Text>
+            <Text style={styles.finishCompletedLabel}>
+              고전시가 어휘 {day}일차
+            </Text>
             <View style={styles.finishCompletedBadge}>
               <Ionicons name="checkmark" size={16} color="#FFF" />
-              <Text style={styles.finishCompletedBadgeText}>오늘 완료</Text>
+              <Text style={styles.finishCompletedBadgeText}>완료</Text>
             </View>
           </View>
 
@@ -217,17 +277,22 @@ export default function VocabTestScreen() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.back();
             }}
-            style={({ pressed }) => [styles.finishHomeBtn, pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }]}
+            style={({ pressed }) => [
+              styles.finishHomeBtn,
+              pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+            ]}
           >
-            <Ionicons name="home" size={20} color="#FFF" />
-            <Text style={styles.finishHomeBtnText}>홈으로 돌아가기</Text>
+            <Ionicons name="arrow-back" size={20} color="#FFF" />
+            <Text style={styles.finishHomeBtnText}>목록으로 돌아가기</Text>
           </Pressable>
         </View>
       </View>
     );
   }
 
-  const getChoiceState = (index: number): "default" | "correct" | "incorrect" | "dimmed" => {
+  const getChoiceState = (
+    index: number
+  ): "default" | "correct" | "incorrect" | "dimmed" => {
     if (!isAnswered) return "default";
     if (index === currentQuestion.correctIndex) return "correct";
     if (index === selectedIndex) return "incorrect";
@@ -236,13 +301,21 @@ export default function VocabTestScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, {
-        paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 8,
-      }]}>
-        <Pressable onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          router.back();
-        }} style={styles.closeButton}>
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: (Platform.OS === "web" ? webTopInset : insets.top) + 8,
+          },
+        ]}
+      >
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
+          style={styles.closeButton}
+        >
           <Ionicons name="close" size={28} color={Colors.light.text} />
         </Pressable>
         <View style={styles.progressWrapper}>
@@ -254,19 +327,35 @@ export default function VocabTestScreen() {
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push({ pathname: "/study/incorrects", params: { type: "vocab" } });
+            router.push({
+              pathname: "/study/incorrects",
+              params: { type: "vocab" },
+            } as any);
           }}
           style={styles.incorrectButton}
         >
-          <Ionicons name="document-text-outline" size={20} color={Colors.light.textMuted} />
+          <Ionicons
+            name="document-text-outline"
+            size={20}
+            color={Colors.light.textMuted}
+          />
         </Pressable>
+      </View>
+
+      <View style={styles.dayBadgeRow}>
+        <View style={styles.dayBadge}>
+          <Text style={styles.dayBadgeText}>{day}일차</Text>
+        </View>
       </View>
 
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 120 },
+          {
+            paddingBottom:
+              (Platform.OS === "web" ? webBottomInset : insets.bottom) + 120,
+          },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -274,7 +363,11 @@ export default function VocabTestScreen() {
           <Text style={styles.wordLabel}>다음 어휘의 뜻은?</Text>
           <Text style={styles.wordText}>{currentQuestion.word}</Text>
           <View style={styles.exampleBox}>
-            <Ionicons name="chatbubble-outline" size={14} color={Colors.light.textMuted} />
+            <Ionicons
+              name="chatbubble-outline"
+              size={14}
+              color={Colors.light.textMuted}
+            />
             <Text style={styles.exampleText}>{currentQuestion.example}</Text>
           </View>
         </View>
@@ -294,21 +387,45 @@ export default function VocabTestScreen() {
 
         {isAnswered && (
           <Animated.View
-            entering={Platform.OS !== "web" ? FadeInDown.duration(400).springify() : undefined}
+            entering={
+              Platform.OS !== "web"
+                ? FadeInDown.duration(400).springify()
+                : undefined
+            }
             style={styles.feedbackSection}
           >
-            <View style={[styles.feedbackBadge, {
-              backgroundColor: selectedIndex === currentQuestion.correctIndex ? Colors.light.success : "#EF4444",
-            }]}>
+            <View
+              style={[
+                styles.feedbackBadge,
+                {
+                  backgroundColor:
+                    selectedIndex === currentQuestion.correctIndex
+                      ? Colors.light.success
+                      : "#EF4444",
+                },
+              ]}
+            >
               <Ionicons
-                name={selectedIndex === currentQuestion.correctIndex ? "checkmark" : "close"}
+                name={
+                  selectedIndex === currentQuestion.correctIndex
+                    ? "checkmark"
+                    : "close"
+                }
                 size={24}
                 color="#FFF"
               />
             </View>
-            <Text style={[styles.feedbackLabel, {
-              color: selectedIndex === currentQuestion.correctIndex ? Colors.light.success : "#EF4444",
-            }]}>
+            <Text
+              style={[
+                styles.feedbackLabel,
+                {
+                  color:
+                    selectedIndex === currentQuestion.correctIndex
+                      ? Colors.light.success
+                      : "#EF4444",
+                },
+              ]}
+            >
               {selectedIndex === currentQuestion.correctIndex ? "정답!" : "오답"}
             </Text>
             <View style={styles.explanationCard}>
@@ -316,7 +433,9 @@ export default function VocabTestScreen() {
                 <Ionicons name="bulb" size={16} color={Colors.light.tint} />
                 <Text style={styles.explanationTitle}>해설</Text>
               </View>
-              <Text style={styles.explanationText}>{currentQuestion.explanation}</Text>
+              <Text style={styles.explanationText}>
+                {currentQuestion.explanation}
+              </Text>
             </View>
           </Animated.View>
         )}
@@ -324,10 +443,16 @@ export default function VocabTestScreen() {
 
       {isAnswered && (
         <Animated.View
-          entering={Platform.OS !== "web" ? FadeIn.duration(300) : undefined}
-          style={[styles.bottomBar, {
-            paddingBottom: (Platform.OS === "web" ? webBottomInset : insets.bottom) + 16,
-          }]}
+          entering={
+            Platform.OS !== "web" ? FadeIn.duration(300) : undefined
+          }
+          style={[
+            styles.bottomBar,
+            {
+              paddingBottom:
+                (Platform.OS === "web" ? webBottomInset : insets.bottom) + 16,
+            },
+          ]}
         >
           <Pressable
             onPress={handleNext}
@@ -384,12 +509,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  dayBadgeRow: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  dayBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#FFF7ED",
+    borderColor: "#FED7AA",
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  dayBadgeText: {
+    fontFamily: "NotoSansKR_700Bold",
+    fontSize: 13,
+    color: "#C2410C",
+  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 16,
   },
   wordCard: {
     backgroundColor: Colors.light.card,
@@ -415,10 +559,11 @@ const styles = StyleSheet.create({
     fontFamily: "NotoSansKR_500Medium",
     fontSize: 32,
     color: Colors.light.tint,
+    textAlign: "center",
   },
   exampleBox: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 6,
     backgroundColor: Colors.light.cream,
     paddingHorizontal: 14,

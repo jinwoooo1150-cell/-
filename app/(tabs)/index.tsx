@@ -31,13 +31,13 @@ export default function HomeScreen() {
   const {
     getDDay,
     completedWorks,
-    vocabProgress,
-    isVocabCompletedToday,
-    incorrectNotes,
+    completedVocabDays,
     bookmarks,
   } = study;
   const dDay = getDDay();
-  const vocabDone = isVocabCompletedToday();
+  const TOTAL_VOCAB_DAYS = 40;
+  const vocabCompletedCount = completedVocabDays.length;
+  const allVocabDone = vocabCompletedCount >= TOTAL_VOCAB_DAYS;
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
@@ -134,36 +134,34 @@ export default function HomeScreen() {
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <Pressable
             onPressIn={() => {
-              if (!vocabDone) vocabScale.value = withSpring(0.97, { damping: 15 });
+              vocabScale.value = withSpring(0.97, { damping: 15 });
             }}
             onPressOut={() => {
               vocabScale.value = withSpring(1, { damping: 15 });
             }}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              if (!vocabDone) {
-                router.push("/study/vocab-test" as any);
-              }
+              router.push("/study/vocab-days" as any);
             }}
           >
             <Animated.View style={vocabPressStyle}>
               <LinearGradient
-                colors={vocabDone ? ["#58CC02", "#46A302"] : ["#FF9640", "#FFB347"]}
+                colors={allVocabDone ? ["#58CC02", "#46A302"] : ["#FF9640", "#FFB347"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.vocabCard}
               >
                 <View style={styles.vocabCardContent}>
                   <View style={styles.vocabIconBox}>
-                    <Ionicons name={vocabDone ? "checkmark-circle" : "sparkles"} size={28} color="#FFF" />
+                    <Ionicons name={allVocabDone ? "checkmark-circle" : "sparkles"} size={28} color="#FFF" />
                   </View>
                   <View style={styles.vocabTextSection}>
-                    <Text style={styles.vocabTitle}>오늘의 고전시가 어휘 테스트</Text>
+                    <Text style={styles.vocabTitle}>고전시가 어휘 테스트</Text>
                     <Text style={styles.vocabProgress}>
-                      {vocabProgress.learnedCount} / {vocabProgress.totalCount} 어휘 학습
+                      {vocabCompletedCount} / {TOTAL_VOCAB_DAYS}일차 완료
                     </Text>
                   </View>
-                  {vocabDone ? (
+                  {allVocabDone ? (
                     <View style={styles.vocabCheckBadge}>
                       <Ionicons name="checkmark" size={22} color="#FFF" />
                     </View>

@@ -37,7 +37,7 @@ export default function GuideClassicPoetryScreen() {
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push("/study/vocab-test" as any);
+              router.push("/study/vocab-days" as any);
             }}
             style={[styles.secondaryCta, { borderColor: theme.border, backgroundColor: theme.card }]}
           >

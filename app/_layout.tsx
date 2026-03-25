@@ -33,6 +33,7 @@ function RootLayoutNav() {
       <Stack.Screen name="study/incorrects" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="study/bookmarks" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="study/vocab-test" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="study/vocab-days" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="guide/index" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="guide/genre" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="guide/ox" options={{ headerShown: false, animation: "slide_from_right" }} />
