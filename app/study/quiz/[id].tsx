@@ -282,7 +282,6 @@ export default function QuizScreen() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerState, setAnswerState] = useState<AnswerState>("unanswered");
-  const [results, setResults] = useState<boolean[]>([]);
   const [feedbackSectionY, setFeedbackSectionY] = useState(0);
 
   const mobileScrollRef = useRef<ScrollView>(null);
@@ -423,7 +422,6 @@ export default function QuizScreen() {
         timestamp: Date.now(),
       });
     }
-    setResults((prev) => [...prev, isCorrect]);
   };
 
   const handleNext = () => {
@@ -433,15 +431,7 @@ export default function QuizScreen() {
       setFeedbackSectionY(0);
     } else {
       addCompletedWork(quiz.id);
-      router.replace({
-        pathname: "/study/quiz/result",
-        params: {
-          quizId: quiz.id,
-          results: JSON.stringify(results),
-          title: quiz.title,
-          total: totalQuestions.toString(),
-        },
-      });
+      router.replace("/study/works");
     }
   };
 
@@ -600,7 +590,7 @@ export default function QuizScreen() {
       ) : (
         <Pressable onPress={handleNext} style={styles.nextBtn}>
           <Text style={styles.nextBtnText}>
-            {currentIndex < totalQuestions - 1 ? "다음 문제" : "결과 보기"}
+            {currentIndex < totalQuestions - 1 ? "다음 문제" : "학습 완료"}
           </Text>
         </Pressable>
       )}
