@@ -208,14 +208,23 @@ function CharacterMapModal({
   data: CharacterMapData;
 }) {
   const insets = useSafeAreaInsets();
+  const [selectedRelationIndex, setSelectedRelationIndex] = useState<number | null>(null);
 
   const compactRelations = useMemo(() =>
     data.relations.map((relation) => ({
       ...relation,
       shortLabel:
-        relation.label.length > 18 ? `${relation.label.slice(0, 18).trim()}…` : relation.label,
+        relation.label.length > 30 ? `${relation.label.slice(0, 30).trim()}…` : relation.label,
     })),
   [data.relations]);
+
+  useEffect(() => {
+    if (!visible) return;
+    setSelectedRelationIndex(data.relations.length > 0 ? 0 : null);
+  }, [visible, data.relations.length]);
+
+  const selectedRelation =
+    selectedRelationIndex !== null ? compactRelations[selectedRelationIndex] : null;
 
   const getRoleBg = (role: string) => {
     if (role.includes("주인공")) return Colors.light.tint;
@@ -266,7 +275,14 @@ function CharacterMapModal({
           </View>
           <View style={styles.relationList}>
             {compactRelations.map((r, i) => (
-              <View key={i} style={styles.relCard}>
+              <Pressable
+                key={i}
+                style={[
+                  styles.relCard,
+                  selectedRelationIndex === i && styles.relCardSelected,
+                ]}
+                onPress={() => setSelectedRelationIndex(i)}
+              >
                 <View style={styles.relNode}>
                   <Text style={styles.relCharacterName} numberOfLines={1}>
                     {r.from}
@@ -277,7 +293,7 @@ function CharacterMapModal({
                   <View style={styles.relLine} />
                   <View style={styles.relArrowHead} />
                   <View style={styles.relLabelChip}>
-                    <Text style={styles.relLabelText} numberOfLines={1}>
+                    <Text style={styles.relLabelText} numberOfLines={2}>
                       {r.shortLabel}
                     </Text>
                   </View>
@@ -288,9 +304,22 @@ function CharacterMapModal({
                     {r.to}
                   </Text>
                 </View>
-              </View>
+              </Pressable>
             ))}
           </View>
+
+          {selectedRelation && (
+            <View style={styles.relationDetailCard}>
+              <View style={styles.relationDetailHeader}>
+                <Ionicons name="information-circle-outline" size={16} color="#9A3412" />
+                <Text style={styles.relationDetailTitle}>관계 상세</Text>
+              </View>
+              <Text style={styles.relationDetailRoute}>
+                {selectedRelation.from} → {selectedRelation.to}
+              </Text>
+              <Text style={styles.relationDetailLabel}>{selectedRelation.label}</Text>
+            </View>
+          )}
         </ScrollView>
       </View>
     </Modal>
@@ -1156,6 +1185,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 14,
   },
+  relCardSelected: {
+    borderColor: "#FDBA74",
+    backgroundColor: "#FFF7ED",
+  },
   relNode: {
     flex: 1,
     minWidth: 0,
@@ -1173,7 +1206,7 @@ const styles = StyleSheet.create({
     fontFamily: "NotoSansKR_700Bold",
   },
   relConnectorArea: {
-    width: 96,
+    width: 118,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
@@ -1182,16 +1215,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF7ED",
     borderWidth: 1,
     borderColor: "#FED7AA",
-    borderRadius: 999,
+    borderRadius: 10,
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    maxWidth: 88,
+    paddingVertical: 5,
+    maxWidth: 108,
     zIndex: 1,
+    transform: [{ translateY: -12 }],
+    minHeight: 34,
+    justifyContent: "center",
   },
   relLabelText: {
     fontSize: 10,
     color: "#C2410C",
     fontFamily: "NotoSansKR_500Medium",
+    textAlign: "center",
+    lineHeight: 13,
   },
   relLine: {
     position: "absolute",
@@ -1212,5 +1250,35 @@ const styles = StyleSheet.create({
     borderTopColor: "transparent",
     borderBottomColor: "transparent",
     borderLeftColor: "#CBD5E1",
+  },
+  relationDetailCard: {
+    marginTop: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#FED7AA",
+    backgroundColor: "#FFF7ED",
+    padding: 12,
+    gap: 6,
+  },
+  relationDetailHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  relationDetailTitle: {
+    fontSize: 13,
+    color: "#9A3412",
+    fontFamily: "NotoSansKR_700Bold",
+  },
+  relationDetailRoute: {
+    fontSize: 12,
+    color: "#7C2D12",
+    fontFamily: "NotoSansKR_700Bold",
+  },
+  relationDetailLabel: {
+    fontSize: 13,
+    color: "#7C2D12",
+    lineHeight: 20,
+    fontFamily: "NotoSansKR_400Regular",
   },
 });
