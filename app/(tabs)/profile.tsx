@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import * as Haptics from "expo-haptics";
 import { CheetahMascot } from "@/components/CheetahMascot";
 import { ThemeMode, useStudy } from "@/contexts/StudyContext";
 import { getThemeLabel, useAppTheme } from "@/hooks/useAppTheme";
@@ -80,7 +82,14 @@ export default function ProfileScreen() {
               onPress={() => setThemeMode(nextThemeMode)}
             />
             <View style={[styles.menuDivider, { backgroundColor: theme.border }]} />
-            <ProfileMenuItem icon="help-circle-outline" title="Suo 사용법" />
+            <ProfileMenuItem
+              icon="help-circle-outline"
+              title="Suo 사용법"
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/guide" as any);
+              }}
+            />
             <View style={[styles.menuDivider, { backgroundColor: theme.border }]} />
             <ProfileMenuItem icon="information-circle-outline" title="앱 정보" value="v1.0.0" />
           </View>
