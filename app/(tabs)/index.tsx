@@ -32,6 +32,7 @@ export default function HomeScreen() {
     getDDay,
     completedWorks,
     completedVocabDays,
+    incorrectNotes,
     bookmarks,
   } = study;
   const dDay = getDDay();
