@@ -624,7 +624,7 @@ export default function QuizScreen() {
             <Text
               style={{
                 fontFamily: "NotoSansKR_700Bold",
-                color: answerState === "correct" ? "#00A86B" : "#FF4B4B",
+                color: answerState === "correct" ? theme.tint : "#FF4B4B",
                 marginBottom: 4,
               }}
             >
@@ -997,8 +997,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   oxResultCorrect: {
-    borderColor: "#00A86B",
-    backgroundColor: "#E6F4EF",
+    borderColor: Colors.light.tint,
+    backgroundColor: "#FFF3E0",
   },
   oxResultIncorrect: {
     borderColor: "#FF4B4B",
@@ -1010,7 +1010,7 @@ const styles = StyleSheet.create({
     lineHeight: 48,
   },
   oxResultTextCorrect: {
-    color: "#00A86B",
+    color: Colors.light.tint,
   },
   oxResultTextIncorrect: {
     color: "#FF4B4B",
