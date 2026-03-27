@@ -28,7 +28,6 @@ function NativeTabLayout() {
 
 function ClassicTabLayout() {
   const theme = useAppTheme();
-  const isDark = theme.background === "#121212";
   const isWeb = Platform.OS === "web";
   const isIOS = Platform.OS === "ios";
 
@@ -44,7 +43,7 @@ function ClassicTabLayout() {
         },
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : isDark ? "#000" : "#fff",
+          backgroundColor: isIOS ? "transparent" : "#fff",
           borderTopWidth: isWeb ? 1 : 0,
           borderTopColor: theme.border,
           elevation: 0,
@@ -54,14 +53,14 @@ function ClassicTabLayout() {
           isIOS ? (
             <BlurView
               intensity={100}
-              tint={isDark ? "dark" : "light"}
+              tint="light"
               style={StyleSheet.absoluteFill}
             />
           ) : isWeb ? (
             <View
               style={[
                 StyleSheet.absoluteFill,
-                { backgroundColor: isDark ? "#000" : "#fff" },
+                { backgroundColor: "#fff" },
               ]}
             />
           ) : null,

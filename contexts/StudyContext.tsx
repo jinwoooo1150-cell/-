@@ -13,7 +13,7 @@ interface SubCategory {
 }
 
 export type NoteType = "literature" | "vocab" | "exam";
-export type ThemeMode = "system" | "light" | "dark";
+export type ThemeMode = "light";
 
 export interface IncorrectNote {
   questionId: string;
@@ -133,7 +133,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [learningTime, setLearningTime] = useState(0);
   const [completedVocabDays, setCompletedVocabDays] = useState<number[]>([]);
-  const [themeMode, setThemeModeState] = useState<ThemeMode>("system");
+  const [themeMode, setThemeModeState] = useState<ThemeMode>("light");
 
   const loadAllData = useCallback(async () => {
     try {
@@ -176,11 +176,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
           setCompletedVocabDays(parsed);
         }
       }
-      if (
-        storedThemeMode === "system" ||
-        storedThemeMode === "light" ||
-        storedThemeMode === "dark"
-      ) {
+      if (storedThemeMode === "light") {
         setThemeModeState(storedThemeMode);
       }
     } catch {
