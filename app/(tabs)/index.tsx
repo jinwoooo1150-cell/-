@@ -27,6 +27,7 @@ import { getQuizzesByGrandUnit } from "@/data/quizData";
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
+  const study = useStudy();
   const {
     getDDay,
     completedWorks,
@@ -34,7 +35,7 @@ export default function HomeScreen() {
     isVocabCompletedToday,
     incorrectNotes,
     bookmarks,
-  } = useStudy();
+  } = study;
   const dDay = getDDay();
   const vocabDone = isVocabCompletedToday();
 
