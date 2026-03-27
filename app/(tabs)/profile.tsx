@@ -6,14 +6,16 @@ import {
   ScrollView,
   Platform,
   Pressable,
+  Linking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { CheetahMascot } from "@/components/CheetahMascot";
-import { ThemeMode, useStudy } from "@/contexts/StudyContext";
-import { getThemeLabel, useAppTheme } from "@/hooks/useAppTheme";
+import { useAppTheme } from "@/hooks/useAppTheme";
+
+const SUO_INSTAGRAM_URL = "https://www.instagram.com/suo_official/";
 
 interface ProfileMenuItemProps {
   icon: string;
@@ -42,10 +44,8 @@ function ProfileMenuItem({ icon, title, value, showChevron = true, onPress }: Pr
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
-  const { themeMode, setThemeMode } = useStudy();
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
-  const nextThemeMode: ThemeMode = themeMode === "system" ? "light" : themeMode === "light" ? "dark" : "system";
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}> 
@@ -76,10 +76,12 @@ export default function ProfileScreen() {
             <ProfileMenuItem icon="notifications-outline" title="알림 설정" />
             <View style={[styles.menuDivider, { backgroundColor: theme.border }]} />
             <ProfileMenuItem
-              icon="moon-outline"
-              title="다크 모드"
-              value={getThemeLabel(themeMode)}
-              onPress={() => setThemeMode(nextThemeMode)}
+              icon="logo-instagram"
+              title="수오 인스타그램 바로가기"
+              onPress={async () => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                await Linking.openURL(SUO_INSTAGRAM_URL);
+              }}
             />
             <View style={[styles.menuDivider, { backgroundColor: theme.border }]} />
             <ProfileMenuItem
