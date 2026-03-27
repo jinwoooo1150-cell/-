@@ -138,7 +138,7 @@ function LitCategoryItem({
 export default function StudyScreen() {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
-  const { incorrectNotes, bookmarks, completedWorks } = useStudy();
+  const { bookmarks, completedWorks } = useStudy();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
   const webBottomInset = Platform.OS === "web" ? 34 : 0;
@@ -231,32 +231,12 @@ export default function StudyScreen() {
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push("/study/incorrects" as any);
-            }}
-            style={({ pressed }) => [
-              styles.actionCard, { backgroundColor: theme.card, borderColor: theme.border },
-              pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
-            ]}
-          >
-            <View
-              style={[styles.actionIconBox, { backgroundColor: "#FFF0E0" }]}
-            >
-              <Ionicons
-                name="alert-circle"
-                size={22}
-                color={Colors.light.tint}
-              />
-            </View>
-            <Text style={[styles.actionTitle, { color: theme.text }]}>나의 오답</Text>
-            <Text style={[styles.actionCount, { color: theme.textMuted }]}>{incorrectNotes.length}개</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.push("/study/bookmarks" as any);
             }}
             style={({ pressed }) => [
-              styles.actionCard, { backgroundColor: theme.card, borderColor: theme.border },
+              styles.actionCard,
+              styles.singleActionCard,
+              { backgroundColor: theme.card, borderColor: theme.border },
               pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
             ]}
           >
@@ -343,6 +323,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+  },
+  singleActionCard: {
+    maxWidth: 180,
   },
   actionIconBox: {
     width: 44,

@@ -32,6 +32,7 @@ export default function HomeScreen() {
     completedWorks,
     vocabProgress,
     isVocabCompletedToday,
+    incorrectNotes,
     bookmarks,
   } = useStudy();
   const dDay = getDDay();
@@ -68,6 +69,23 @@ export default function HomeScreen() {
         <View style={styles.topBar}>
           <Text style={[styles.appTitle, { color: theme.tint }]}>Suo</Text>
           <View style={styles.headerBadgeRow}>
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/study/incorrects" as any);
+              }}
+              style={({ pressed }) => [
+                styles.xpBadge,
+                { backgroundColor: theme.card, borderColor: theme.border },
+                pressed && { opacity: 0.85 },
+              ]}
+            >
+              <Ionicons name="alert-circle" size={14} color="#EF4444" />
+              <Text style={[styles.xpText, styles.incorrectText]}>오답노트</Text>
+              <View style={[styles.bookmarkCountBadge, styles.incorrectCountBadge]}>
+                <Text style={[styles.bookmarkCountText, styles.incorrectCountText]}>{incorrectNotes.length}</Text>
+              </View>
+            </Pressable>
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -257,6 +275,9 @@ const styles = StyleSheet.create({
   bookmarkText: {
     color: "#2563EB",
   },
+  incorrectText: {
+    color: "#DC2626",
+  },
   bookmarkCountBadge: {
     minWidth: 20,
     paddingHorizontal: 6,
@@ -269,6 +290,12 @@ const styles = StyleSheet.create({
     fontFamily: "NotoSansKR_700Bold",
     fontSize: 11,
     color: "#1D4ED8",
+  },
+  incorrectCountBadge: {
+    backgroundColor: "#FEE2E2",
+  },
+  incorrectCountText: {
+    color: "#B91C1C",
   },
   heroCard: {
     backgroundColor: "#FFF",
