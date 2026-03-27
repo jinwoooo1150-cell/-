@@ -44,7 +44,7 @@ function ChoiceButton({
 
   const bgColor =
     state === "correct"
-      ? Colors.light.success
+      ? Colors.light.tint
       : state === "incorrect"
         ? "#EF4444"
         : state === "dimmed"
@@ -60,7 +60,7 @@ function ChoiceButton({
 
   const borderColor =
     state === "correct"
-      ? Colors.light.success
+      ? Colors.light.tint
       : state === "incorrect"
         ? "#EF4444"
         : Colors.light.border;
@@ -120,7 +120,7 @@ function CompletionCheckmark() {
 
   return (
     <Animated.View style={[styles.completionCheckmark, animStyle]}>
-      <Ionicons name="checkmark-circle" size={96} color={Colors.light.success} />
+      <Ionicons name="checkmark-circle" size={96} color={Colors.light.tint} />
     </Animated.View>
   );
 }
@@ -400,7 +400,7 @@ export default function VocabTestScreen() {
                 {
                   backgroundColor:
                     selectedIndex === currentQuestion.correctIndex
-                      ? Colors.light.success
+                      ? Colors.light.tint
                       : "#EF4444",
                 },
               ]}
@@ -421,7 +421,7 @@ export default function VocabTestScreen() {
                 {
                   color:
                     selectedIndex === currentQuestion.correctIndex
-                      ? Colors.light.success
+                      ? Colors.light.tint
                       : "#EF4444",
                 },
               ]}

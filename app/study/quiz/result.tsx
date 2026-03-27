@@ -170,7 +170,7 @@ export default function QuizResultScreen() {
               style={[
                 styles.resultDot,
                 {
-                  backgroundColor: correct ? Colors.light.success : "#EF4444",
+                  backgroundColor: correct ? Colors.light.tint : "#EF4444",
                 },
               ]}
             >

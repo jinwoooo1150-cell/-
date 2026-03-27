@@ -10,8 +10,8 @@ const lightText = "#9090A7";
 const cardBg = "#FFFFFF";
 const lockedGray = "#E8E4EF";
 const lockedText = "#B5B0C0";
-const success = "#58CC02";
-const successDark = "#46A302";
+const success = orange;
+const successDark = orangeDark;
 
 const light = {
   text: darkText,

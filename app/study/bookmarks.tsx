@@ -29,8 +29,8 @@ function BookmarkCard({ item, index, onDelete }: { item: BookmarkItem; index: nu
   const itemType = getBookmarkType(item);
   const isExam = itemType === "exam";
   const correctAnswer = item.isTrue ? "O" : "X";
-  const borderColor = isExam ? "#8B5CF6" : theme.tint;
-  const bookmarkIconColor = isExam ? "#8B5CF6" : theme.tint;
+  const borderColor = theme.tint;
+  const bookmarkIconColor = theme.tint;
 
   const handleDelete = () => {
     if (Platform.OS === "web") {
@@ -72,7 +72,7 @@ function BookmarkCard({ item, index, onDelete }: { item: BookmarkItem; index: nu
       </View>
       {isExam && item.sourceTitle && (
         <View style={styles.sourceTag}>
-          <Ionicons name="school-outline" size={11} color="#8B5CF6" />
+          <Ionicons name="school-outline" size={11} color={theme.tint} />
           <Text style={styles.sourceTagText}>{item.sourceTitle}</Text>
           <Text style={styles.sourceTagSep}>|</Text>
           <Text style={styles.sourceTagWork}>{item.quizAuthor}</Text>
@@ -96,7 +96,7 @@ function BookmarkCard({ item, index, onDelete }: { item: BookmarkItem; index: nu
 const filterOptions: { key: FilterType; label: string; icon: string; color: string }[] = [
   { key: "all", label: "전체", icon: "apps", color: Colors.light.text },
   { key: "literature", label: "문학", icon: "book-outline", color: Colors.light.tint },
-  { key: "exam", label: "기출", icon: "school-outline", color: "#8B5CF6" },
+  { key: "exam", label: "기출", icon: "school-outline", color: Colors.light.tintDark },
 ];
 
 export default function BookmarksScreen() {
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#F3EEFF",
+    backgroundColor: Colors.light.tintGlow,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -320,17 +320,17 @@ const styles = StyleSheet.create({
   sourceTagText: {
     fontFamily: "NotoSansKR_500Medium",
     fontSize: 11,
-    color: "#8B5CF6",
+    color: Colors.light.tintDark,
   },
   sourceTagSep: {
     fontFamily: "NotoSansKR_500Medium",
     fontSize: 10,
-    color: "#C4B5FD",
+    color: Colors.light.tintDark,
   },
   sourceTagWork: {
     fontFamily: "NotoSansKR_500Medium",
     fontSize: 11,
-    color: "#7C3AED",
+    color: Colors.light.tintDark,
   },
   statementText: {
     fontFamily: "NotoSansKR_500Medium",

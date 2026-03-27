@@ -240,9 +240,9 @@ export default function StudyScreen() {
             ]}
           >
             <View
-              style={[styles.actionIconBox, { backgroundColor: "#E8F4FF" }]}
+              style={[styles.actionIconBox, { backgroundColor: theme.tintGlow }]}
             >
-              <Ionicons name="bookmark" size={22} color="#3B82F6" />
+              <Ionicons name="bookmark" size={22} color={theme.tint} />
             </View>
             <Text style={[styles.actionTitle, { color: theme.text }]}>북마크</Text>
             <Text style={[styles.actionCount, { color: theme.textMuted }]}>{bookmarks.length}개</Text>
