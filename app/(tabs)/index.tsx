@@ -95,10 +95,10 @@ export default function HomeScreen() {
               }}
               style={({ pressed }) => [styles.xpBadge, { backgroundColor: theme.card, borderColor: theme.border }, pressed && { opacity: 0.85 }]}
             >
-              <Ionicons name="bookmark" size={14} color="#3B82F6" />
+              <Ionicons name="bookmark" size={14} color={theme.tint} />
               <Text style={[styles.xpText, styles.bookmarkText]}>북마크</Text>
-              <View style={styles.bookmarkCountBadge}>
-                <Text style={styles.bookmarkCountText}>{bookmarks.length}</Text>
+              <View style={[styles.bookmarkCountBadge, { backgroundColor: theme.tintGlow }]}>
+                <Text style={[styles.bookmarkCountText, { color: theme.tintDark }]}>{bookmarks.length}</Text>
               </View>
             </Pressable>
           </View>
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
   },
   bookmarkText: {
-    color: "#2563EB",
+    color: Colors.light.tint,
   },
   incorrectText: {
     color: "#DC2626",
@@ -283,13 +283,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 10,
-    backgroundColor: "#DBEAFE",
+    backgroundColor: Colors.light.tintGlow,
     alignItems: "center",
   },
   bookmarkCountText: {
     fontFamily: "NotoSansKR_700Bold",
     fontSize: 11,
-    color: "#1D4ED8",
+    color: Colors.light.tintDark,
   },
   incorrectCountBadge: {
     backgroundColor: "#FEE2E2",
