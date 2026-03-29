@@ -44,6 +44,15 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "description": "국어 학습을 위한 Suo 앱",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
     }
   }
 }
